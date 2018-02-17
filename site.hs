@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend)
+import           Control.Monad (forM, when)
 import           Hakyll
 
 import qualified Text.Regex.Posix as Regex
@@ -36,15 +37,34 @@ main = hakyll $ do
         route   idRoute
         compile getResourceLBS
 
-    match "plugin/highlight/highlight.js" $ do
+    match "plugin/*/*.js" $ do
         route   idRoute
         compile getResourceBody
 
-    match "slides/*.html_" $ do
-        route $ setExtension "html"
-        compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/slide.html"    postCtx
-            >>= relativizeUrls
+    match "slides/*.html" $ do
+        route $ idRoute -- setExtension "html"
+
+        let indexCtx =
+                    -- Insert code snippet and progress through the given transition points (code snippet template will be evaluated for each step individually)
+                    functionField "code" (\(file:steps) _ -> if null steps then (getCompiledCodeSnippet file "0") else do
+                        let group_open_str = "<span style=\"position:relative\">"
+                        let group_close_str = "</span>"
+                        result <- fmap concat $ forM (zip steps (drop 1 steps ++ [""])) $ \(step, next_step) -> do
+                            let open_str = if (step == "") then "" else ("<span class=\"fragment fade-in\" style=\"position:absolute; width:1000px; transform:translate(-50%, 0%)\" data-fragment-index=" ++ step ++ ">") ++
+                                           -- If this is not the last step, auto-hide it on the next step
+                                           if (next_step == "") then mempty else ("<span class=\"fragment fade-out\" data-fragment-index=" ++ next_step ++ ">")
+                            snippet <- getCompiledCodeSnippet file step
+                            let close_str = (if (step == "") then "" else "</span>") ++ if (next_step == "") then "" else "</span>"
+                            return $ open_str ++ snippet ++ close_str
+                        return $ group_open_str ++ result ++ group_close_str
+                        ) `mappend`
+                    functionField "make_fragment" (\[index] _ -> return $"class=\"fragment\" data-fragment-index=" ++ index) `mappend`
+                    defaultContext
+
+        compile $ getResourceBody -- >>= pandocCompiler
+            >>= applyAsTemplate indexCtx
+            >>= loadAndApplyTemplate "templates/slide.html"    indexCtx
+            -- >>= relativizeUrls
 
     match "index.html" $ do
         route idRoute
@@ -54,8 +74,20 @@ main = hakyll $ do
             let indexCtx =
                     listField "slides" postCtx (return slides) `mappend`
                     constField "title" "Home"                `mappend`
-                    -- $code("filename", "step")$
-                    functionField "code" (\(file:step:[]) _ -> getCompiledCodeSnippet file step) `mappend`
+                    -- Insert code snippet and progress through the given transition points (code snippet template will be evaluated for each step individually)
+                    functionField "code" (\(file:steps) _ -> do
+                        let group_open_str = "<span style=\"position:relative\">"
+                        let group_close_str = "</span>"
+                        result <- fmap concat $ forM (zip steps (drop 1 steps ++ [""])) $ \(step, next_step) -> do
+                            let open_str = if (step == "") then "" else ("<span class=\"fragment fade-in\" style=\"position:absolute; width:1000px; transform:translate(-50%, 0%)\" data-fragment-index=" ++ step ++ ">") ++
+                                           -- If this is not the last step, auto-hide it on the next step
+                                           if (next_step == "") then mempty else ("<span class=\"fragment fade-out\" data-fragment-index=" ++ next_step ++ ">")
+                            snippet <- getCompiledCodeSnippet file step
+                            let close_str = (if (step == "") then "" else "</span>") ++ if (next_step == "") then "" else "</span>"
+                            return $ open_str ++ snippet ++ close_str
+                        return $ group_open_str ++ result ++ group_close_str
+                        ) `mappend`
+                    functionField "make_fragment" (\[index] _ -> return $"class=\"fragment\" data-fragment-index=" ++ index) `mappend`
                     defaultContext
 
             getResourceBody
@@ -65,18 +97,44 @@ main = hakyll $ do
 
     match "templates/*" $ compile templateBodyCompiler
 
-    -- Code snippets get a suffix that allows us to progressively enable individual parts of the snippet instead of showing everything at once
-    -- (We need to do this ourselves because apparently that's something highlight.js cannot do currently :( )
-    match "code/*" $ do
+    -- Code snippet templates (with their own set of macros)
+    match "code/*.html" $ do
         route idRoute
         compile getResourceBody
 
+getCompiledCodeSnippet :: String -> String -> Compiler String
 getCompiledCodeSnippet file_path step =
     fmap itemBody $ loadBody (fromFilePath file_path) >>= makeItem >>= applyAsTemplate codeCtx >>= relativizeUrls
     -- Provide various utility macros:
-    -- * ifStepEqual only includes the second argument if its first argument is equal to the step provided in the parent context
+    -- * [Deprecated, use stepEquals_N instead] ifStepEqual only includes the second argument if its first argument is equal to the step provided in the parent context
+    -- * stepEquals_N will be set if the current step is N
+    -- * template("string"): prints the given string enclosed in "<>" but properly HTML-escaped
     where codeCtx = functionField "ifStepEqual" (\(number:content:tail) _ -> if number == step then return content else return "") `mappend`
+                    constField ("stepEquals_" ++ step) "1" `mappend`
+                    (mconcat $ map (flip constField "1" . ("stepGreaterEquals_" ++) . show) [0..(if step == "" then -1 else (read step :: Int))]) `mappend`
+                    (mconcat $ map (flip constField "1" . ("stepLessEquals_" ++) . show) [(if step == "" then 21 else (read step :: Int))..20]) `mappend` -- Hardcoded to not go higher than 20 for now
+                    --(mconcat $ [constField "stepGreaterEquals_2" "1", constField "stepGreaterEquals_4" "1"]) `mappend` -- Hardcoded to not go higher than 20 for now
+                    --constField "stepGreaterEquals_2" "1" `mappend` constField "stepGreaterEquals_4" "1" `mappend` -- Hardcoded to not go higher than 20 for now
+                    functionField "template" (\[str] _ -> return $ "&lt;" ++ str ++ "&gt;") `mappend`
+                    functionField "after" (\[step] _ -> return $ fadein_str step) `mappend`
+                    functionField "endafter" (\_ _ -> return "</span>") `mappend`
+                    functionField "only" (\(step:maybe_until_step) _ -> do
+                        --let until_step = maybe (step + 1) id $ listToMaybe maybe_until_step
+                        let (until_step:[]) = maybe_until_step -- TODO: Support implicit "maybe_until_step = step + 1"!
+                        return $ fadein_str step ++ fadeout_str until_step) `mappend`
+                    functionField "endonly" (\_ _ -> return "</span></span>") `mappend`
+                    functionField "begin_overlay" (\[] _ -> return $ "<span style=\"position:relative\">") `mappend`
+                    functionField "overlay_item" (\(step:next_step:[]) _ -> do
+                        return $ make_overlay_item step next_step) `mappend`
+                    functionField "overlay_next_item" (\(step:next_step:[]) _ -> return $ "</span></span>" ++ make_overlay_item step next_step) `mappend`
+                    --functionField "overlay_end_item" (\[] _ -> return "</span></span>") `mappend`
+                    functionField "end_overlay" (\[] _ -> return $ "</span></span></span>") `mappend`
                     defaultContext
+          fadein_str step = "<span class=\"fragment fade-in\" data-fragment-index=" ++ step ++ "\">"
+          fadeout_str step = "<span class=\"fragment fade-out\" data-fragment-index=" ++ step ++ "\">"
+          fadein_abspos_str step = "<span class=\"fragment fade-in\" style=\"position:absolute\" data-fragment-index=" ++ step ++ ">"
+          fadeout_abspos_str step = "<span class=\"fragment fade-out\" style=\"position:absolute\" data-fragment-index=" ++ step ++ ">"
+          make_overlay_item step next_step = fadein_abspos_str step ++ fadeout_abspos_str next_step
 
 
 --------------------------------------------------------------------------------
