@@ -4,8 +4,6 @@ import           Data.Monoid (mappend)
 import           Control.Monad (forM, when)
 import           Hakyll
 
-import qualified Text.Regex.Posix as Regex
-
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
