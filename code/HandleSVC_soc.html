@@ -1,0 +1,44 @@
+<!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em; overflow:hidden"><!--
+-->$if(stepEquals_0)$<!--
+-->// No inputs, no outputs
+void
+DoExitProcess();<!--
+-->$else$$if(stepEquals_1)$<!--
+-->// One input, one output
+uint32_t <!-- NOTE: Will return std::tuple<u32> later, but for now a plain u32 is better to convey the idea -->
+DoSleepThread(uint32_t duration);<!--
+-->$else$$if(stepGreaterEquals_2)$<!--
+-->// Three inputs, two outputs
+std::tuple$template("uint32_t, VAddr")$
+DoControlMemory(uint32_t size, uint32_t perm, uint32_t mode);<!--
+-->$endif$$endif$$endif$
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+$if(stepEquals_0)$<!--
+-->  case SvcId::ExitCurrentProcess: // 0x3
+    DoExitCurrentProcess();
+    break;<!--
+-->$else$$if(stepEquals_1)$<!--
+-->  case SvcId::SleepThread: // 0xa
+    uint32_t duration_ns = FromRegister$template("uint32_t")$(cpu.reg[0]);
+
+    auto result = DoSleepThread(duration_ns);
+
+    cpu.reg[0] = ToRegister$template("uint32_t")$(result); // result code
+    break;<!--
+-->$else$$if(stepGreaterEquals_2)$<!--
+-->  case SvcId::ControlMemory: // 0x1
+    uint32_t size        = FromRegister$template("uint32_t")$(cpu.reg[1]); $if(stepEquals_3)$<font color="red">/&#8203;/ Starts at r1??</font>$endif$
+    uint32_t mode        = FromRegister$template("uint32_t")$(cpu.reg[2]);
+    uint32_t permissions = FromRegister$template("uint32_t")$(cpu.reg[3]);
+    auto outputs = DoControlMemory(size, permissions, mode);
+    cpu.reg[0] = ToRegister$template("uint32_t")$(std::get$template("0")$(outputs)); // Error code
+    cpu.reg[1] = ToRegister$template("VAddr   ")$(std::get$template("1")$(outputs)); // Block address
+    break;<!--
+-->$endif$$endif$$endif$
+  // ...
+  }
+}</code></pre>
