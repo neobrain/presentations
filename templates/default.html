@@ -1,0 +1,436 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/reveal.css">
+    <!-- black, blood, night, league -->
+    <link rel="stylesheet" href="css/theme/league.css" id="theme">
+    <!--<link rel="stylesheet" href="css/theme/league.css" id="theme"> -->
+    <!--<link rel="stylesheet" href="css/theme/night.css" id="theme"> -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <title>My Hakyll Blog - $title$</title> -->
+
+    <style>
+      .comment { color: #bbb; font-size: 22pt !important; }
+      .fixed { color: purple; font-size: 13pt !important; }
+      table, td, th { border: 3px solid #b0b0b0 !important; border-collapse: collapse !important; border-radius:5px !important; }
+      img { border-radius:10px; }
+      .main_cpu { border-color: #FFA500 !important; border-collapse: separate !important; }
+      .chip { display: inline; border-color: #D8BFD8 !important; border-collapse: separate !important; }
+      .chip td { border-width: 0 !important; }
+      .chip tr { border-width: 0 !important; }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+		<div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
+neobrain.github.io | @fail_cluez
+</div>
+$body$
+
+<section><h1>THX && FAQ ? OK : EOF</h1>
+<div width=50% style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
+  <img src="images/twitter.png" style="border:none">&nbsp;@fail_cluez
+</div>
+<div width=50% style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
+<img src="images/github.png" style="border:none">&nbsp;neobrain
+</div>
+<img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle">
+</section>
+
+$if(redundantContent)$
+<section><h2>Example of a handler</h2>
+<pre style="width:100%"><code class="cpp">void SVCStartDma(CPU& cpu) {
+  Process  dst_process { cpu.reg[1] };
+  VAddr    dst_addr    { cpu.reg[2] };
+  Process  src_process { cpu.reg[3] };
+  VAddr    src_addr    { cpu.reg[0] };
+  uint32_t num_bytes  { cpu.reg[4] };
+
+  uint32_t dst_phys_addr = VirtualToPhysical(dst_process, dst_addr);
+  uint32_t src_phys_addr = VirtualToPhysical(src_process, src_addr);
+  auto dma_object = ProcessDma(dst_phys_addr, src_phys_addr, num_bytes);
+
+  cpu.reg[0] = SUCCESS;
+  cpu.reg[1] = dma_object.GetHandle();
+}
+</code></pre>
+<p class="fragment">We'll ignore the core logic today.<br>
+Let's focus on the boilerplate</p>
+</section>
+
+<section><h2>Example of a handler</h2>
+<pre><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Process& dst_process, VAddr dst_data_addr,
+                Process& src_process, VAddr src_data_addr,
+                uint32_t data_size);
+</code></pre> <!-- TODO: Get rid of this split. We only care because otherwise reveal.js forces a scrollarea into our snippet-.- -->
+Boilerplate:
+<pre style="width:100%"><code class="cpp">
+void SVCStartDma(CPU& cpu) {
+  Process  dst_process { cpu.reg[1] };
+  VAddr    dst_addr    { cpu.reg[2] };
+  Process  src_process { cpu.reg[3] };
+  VAddr    src_addr    { cpu.reg[0] };
+  uint32_t num_bytes  { cpu.reg[4] };
+
+  auto ret = svcStartDmaImpl(dst_process, dst_addr,
+                             src_process, src_addr, num_bytes);
+  cpu.reg[0] = std::get<0>(ret);
+  cpu.reg[1] = std::get<1>(ret);
+}
+</code></pre>
+</section>
+
+<section><h2>Introducing: Strong typedefs</h2>
+  <pre><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+  <pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  Handle    dst_process { cpu->reg[1] };
+  VAddr     dst_addr    { cpu->reg[2] };
+  Handle    src_process { cpu->reg[3] };
+  VAddr     src_addr    { cpu->reg[0] };
+  SizeBytes num_bytes   { cpu->reg[4] };
+
+  std::tie(cpu->reg[0], cpu->reg[1]) =
+      svcStartDmaImpl(dst_process, dst_addr,
+                      src_process, src_addr, num_bytes);
+}
+</code></pre>
+<p class="fragment">Much harder to mix up argument order now</p>
+<p class="fragment">Address/size kinds are explicitly expressed</p>
+<!-- Insufficient because:
+* Can't make return values type-safe without extra boilerplate
+* Still doesn't have register decoding expressive
+-->
+</section>
+
+<section><h2>About the Magic Numbers</h2>
+<div style="position:relative; width:100%; height:100%">
+  <div style="position:absolute; z-index:10; width:100%; height:100%">
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveAspectRatio="xMidYMid" width="100%" height="500">
+      <rect stroke="#c42412" stroke-width=2 x="33%" y="36.5%" width="22%" height="27.5%" rx="5" ry="5" style="fill:none"></rect>
+      <text x="57%" y="51%" fill="#cfcfc2" width="10%" font-size="24">Can we automate this?</text>
+    </svg>
+  </div>
+  <div style="position:absolute; width:100%; height:100%">
+  <pre><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+  <pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  Handle    dst_process { cpu->reg[1] };
+  VAddr     dst_addr    { cpu->reg[2] };
+  Handle    src_process { cpu->reg[3] };
+  VAddr     src_addr    { cpu->reg[0] };
+  SizeBytes num_bytes   { cpu->reg[4] };
+
+  std::tie(cpu->reg[0], cpu->reg[1]) =
+      svcStartDmaImpl(dst_process, dst_addr,
+                      src_process, src_addr, num_bytes);
+}
+</code></pre>
+<p class="fragment">Let's pretend the reg indices made any sense first</p>
+<!-- Insufficient because:
+* Can't make return values type-safe without extra boilerplate
+* Still doesn't have register decoding expressive
+-->
+  </div>
+</div>
+</section>
+$endif$ <!-- redundantContent -->
+
+$if(LEGACYSLIDE)$
+<section><h2>In a world where it's easy…</h2>
+<div style="position:relative; width:100%; height:100%">
+  <div style="position:absolute; z-index:10; width:100%; height:100%">
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveAspectRatio="xMidYMid" width="100%" height="500">
+      <rect stroke="#c42412" stroke-width=2 x="33%" y="36.5%" width="22%" height="27.5%" rx="5" ry="5" style="fill:none"></rect>
+      <text x="57%" y="51%" fill="#cfcfc2" width="10%" font-size="24">Can we automate this?</text>
+    </svg>
+  </div>
+  <div style="position:absolute; width:100%; height:100%">
+  <pre><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+  <pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  Handle    dst_process { cpu->reg[0] };
+  VAddr     dst_addr    { cpu->reg[1] };
+  Handle    src_process { cpu->reg[2] };
+  VAddr     src_addr    { cpu->reg[3] };
+  SizeBytes num_bytes   { cpu->reg[4] };
+
+  std::tie(cpu->reg[0], cpu->reg[1]) =
+      svcStartDmaImpl(dst_process, dst_addr,
+                      src_process, src_addr, num_bytes);
+}
+</code></pre>
+<p style="visibility:hidden">Let's pretend the reg indices made any sense first</p>
+  </div>
+</div>
+</section>
+$endif$ <!-- LEGACYSLIDE -->
+
+$if(enableMovedContent)$
+<section style="line-height:0.5"><h2>What should be done at compile-time</h2>
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+<span class="fragment">
+↓
+<!-- TODO: On the side: Function traits -->
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">using InData  = std::tuple&lt;Handle, VAddr, Handle, VAddr, SizeBytes>
+using OutData = std::tuple&lt;uint32_t, uint32_t>
+</code></pre>
+<span class="fragment">
+↓
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">InData DecodeInArgs(CPU* cpu);
+void EncodeOutData(CPU* cpu, OutData& data);
+</code></pre>
+<span class="fragment">
+↓
+<pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  InData args = DecodeInArgs(cpu);
+  OutData out = std::apply(svcStartDmaImpl, args);
+  EncodeOutData(cpu, out);
+}
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+$endif$ <!-- enableMovedContent -->
+
+$if(LEGACYSLIDES)$
+<section style="line-height:0.5"><h2>What should be done at compile-time</h2>
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+↓
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0; border:3px solid #4840bf">using InData = FunctionTraits&lt;svcStartDmaImpl&gt;::Args;
+using OutData = FunctionTraits&lt;svcStartDmaImpl&gt;::Result;
+</code></pre>
+↓
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">InData DecodeInArgs(CPU* cpu);
+void EncodeOutData(CPU* cpu, OutData& data);
+</code></pre>
+↓
+<pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  InData args = DecodeInArgs(cpu);
+  OutData out = std::apply(svcStartDmaImpl, args);
+  EncodeOutData(cpu, out);
+}
+</code></pre>
+</section>
+$endif$ <!-- LEGACYSLIDES -->
+
+$if(enableMovedContent)$
+<section><h2>Step 2a: Register Decoding</i></h2>
+For DecodeInArgs, we basically want to
+<ul>
+  <li>Perform an operation on each func argument:
+    <pre style="width:100%"><code class="cpp">Handle { cpu->reg[reg_index++] }</code></pre>
+  </li>
+  <li>Collect the results into a <code class="cpp">std::tuple</code>
+  </li>
+  <li class="fragment">Parameter pack expansion to the rescue!
+    <pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">template&lt;typename... T&gt;
+std::tuple&lt;T...&gt; DecodeInArgs(CPU* cpu) {
+  unsigned reg_index = 0;
+  return std::tuple&lt;T...&gt; { T { cpu-&gt;reg[reg_index++] } ... };
+}
+</code></pre>
+  </li>
+</ul>
+</section>
+
+<section><h2>Step 2b: Register Encoding</i></h2>
+For EncodeOutData:
+<ul>
+  <li>
+  We want to perform the same operation on each type, e.g.
+  <pre style="width:100%"><code class="cpp">cpu->reg[reg_index++] = handle</code></pre>
+  </li>
+  <li class="fragment">More parameter packs expansions:
+<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">template&lt;typename... T&gt;
+void EncodeOutData(CPU* cpu, const T&... data) {
+  unsigned reg_index = 0;
+  (cpu-&gt;reg[reg_index++] = data)...;
+}
+</code></pre>
+  </li>
+</ul>
+<p class="fragment">Turns out that doesn't actually compile :(</p>
+</section>
+
+<section style="line-height:0.7"><h2>Step 2b: Register Encoding</i></h2>
+<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">(cpu-&gt;reg[reg_index++] = data)...; // Doesn't compile :(
+</code></pre>
+
+<span class="fragment">C++17: Fold expression on the comma-operator:
+<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">((cpu-&gt;reg[reg_index++] = data), ...);
+</code></pre>
+
+<span class="fragment">C++11: Black magic¹
+<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">template&lt;typename... T&gt;
+void EncodeOutData(CPU* cpu, const T&... data) {
+  unsigned reg_index = 0;
+  (void)std::initializer_list&lt;uint32_t&gt;{
+      (cpu-&gt;regs[reg_index++] = data)...
+  };
+}
+</code></pre>
+<p class="fragment">Take care not to walk into the execution-order trap!</p>
+<small class="footer">¹ Vittorio Romeo: for_each_argument explained and expanded<br><a href=https://www.youtube.com/watch?v=2l83JlqkzBk>https://www.youtube.com/watch?v=2l83JlqkzBk</a></small>
+</span>
+</span>
+</section>
+$endif$ <!-- enableMovedContent -->
+
+$if(LEGACYSLIDES)$
+<section style="line-height:0.5"><h2>What should be done at compile-time</h2>
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+↓
+<pre style="width:100%"><code class="cpp" style="padding-bottom:0">using InData = FunctionTraits&lt;svcStartDmaImpl&gt;::Args;
+using OutData = FunctionTraits&lt;svcStartDmaImpl&gt;::Result;
+</code></pre>
+↓
+<pre style="width:100%"><code class="cpp" style="border:3px solid #4840bf">template&lt;typename svcImpl&gt;
+void svcWrapper(CPU* cpu) {
+  InData args = DecodeInArgs&lt;InData&gt;(cpu);
+  OutData out = std::apply(svcImpl{}, args);
+  std::apply(
+    [cpu](auto...&& out_) { EncodeOutData&lt;OutData&gt;(cpu, out_); },
+    out);
+}
+</code></pre>
+</section>
+$endif$ <!-- LEGACYSLIDES -->
+
+<!-- OUTDATED slides
+
+<section><h2>DRY</h2>
+  <!-- TODO: Do this before we move to the simpler register allocation! ->
+  <pre><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+  <pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  unsigned reg_index = 0;
+  auto args =
+      std::make_tuple(
+          Handle    { cpu->reg[reg_index++] } /* dst process */,
+          VAddr     { cpu->reg[reg_index++] } /* VAddr */,
+          Handle    { cpu->reg[reg_index++] } /* Handle */,
+          VAddr     { cpu->reg[reg_index++] } /* VAddr */,
+          SizeBytes { cpu->reg[reg_index++] } /* num_bytes */
+      );
+
+  std::tie(cpu->reg[0], cpu->reg[1]) = std::apply(svcStartDmaImpl, args);
+}
+</code></pre>
+</section>
+
+<section><h2>What we wish we could write</h2>
+  <!-- TODO: Do this before we move to the simpler register allocation! ->
+  <pre><code class="cpp" style="padding-bottom:0">std::tuple&lt;uint32_t, uint32_t>
+svcStartDmaImpl(Handle dst_process, VAddr dst_data_addr,
+                Handle src_process, VAddr src_data_addr,
+                SizeBytes data_size);
+</code></pre>
+  <pre style="width:100%"><code class="cpp">void svcStartDma(CPU* cpu) {
+  unsigned reg_index = 0;
+  typedef ArgumentListFor&lt;svcStartDmaImpl> ArgumentList;
+  auto args = DecodeArgumentList&lt;ArgumentList>(cpu->reg);
+  std::tie(cpu->reg[0], cpu->reg[1]) = std::apply(svcStartDmaImpl, args);
+}
+</code></pre>
+</section>
+END OF OUTDATED stuff -->
+
+<!--
+Further notes:
+* reg[0] is recycled before reg 4 because it's a scratch register (r4 is not)
+-->
+
+<!-- Misc TODOs:
+* Consider backup slide where instead of describing SVCs via function signatures, we only use a single type that uses tag types for things
+* Use the term "vocabulary type"
+* Add a section about using a strong Process type (=> Needs a visitor function when decoding the objects)
+* Show generated assembly for SVCRaw loop with dummy implementations for all SVCs (Just call "ExternalFunc(arglist)" to make sure the compiler doesn't generate NOPs)
+    * Explain why the generated assembly is so good (... if it actually is): Compiler optimisations play a big role, but also TMP not producing any runtime-overhead
+* Preface "Enter metaprogramming" section by saying the aim for beginners (who haven't seen metaprogramming in the wild) isn't to teach the metaprogramming tricks, but to convince the audience that the outcome makes it worth to spend time outside of my talk to learn these tricks
+* Consider adding a part where it auto-deserialises DMAConfig from memory given a VAddr
+* Highlight: Things that are expressed as types cannot be computed at runtime => even crappy compilers would compile this to efficient code
+* Slide idea: "Evolution of a template programmer: a) Learn C++, be utterly confused about templates b) Start using templates for simple stuff c) try to do anything nontrivial (and fail) d) figure out how to do stuff but get lost overengineering it and ending up with code nobody understands e) actually get stuff done, but still nobody understands it f) profit???
+-->
+
+<!-- DRAFT slides
+<section><h2>A look at the TODO ABI</h2>
+<ul>
+  <li>Reserve N registers for outputs</li>
+  <li>Allocate argument registers starting from rN up to r3</li>
+  <li>Once rN-r3 are exhausted, use up r0-r(N-1)</li>
+  <li>Once r0-r3 are exhausted, allocate argument registers starting from r4</li>
+  <li>64-bit values: Skip to the next "even" Allocate two registers</li>
+</ul>
+</section>
+
+<section><h1>Conclusion</h1>
+<ul>
+  <li>Strong typedefs and vocabulary types are awesome</li>
+  <li>Generating code using type lists is a powerful technique</li>
+  <li>A lot of this stuff becomes easy if you use a metaprogramming-library</li>
+</ul>
+</section>
+-->
+      </div>
+    </div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      Reveal.initialize({
+        controls: false,
+        transition: 'slide',
+        transitionSpeed: 'fast',
+        fragments: 'false', // TODO: Disable in the final presentation!
+        dependencies: [
+          // Highlighting for code blocks
+         { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+		// Interpret Markdown in <section> elements
+		{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+		{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+
+		// Syntax highlight for <code> elements
+		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+window.addEventListener("mousedown", handleClick, false);
+window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+
+function handleClick(e) {
+	e.preventDefault();
+	if(e.button === 0) Reveal.next(); 
+	if(e.button === 2) Reveal.prev(); 
+}
+    </script>
+  </body>
+</html>
