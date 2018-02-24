@@ -1,9 +1,11 @@
 <section><h1>Our Toolbox</h1>
 </section>
 
+
 <section><h2 style="color:#f6ba4a">Variadic Templates</h2>
 $code("code/variadic_templates_theory.html", "0", "1")$
 </section>
+
 
 <section><h2 style="color:#f6ba4a">Variadic Templates</h2>
 <p $make_fragment("0")$>Can take any number of arguments</p>
@@ -15,29 +17,6 @@ $code("code/variadic_templates_theory.html", "0", "1")$
 <p $make_fragment("5")$>TransformMany&lt;T1, T2&gt; == TransformTwo&lt;T1, T2&gt;</p>
 </section>
 
-$if(NOTENOUGHTIME)$
-<section><h2 style="color:#f6ba4a">Variadic Templates</h2>
-<pre><code class="cpp">template&lt;typename T&gt;
-T DoubleAndPrint(T val) {
-  T result = val + val;
-  std::cout &lt;&lt; val &lt;&lt; std::endl;
-  return result;
-}
-
-auto result = TransformAndGather(DoubleAndPrint,
-                                 5, '4', 0x10000000000ull);
-</code></pre>
-
-<pre style="background:#121212" $make_fragment("0")$>
-10
-h
-2199023255552
-</pre>
-
-<pre $make_fragment("1")$><code class="cpp">result == std::tuple(13, 'k', 2199023255555ull);
-</code></pre>
-</section>
-NOTENOUGHTIME $endif$
 
 <section><h2 style="color:#f7f749">Tuples and Functions</h2>
 std::tuple(num, str) ⇒ func(num, str) ?
@@ -58,6 +37,7 @@ String: Hello World
 </pre>
 </section>
 
+
 <section data-transition="slide-in fade-out"><h2 style="color:#f6ba4a">Variadic Templates</h2>
 Smart register decoding:
 
@@ -72,6 +52,7 @@ std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
     auto outputs = std::apply(DoStartDma, inputs);
 </code></pre>
 </section>
+
 
 <section data-transition="slide-out fade-in"><h2 style="color:#f6ba4a">Variadic Templates</h2>
 Smart register decoding:
@@ -88,7 +69,7 @@ std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
 </code></pre>
 </section>
 
-<!-- SLIDE 9 -->
+
 <section><h2 style="color:#f6ba4a">Variadic Templates</h2>
 Smart register decoding:
 
@@ -107,6 +88,7 @@ Smart register decoding:
 </code></pre>
 </section>
 
+
 <section><h2 style="color:#f6ba4a">Fold Expressions</h2>
 <p>Pack expansion while applying an operator</p>
 <p $make_fragment("0")$ style="margin-bottom:0">Syntax:</p>
@@ -120,7 +102,7 @@ AccumulateMany(twice, 5, 64) == twice(5)+twice(64)
 </ul>
 </section>
 
-<!-- SLIDE 10a -->
+
 <section><h2 style="color:#f6ba4a">Fold Expressions</h2>
 Smart register encoding:
 <ul>
@@ -145,24 +127,6 @@ std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 
 <small $make_fragment("5")$ class="footer">Further reading: Vittorio Romeo, Introduction to C++ origami @ C++::London Jan 2018<br><a href=https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami>https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami</a></small>
 </section>
-
-$if(NOTIME)$
-<!-- SLIDE 10a -->
-<section><h2 style="color:#f6ba4a">Fold Expressions</h2>
-<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">template&lt;typename... T&gt;
-void Encode(CPUContext& cpu, const T&... values) {
-  unsigned reg_index = 0;
-  ((cpu.reg[reg_index++] = ToRegister&lt;T&gt;(values)), ...);
-}
-</code></pre>
-
-<blockquote $make_fragment("0")$><q>Beautifully subtle</q><br>
-<small class="author">Someone, last session</small></blockquote>
-
-<blockquote $make_fragment("1")$><q>Beautifully useful</q><br>
-<small class="author">Me, today</small></blockquote>
-</section>
-NOTIME $endif$
 
 
 <section><h2 style="color:#49f749">Function traits</h2>
@@ -191,6 +155,7 @@ NOTIME $endif$
 <br>
 </section>
 
+
 <section><h2 style="color:#49f749">Function Traits</h2>
 <span class="fragment">
 <pre style="width:100%"><code class="cpp">template&lt;typename F&gt;
@@ -208,13 +173,14 @@ struct FunctionTraits {
 </span>
 </section>
 
+
 <section><h2 style="color:#49f749">Function Traits</h2>
 <p>Minimal implementation for our use case</p>
 <span class="fragment">
 <pre style="width:100%"><code class="cpp">template&lt;typename F&gt;
 struct FunctionTraits;
 
-// Specialization
+// Specialisation
 template&lt;typename FuncResult, typename... FuncArgs&gt;
 struct FunctionTraits&lt;Result(Args...)&gt; {
   using Args   = std::tuple&lt;FuncArgs...&gt;;
@@ -223,20 +189,3 @@ struct FunctionTraits&lt;Result(Args...)&gt; {
 </code></pre>
 Very limited, but good enough here
 </section>
-
-
-<!--
-<span class="fragment">C++11: Black magic¹
-<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">template&lt;typename... T&gt;
-void EncodeOutData(CPU* cpu, const T&... data) {
-  unsigned reg_index = 0;
-  (void)std::initializer_list&lt;uint32_t&gt;{
-      (cpu-&gt;regs[reg_index++] = data)...
-  };
-}
-</code></pre>
-<p class="fragment">Take care not to walk into the execution-order trap!</p>
-<small class="footer">¹ Vittorio Romeo: for_each_argument explained and expanded<br><a href=https://www.youtube.com/watch?v=2l83JlqkzBk>https://www.youtube.com/watch?v=2l83JlqkzBk</a>
-</small>
-</span>
-</span>-->

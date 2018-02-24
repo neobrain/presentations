@@ -1,5 +1,3 @@
-<!-- SLIDE 8.5, repeated -->
-<!-- TODO: Update for new function names etc-->
 <section style="line-height:0.5"><h2>Our Vision</h2>
 <pre style="width:100%"><code class="cpp">std::tuple&lt;Result, DmaObject*&gt;
 DoStartDma(Process* dst_process, VAddr dst_data_addr,
@@ -8,7 +6,6 @@ DoStartDma(Process* dst_process, VAddr dst_data_addr,
 </code></pre>
 <span class="fragment">
 ↓ <font color="#49f749">Function Traits</font> ↓
-<!-- TODO: On the side: Function traits -->
 <pre style="width:100%"><code class="cpp">using InData  = FunctionTraits&lt;decltype(DoStartDma)&gt;::Args;
 using OutData = FunctionTraits&lt;decltype(DoStartDma)&gt;::Result;
 </code></pre>
@@ -27,6 +24,7 @@ void   Encode&lt;OutData&gt;(CPU& cpu, OutData... data)
 </span>
 </span>
 </section>
+
 
 <section>Putting things together:<br><h1>Live Coding!</h1>
 <!-- Show the full "naive" code to illustrate how many LOCs we need just for reg encoding/decoding -->

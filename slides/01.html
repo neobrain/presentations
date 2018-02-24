@@ -5,16 +5,12 @@
 <p style="width:25%; font-size:80%; color:#c0c0c0">C++::London<br><small>19 Feb 2018</small></p>
 </div>
 </p>
-<!-- TODO: Add fancy picture of 3DS -->
-<!-- TODO: Add fancy picture of variadic templates & parameter pack expansion -->
-<!-- Motivation: Coworkers asked what TMP is useful for, no good answer to that, TODO: Reorder the "what this will be about part" to the front, then introduce myself after that  -->
-<!-- Hammer and nails: For TMP, we don't know what the nail looks like! -->
 </section>
 
 <section><h2>What this will be about</h2>
 <ul>
-<li $make_fragment("0")$>Introduction to the 3DS kernel interface</li> <!-- + language evolution has made it more accessible, and furthering that trend is desirable and worthwhile-->
-<li $make_fragment("1")$>Claim: Metaprogramming is useful here</li> <!-- + language evolution has made it more accessible, and furthering that trend is desirable and worthwhile-->
+<li $make_fragment("0")$>Introduction to the 3DS kernel interface</li>
+<li $make_fragment("1")$>Claim: Metaprogramming is useful here</li> <!-- + language evolution has made it more accessible -->
 <ul>
 <li $make_fragment("2")$>It's more accessible than ever!</li>
 </ul>
@@ -26,15 +22,15 @@
 
 <section><h2>Who am I?</h2>
 <ul>
-<li>C++ enthusiast: Low-level & type-safety</li> <!-- <br>Low-level; type-safety; compile-time programming</li> <!-- talk about untyped data and how C++ allows us to leverage the type system on it -->
-<li>Game console emulation: GC/Wii/3DS/PSP</li> <!-- TODO: Fancy logos -->
+<li>C++ enthusiast: Low-level & type-safety</li> <!-- C++ makes the type system effective even for inherently untyped data -->
+<li>Game console emulation: GC/Wii/3DS/PSP</li>
 <div style="display:flex; justify-content:space-around; align-items:center">
 <small style="text-align: center"><img src="images/ppsspp_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>PPSSPP</small>
 <small style="text-align: center"><img src="images/dolphin_logo.svg" height="150em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>Dolphin</small>
 <small style="text-align: center"><img src="images/citra_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>Citra</small><br>
 </div>
 <li>Twitter: @fail_cluez, GitHub: neobrain <img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle"></li>
-<!-- Maybe refer to my Twitter avatar, talk about software rendering -->
+<li>Studied Physics, now working on GPU drivers</li>
 </ul>
 </section>
 
@@ -62,7 +58,7 @@
             <tr>
               <td class="fragment fade-in" data-fragment-index=2 colspan="6">
                 <div style="display:flex; align-items:center; justify-content:space-between">
-                  <div><font color="#40c030">Game/Application</font></div> <!-- TODO: Reintroduce the microservices here to make this somewhat less pointless -->
+                  <div><font color="#40c030">Game/Application</font></div>
                   <div class="comment" style="font-size:17pt !important; text-align:right">Runs on emulated CPU</div>
                 </div>
               </td>
@@ -95,11 +91,6 @@
 <li $make_fragment("3")$>Inter-Process Communication</li>
 <li $make_fragment("4")$>&#8230;</li>
 </ul>
-<!-- NOTENOUGHTIME Partially object-oriented: Processes, Mutexes, etc; Polymorphism<br>
-
-Object pointers abstracted away from the app<br>
-
-Interesting for emulation: Strongly typed interface -->
 </section>
 
 <section data-transition="slide-in fade-out"><h2>3DS System Calls</h2>
@@ -110,23 +101,12 @@ Interesting for emulation: Strongly typed interface -->
 <div $make_fragment("0")$>⟶</div>
 <div style="display:inline-block; text-align:center; vertical-align:middle" $make_fragment("0")$><ul><li>CPU software interrupt</li><li>Mode switch (to kernel)</li><li>OS interrupt handler</li><li>Mode switch (to userland)</li></ul></div>
 </div>
-<!-- Stress how SVCs read and write back from/to registers -->
+<!-- Stress how SVCs read and write back from/to CPU registers to get arguments/return results -->
 <pre style="visibility:hidden"><code class="cpp">struct CPUContext {
   uint32_t reg[16];
 } cpu;
 </code></pre>
 </section>
-
-$if(NOTENOUGHTIME)$
-<section><h2>Emulating 3DS System Calls</h2>
-<ul>
-<li>Full kernel emulation is expensive and wasteful</li>
-<li>Often, we only care about the game</li>
-<li>Can we just emulate the kernel interface?</li>
-</ul>
-<p><b>Yes</b>, this is called High Level Emulation</p>
-</section>
-NOTENOUGHTIME $endif$
 
 
 <section data-transition="fade-in slide-out"><h2>3DS System Calls</h2>
@@ -135,74 +115,10 @@ NOTENOUGHTIME $endif$
 <div style="display:flex; justify-content:space-around; align-items:center">
 <img src="images/asm_svc_example.png" style="vertical-align:middle">
 <div>⟶</div>
-<div style="display:inline-block; text-align:center; vertical-align:middle">HandleSVC(cpu, 0x54);</div> <!-- TODO: Consider renaming this to HandleSysCall -->
+<div style="display:inline-block; text-align:center; vertical-align:middle">HandleSVC(cpu, 0x54);</div>
 </div>
 <pre><code class="cpp">struct CPUContext {
   uint32_t reg[16];
 } cpu;
 </code></pre>
 </section>
-
-$if(NOTENOUGHTIME)$
-<section><h2>Emulating 3DS System Calls</h2>
-TODO: Diagram. CTR LLE vs HLE, kernel vs app. stress that the "handles" should not change when doing HLE
-
-<!--           CTR_LLE                                                    CTR_HLE
-kernel     C++ object in compiled kernel binary ---(emulation)---=>  C++ object in emulator source
-              ^                                                          ^
-              |                                                          |
-           (translation in kernel code in syscall handler)       (lookup in emulator source in HLE syscall handler)
-              |                                                          |
-              v                                                          v
-userland   uint32_t handle in physical CPU register ---(emulation)---=> uint32_t handle in emulated CPU register -->
-
-In HLE, we can map those to C++ classes! This is great for type-safety
-
-CPUContext, Result, VAddr, Process, Mutex <!-- TODO: Consider getting rid of VAddr, seems to be just one block to stumble upon -->
-</section>
-NOTENOUGHTIME $endif$
-
-<!-- TODO: Seems like these slides have lost their purpose
- <section><h1>Part I:</h1><h2>Emulating 3DS System Calls</h2>
-</section>
-
-<section><h2>Context</h2>
-Case study: System calls on the Nintendo 3DS
-<ul>
-  <li>What issues does a naive emulator face here?</li>
-  <li>How can modern C++ help?</li>
-</ul>
-</section> -->
-
-
-$if(LEGACYSLIDE)$
-<section><h2>In the app…</h2>
-To 3DS apps, each syscall is just a regular function:
-<pre><code class="cpp" style="padding-bottom:0">ErrorCode svcStartDma(
-    uint32_t*  out_dma_object_handle,
-    uint32_t   dst_process_handle,
-    uint32_t   dst_data_addr,
-    uint32_t   src_process_handle,
-    uint32_t   src_data_addr,
-    uint32_t   data_size,
-    DmaConfig* dma_config);
-</code></pre>
-What does it look like under the hood?
-</section>
-
-<section><h2>In the app… under the hood</h2>
-How do the arguments map to CPU registers?
-<!-- TODO: Consider overlying red arrows or something instead -->
-<pre><code class="cpp" style="padding-bottom:0">ErrorCode svcStartDma(     // Error code --&gt; r0 (out)
-    uint32_t*  out_dma_object_handle, // --&gt; r1 (out)
-    uint32_t   dst_process_handle,    // &lt;-- r1 (in)
-    uint32_t   dst_data_addr,         // &lt;-- r2 (in)
-    uint32_t   src_process_handle,    // &lt;-- r3 (in)
-    uint32_t   src_data_addr,         // &lt;-- r0 (in)
-    uint32_t   data_size,             // &lt;-- r4 (in)
-    DmaConfig* dma_config);           // &lt;-- r5 (in)
-</code></pre>
-<!-- <span style="visibility:hidden">What does it look like under the hood?</span> -->
-Weird register order, but we'll get to that later…
-</section>
-$endif$ <!-- LEGACYSLIDE -->
