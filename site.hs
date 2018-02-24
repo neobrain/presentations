@@ -73,7 +73,6 @@ main = hakyll $ do
             slides <- loadAll "slides/*.html"
             let indexCtx =
                     listField "slides" postCtx (return slides) `mappend`
-                    constField "title" "Home"                `mappend`
                     -- Insert code snippet and progress through the given transition points (code snippet template will be evaluated for each step individually)
                     functionField "code" (\(file:steps) _ -> do
                         let group_open_str = "<span style=\"position:relative\">"
@@ -106,35 +105,23 @@ getCompiledCodeSnippet :: String -> String -> Compiler String
 getCompiledCodeSnippet file_path step =
     fmap itemBody $ loadBody (fromFilePath file_path) >>= makeItem >>= applyAsTemplate codeCtx >>= relativizeUrls
     -- Provide various utility macros:
-    -- * [Deprecated, use stepEquals_N instead] ifStepEqual only includes the second argument if its first argument is equal to the step provided in the parent context
     -- * stepEquals_N will be set if the current step is N
     -- * template("string"): prints the given string enclosed in "<>" but properly HTML-escaped
-    where codeCtx = functionField "ifStepEqual" (\(number:content:tail) _ -> if number == step then return content else return "") `mappend`
-                    constField ("stepEquals_" ++ step) "1" `mappend`
+    where codeCtx = constField ("stepEquals_" ++ step) "1" `mappend`
                     (mconcat $ map (flip constField "1" . ("stepGreaterEquals_" ++) . show) [0..(if step == "" then -1 else (read step :: Int))]) `mappend`
                     (mconcat $ map (flip constField "1" . ("stepLessEquals_" ++) . show) [(if step == "" then 21 else (read step :: Int))..20]) `mappend` -- Hardcoded to not go higher than 20 for now
-                    --(mconcat $ [constField "stepGreaterEquals_2" "1", constField "stepGreaterEquals_4" "1"]) `mappend` -- Hardcoded to not go higher than 20 for now
-                    --constField "stepGreaterEquals_2" "1" `mappend` constField "stepGreaterEquals_4" "1" `mappend` -- Hardcoded to not go higher than 20 for now
                     functionField "template" (\[str] _ -> return $ "&lt;" ++ str ++ "&gt;") `mappend`
                     functionField "after" (\[step] _ -> return $ fadein_str step) `mappend`
                     functionField "endafter" (\_ _ -> return "</span>") `mappend`
                     functionField "only" (\(step:maybe_until_step) _ -> do
-                        --let until_step = maybe (step + 1) id $ listToMaybe maybe_until_step
                         let (until_step:[]) = maybe_until_step -- TODO: Support implicit "maybe_until_step = step + 1"!
                         return $ fadein_str step ++ fadeout_str until_step) `mappend`
                     functionField "endonly" (\_ _ -> return "</span></span>") `mappend`
-                    functionField "begin_overlay" (\[] _ -> return $ "<span style=\"position:relative\">") `mappend`
-                    functionField "overlay_item" (\(step:next_step:[]) _ -> do
-                        return $ make_overlay_item step next_step) `mappend`
-                    functionField "overlay_next_item" (\(step:next_step:[]) _ -> return $ "</span></span>" ++ make_overlay_item step next_step) `mappend`
-                    --functionField "overlay_end_item" (\[] _ -> return "</span></span>") `mappend`
-                    functionField "end_overlay" (\[] _ -> return $ "</span></span></span>") `mappend`
                     defaultContext
           fadein_str step = "<span class=\"fragment fade-in\" data-fragment-index=" ++ step ++ "\">"
           fadeout_str step = "<span class=\"fragment fade-out\" data-fragment-index=" ++ step ++ "\">"
           fadein_abspos_str step = "<span class=\"fragment fade-in\" style=\"position:absolute\" data-fragment-index=" ++ step ++ ">"
           fadeout_abspos_str step = "<span class=\"fragment fade-out\" style=\"position:absolute\" data-fragment-index=" ++ step ++ ">"
-          make_overlay_item step next_step = fadein_abspos_str step ++ fadeout_abspos_str next_step
 
 
 --------------------------------------------------------------------------------
