@@ -1,0 +1,33 @@
+<!-- SLIDE 8.5, repeated -->
+<!-- TODO: Update for new function names etc-->
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, DmaObject*&gt;
+DoStartDma(Process* dst_process, VAddr dst_data_addr,
+           Process* src_process, VAddr src_data_addr,
+           uint32_t data_size);
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<!-- TODO: On the side: Function traits -->
+<pre style="width:100%"><code class="cpp">using InData  = FunctionTraits&lt;decltype(DoStartDma)&gt;::Args;
+using OutData = FunctionTraits&lt;decltype(DoStartDma)&gt;::Result;
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">InData Decode&lt;InData&gt;(CPU& cpu)
+void   Encode&lt;OutData&gt;(CPU& cpu, OutData... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">case SvcId::StartDma:
+  WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+  break;
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+
+<section>Putting things together:<br><h1>Live Coding!</h1>
+<!-- Show the full "naive" code to illustrate how many LOCs we need just for reg encoding/decoding -->
+</section>

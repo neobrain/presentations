@@ -1,0 +1,137 @@
+<!-- SLIDE 4a -->
+$if(LEGACYSLIDE)$
+<section><h2>Emulating 3DS System Calls</h2>
+$code("code/HandleSVC_naive.html", "0", "1", "2", "3")$
+</section>
+$endif$ <!-- LEGACYSLIDE: Kind of confusing to introduce it to different ways, so show it with separation of concerns applied directly-->
+
+<!-- SLIDE 4b -->
+<section data-transition="slide-in fade-out"><h2>Emulating 3DS System Calls</h2>
+<!-- TODO: Rename ControlMemory to AllocateMemory - we don't consider the addr parameter, so anything other than allocation wouldn't make any sense! -->
+Example handlers:<br>
+$code("code/HandleSVC_soc.html", "0", "1", "2", "3")$
+</section>
+
+<!-- SLIDE 4b -->
+<section data-transition="fade-in slide-out"><h2>Emulating 3DS System Calls</h2>
+<!-- Showing the CreateMutex and LockMutex handlers, now that the kernel objects have been introduced -->
+<!-- TODO: Consider showing the function signatures of DoCreateMutex and DoLockMutex both on one side, so that it's easier to see how they're supposed to be used together-->
+Example handlers:<br>
+$code("code/HandleSVC_soc2.html", "0", "1")$
+</section>
+
+<section><h2>Emulating 3DS System Calls</h2>
+Common structure:
+<ul>
+<li $make_fragment("0")$>Read inputs from CPU registers (cpu.reg[n])</li>
+<ul><li $make_fragment("1")$>Handle→Object* lookup via <span style=" vertical-align: baseline; font-family: monospace; font-size:60%">FromReg&lt;Object*&gt;(handle)</span></li></ul>
+<li $make_fragment("2")$>Invoke main handler: <span style="font-size:60%"><span style=" vertical-align: baseline; font-family: monospace">DoCreateMutex</span>, <span style=" vertical-align: baseline; font-family: monospace">DoLockMutex</span>,&#8230;</span></li>
+<li $make_fragment("3")$>Write outputs back to CPU registers</li>
+<ul><li $make_fragment("4")$>Object*⟶Handle via <span style=" vertical-align: baseline; font-family: monospace; font-size:60%">ToRegister&lt;Object*&gt;(object)</span></li></ul>
+</ul>
+</section>
+
+<!-- SLIDE 5a -->
+<section><h2>Repetitive logic makes code ...</h2>
+<ul> <!-- TODO: Missing "Hard to test" -->
+<li $make_fragment("0")$ style="line-height:1.1">Hard to write<br><small>more typing, mental arithmetic</small></li>
+<li $make_fragment("1")$ style="line-height:1.1">Hard to modify<br><small>consistency<!-- across instances-->? <!-- Make a point about compile-time consistency checking!--> </small></li>
+<li $make_fragment("2")$ style="line-height:1.1">Hard to document<br><small><!--discoverability: -->where to put docstrings?</small></li>
+<li $make_fragment("3")$ style="line-height:1.1">Hard to understand<br><small><!--hard to reason about -->scattered information<br>magic numbers<!-- are bad--></small></li>
+<li $make_fragment("4")$ style="line-height:1.1">Hard to review & validate<br><small>"given enough eyeballs" notwithstanding</small></li> <!-- "given enough eyeballs, all bugs are shallow" not so much -->
+</ul><br>
+
+<b $make_fragment("5")$>Don't Repeat Yourself</b><br>
+<span $make_fragment("6")$>But how?</span>
+</section>
+
+$if(LEGACYSLIDE)$
+<!-- SLIDE 5b -->
+<section><h2>TODO SKIP? Issues to tackle</h2> <!-- TODO: Is there any value in this slide? -->
+<ul>
+<li $make_fragment("0")$>Automatic argument decoding from cpu.reg[n]</li>
+<li $make_fragment("1")$>Automatic output encoding back to cpu.reg[n]</li>
+<li $make_fragment("2")$>Do away with boilerplate code</li>
+<li $make_fragment("3")$>Do away with magic register indices</li>
+</ul><br>
+TODO: Explain the shortcomings of a runtime solution for this stuff
+</section>
+$endif$ <!-- LEGACYSLIDE -->
+
+<!-- SLIDE 6 -->
+<!-- TODO: This slide needs a rework -->
+<!-- TODO: Consider adding the Drake hotline bling meme here: Repeating yourself vs Generative Programming -->
+<!-- TODO: Change title to "Enter TMP", then show picture of Thymidine monophosphate, then say "Wait, something isn't right here, this sounds really complicated... <switch to template MP> ah, this seems much simpler -->
+<!-- "enter CTP ... and because this is not actually a scary topic at all, it's also gets to be the most colorful slide in the talk" -->
+<section><h2>Enter Compile-time Programming</h2>
+<p>Building blocks:</p>
+<ul>
+<li $make_fragment("1")$><font color="#f6ba4a">Code generation</font>: <font color="#f7f749">Type lists</font> ⟶ <font color="#f64a4a">Runtime logic</font></li>
+<li $make_fragment("2")$><font color="#49f749">Reflection</font>: Capture <font color="#0049f7">code properties</font> in <font color="#f7f749">type lists</font></li>
+<li $make_fragment("3")$><font color="#f7f749">TMP</font>: Transform <font color="#f7f749">type list</font> into <font color="#f7f749">type lists</font></li>
+</ul>
+
+<img $make_fragment("0")$ src="images/metaprogramming.svg" style="background:#2a2a2a">
+</section>
+
+<!-- SLIDE 4b -->
+<section><h2>Our Vision</h2>
+<!-- Showing the DoStartDma handler -->
+"Worst case" handler:<br>
+$code("code/HandleSVC_soc2.html", "2")$
+<!-- code("code/HandleSVC_soc2.html", "2", "3", "4", "5") -->
+</section>
+
+<!-- SLIDE 7a -->
+<!-- SUPERSEDED BY THE SLIDE ABOVE <section><h2>Our Vision</h2>
+What we started with:
+code("code/SVCStartDMANoTransition.html")
+</section> -->
+
+<!-- SLIDE 8.5 -->
+<!-- TODO: Update for new function names etc-->
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, DmaObject*&gt;
+DoStartDma(Process* dst_process, VAddr dst_data_addr,
+           Process* src_process, VAddr src_data_addr,
+           uint32_t data_size);
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<!-- TODO: On the side: Function traits -->
+<pre style="width:100%"><code class="cpp">using InData  = std::tuple&lt;Process*, VAddr, Process*, VAddr, uint32_t>
+using OutData = std::tuple&lt;Result, DmaObject*>
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">template&lt;typename  InData&gt; InData Decode(CPU& cpu)
+template&lt;typename OutData&gt; void   Encode(CPU& cpu, OutData... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">case SvcId::StartDma:
+  WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+  break;
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+
+<!-- SLIDE 7a -->
+<section><h2>Our Vision</h2>
+What we end up with:
+$code("code/SVCStartDMACompact2.html")$
+</section>
+
+$if(LEGACYSLIDES)$
+<!-- SLIDE 7b + 7c -->
+<section><h2>Our Vision</h2>
+$code("code/SVCStartDMA_variadic.html", "0", "1", "2", "3", "4")$
+</section>
+
+<!-- SLIDE 8a -->
+<section><h2>Our Vision</h2>
+$code("code/SVCStartDMA_reflection.html", "0", "1", "2", "3")$
+</section>
+$endif$ <!-- LEGACYSLIDES: We're just showing the new API directly now -->
