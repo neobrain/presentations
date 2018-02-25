@@ -29,8 +29,9 @@ deployment:
       - cd _site && git commit --allow-empty -m "Update (`date '+%F %T TZ'`) [ci skip]."
       - cd _site && git push origin cpplondon_feb2018
 
+      - git fetch origin
       - git checkout dev
-      - git pull
+      - git reset --hard dev/origin
       - git status
       - git submodule update --init
       - cd cpplondon_feb2018 && git pull
@@ -38,7 +39,7 @@ deployment:
       - git push origin dev
 
       - git checkout master
-      - git pull
+      - git reset --hard /dev/origin
       - git status
       - git submodule update --init
       - cd cpplondon_feb2018 && git pull
