@@ -34,14 +34,14 @@ deployment:
       - git reset --hard origin/dev
       - git status
       - git submodule update --init
-      - cd cpplondon_feb2018 && git checkout cpplondon_feb2018_dev && git pull && git add cpplondon_feb2018
-      - git commit -m "Update cpplondon_feb2018 (`date '+%F %T TZ'`) [ci skip]"
+      - cd cpplondon_feb2018 && git checkout cpplondon_feb2018_dev && git pull
+      - git commit cpplondon_feb2018 -m "Update cpplondon_feb2018 (`date '+%F %T TZ'`) [ci skip]"
       - git push origin dev
 
       - git checkout master
       - git reset --hard origin/master
       - git status
       - git submodule update --init
-      - cd cpplondon_feb2018 && git checkout cpplondon_feb2018 && git pull && git add cpplondon_feb2018
-      - git commit -m "Deploy cpplondon_feb2018 (`date '+%F %T TZ'`) [ci skip]"
+      - cd cpplondon_feb2018 && git checkout cpplondon_feb2018 && git pull
+      - git commit cpplondon_feb2018 -m "Deploy cpplondon_feb2018 (`date '+%F %T TZ'`) [ci skip]"
       - git push origin master
