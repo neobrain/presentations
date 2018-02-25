@@ -14,7 +14,7 @@ test:
     - stack build
   post:
     - rm -rf _site
-    - rsync -Rr ./ ./_site
+    - rsync -Rr ./.git ./_site/
     - cd _site && git checkout cpplondon_feb2018
     - stack exec site build
 
