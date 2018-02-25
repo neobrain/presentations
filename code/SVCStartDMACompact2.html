@@ -1,0 +1,15 @@
+<pre><code class="cpp" data-trim data-noescape style="max-height:200em"><!--
+-->std::tuple$template("uint32_t, DmaTracker*")$
+DoStartDma(Process* dst_process, VAddr dst_addr,
+           Process* src_process, VAddr src_addr, uint32_t size)
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+  case SvcId::StartDma:
+    WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+    break;
+  // ...
+  }
+}
+</code></pre>

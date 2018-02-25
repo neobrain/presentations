@@ -1,0 +1,93 @@
+/*
+
+Zenburn style from voldmar.ru (c) Vladimir Epifanov <voldmar@voldmar.ru>
+based on dark.css by Ivan Sagalaev
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #3f3f3f;
+  color: #dcdcdc;
+  background: #232629;
+  color: #cfcfc2;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-tag {
+  color: #e3ceab;
+  color: #2980b9;
+}
+
+.hljs-template-tag {
+  color: #dcdcdc;
+  color: #ff0000;
+}
+
+.hljs-number {
+  color: #8cd0d3;
+  color: #f67400;
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute {
+  color: #efdcbc;
+  color: #ff0000;
+}
+
+.hljs-literal {
+  color: #efefaf;
+  color: #ff0000;
+}
+
+.hljs-subst {
+  color: #8f8f8f;
+  color: #ff0000;
+}
+
+/*.hljs-title, < -- This one is detected inconsistently for function names, so better just disable it */
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-section,
+.hljs-type {
+  color: #efef8f;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: #dca3a3;
+  color: #ff0000;
+}
+
+.hljs-deletion,
+.hljs-string,
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #cc9393;
+  color: #7f8c8d;
+}
+
+.hljs-addition,
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+  color: #7f9f7f;
+  color: #7a7c7d;
+}
+
+
+.hljs-emphasis {
+  font-style: italic;
+  color: #ff0000;
+}
+
+.hljs-strong {
+  font-weight: bold;
+  color: #ff0000;
+}

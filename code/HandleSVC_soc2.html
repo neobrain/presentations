@@ -1,0 +1,48 @@
+<!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em"><!--
+-->$if(stepEquals_0)$<!--
+-->// No inputs, two outputs
+std::tuple$template("Result, Mutex*")$
+DoCreateMutex();<!--
+-->$else$$if(stepEquals_1)$<!--
+-->// One input, one output
+Result
+DoLockMutex(Mutex* mutex, uint32_t timeout);<!--
+-->$else$$if(stepGreaterEquals_2)$<!--
+-->// Three inputs, two outputs
+std::tuple$template("uint32_t, DmaTracker*")$
+DoStartDma(Process* dst_process, VAddr dst_addr,
+           Process* src_proces, VAddr src_addr, uint32_t size);<!--
+-->$endif$$endif$$endif$
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+$if(stepEquals_0)$<!--
+-->  case SvcId::CreateMutex: // 0x13
+    auto outputs = DoCreateMutex();
+    cpu.reg[0] = ToRegister$template("uint32_t")$(std::get$template("0")$(outputs)); // Error code
+    cpu.reg[1] = ToRegister$template("Mutex*  ")$(std::get$template("1")$(outputs)); // Handle of created mutex
+    break;<!--
+-->$else$$if(stepEquals_1)$<!--
+-->  case SvcId::LockMutex: // 0x24
+    Mutex*   mutex   = FromRegister$template("Mutex*  ")$(cpu.reg[0]);
+    uint32_t timeout = FromRegister$template("uint32_t")$(cpu.reg[1]);
+    auto output = DoLockMutex(mutex, timeout);
+    cpu.reg[0] = ToRegister$template("uint32_t")$(output);
+    break;<!--
+-->$else$$if(stepGreaterEquals_2)$<!--
+-->  case SvcId::StartDma: // 0x1
+    Process* dst_proc  = FromRegister$template("Process*")$(cpu.reg[1]); $if(stepEquals_3)$<font color="red">/&#8203;/ Starts at r1??</font>$endif$
+    VAddr    dst_addr  = FromRegister$template("VAddr   ")$(cpu.reg[2]);
+    Process* src_proc  = FromRegister$template("Process*")$(cpu.reg[3]);
+    VAddr    src_addr  = FromRegister$template("VAddr   ")$(cpu.reg[0]); $if(stepEquals_4)$<font color="red">/&#8203;/ Jumps to r0??</font>$endif$
+    uint32_t data_size = FromRegister$template("uint32_t")$(cpu.reg[4]); $if(stepEquals_5)$<font color="red">/&#8203;/ Jumps to r4??</font>$endif$
+    auto outputs = DoStartDma(dst_proc, dst_addr, src_proc, src_addr, data_size);
+    cpu.reg[0] = ToRegister$template("uint32_t  ")$(std::get$template("0")$(outputs)); // Error code
+    cpu.reg[1] = ToRegister$template("DmaObject*")$(std::get$template("1")$(outputs)); // DMA object
+    break;<!--
+-->$endif$$endif$$endif$
+  // ...
+  }
+}</code></pre>

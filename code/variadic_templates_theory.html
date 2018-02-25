@@ -1,0 +1,11 @@
+<pre><code class="cpp">$if(stepEquals_0)$template&lt;typename F, typename T&gt;
+T TransformOne(F func, T value) {
+  return func(value);
+}$endif$$if(stepEquals_1)$template&lt;typename F, typename T1, typename T2&gt;
+std::tuple&lt;T1, T2&gt; TransformTwo(F func, T1 value1, T2 value2) {
+  return std::tuple&lt;T1, T2&gt; { func(value1), func(value2) };
+}$endif$$if(stepGreaterEquals_2)$template&lt;typename F, typename... T&gt;
+std::tuple&lt;T...&gt; TransformMany(F func, T... values) {
+  $if(stepEquals_3)$return std::tuple&lt;T...&gt; { func(values) ... };$endif$
+}$endif$
+</code></pre>

@@ -1,0 +1,720 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/league.css" id="theme">
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generative Programming in Action: Emulating the 3DS</title>
+
+    <style>
+      .comment { color: #bbb; font-size: 22pt !important; }
+      .fixed { color: purple; font-size: 13pt !important; }
+      table, td, th { border: 3px solid #b0b0b0 !important; border-collapse: collapse !important; border-radius:5px !important; }
+      img { border-radius:10px; }
+      .main_cpu { border-color: #FFA500 !important; border-collapse: separate !important; }
+      .chip { display: inline; border-color: #D8BFD8 !important; border-collapse: separate !important; }
+      .chip td { border-width: 0 !important; }
+      .chip tr { border-width: 0 !important; }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+		<div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
+          neobrain.github.io | @fail_cluez | tony.wasserka@gmx.de
+        </div>
+
+<section><h2>Generative Programming in Action</h2><h3>Emulating the Nintendo 3DS</h3>
+<p>
+<div style="display:flex; justify-content:space-around">
+<p style="width:25%; font-size:80%; color:#c0c0c0">Tony Wasserka<br><small>@fail_cluez</small></p>
+<p style="width:25%; font-size:80%; color:#c0c0c0">C++::London<br><small>19 Feb 2018</small></p>
+</div>
+</p>
+</section>
+
+<section><h2>What this will be about</h2>
+<ul>
+<li class="fragment" data-fragment-index="0">Introduction to the 3DS kernel interface</li>
+<li class="fragment" data-fragment-index="1">Claim: Metaprogramming is useful here</li> <!-- + language evolution has made it more accessible -->
+<ul>
+<li class="fragment" data-fragment-index="2">It's more accessible than ever!</li>
+</ul>
+<li class="fragment" data-fragment-index="3">Show off some common techniques</li> <!-- Stress that this is not a tutorial: "Focus on what can be done rather than how!" -->
+</ul>
+
+<p class="fragment" data-fragment-index="4">First of all: Who am I?</p>
+</section>
+
+<section><h2>Who am I?</h2>
+<ul>
+<li>C++ enthusiast: Low-level & type-safety</li> <!-- C++ makes the type system effective even for inherently untyped data -->
+<li>Game console emulation: GC/Wii/3DS/PSP</li>
+<div style="display:flex; justify-content:space-around; align-items:center">
+<small style="text-align: center"><img src="images/ppsspp_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>PPSSPP</small>
+<small style="text-align: center"><img src="images/dolphin_logo.svg" height="150em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>Dolphin</small>
+<small style="text-align: center"><img src="images/citra_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>Citra</small><br>
+</div>
+<li>Twitter: @fail_cluez, GitHub: neobrain <img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle"></li>
+<li>Studied Physics, now working on GPU drivers</li>
+</ul>
+</section>
+
+<section><h2>The Nintendo 3DS</h2>
+<div style="display:flex; justify-direction:column">
+<img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+<ul>
+<li>Released in 2011</li>
+<li class="fragment" data-fragment-index="0">CPU: 2x ARM11 MPCore @ 268 MHz</li> <!-- "Big embedded system" -->
+<li class="fragment" data-fragment-index="0">GPU: DMP PICA200</li>
+<li class="fragment" data-fragment-index="0">RAM: 128 MB FCRAM, 6 MB VRAM</li>
+<li class="fragment" data-fragment-index="1">Software stack:
+<ul class="fragment" data-fragment-index="1">
+<li>Microkernel (fully multitasking)</li>
+<li>Microservices</li>
+</ul>
+</ul>
+</div>
+</section>
+
+<section><h2>The 3DS Software Stack</h2> <!-- Three layers that are relevant to emulation -->
+<div style="display:flex; justify-direction:column">
+<img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+<table width="65%">
+            <tr>
+              <td class="fragment fade-in" data-fragment-index="2" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <div><font color="#40c030">Game/Application</font></div>
+                  <div class="comment" style="font-size:17pt !important; text-align:right">Runs on emulated CPU</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index="1" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <font color="#e06130">Kernel: Horizon</font>
+                  <div class="comment">API emulation</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index="0" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                   <font color="#d02030">ARM11 CPUs</font>
+                   <div class="comment">Interpreter</div>
+                </div>
+              </td>
+            </tr>
+</table>
+</section>
+
+<section><h2>3DS System Calls</h2>
+<p>Kernel↔Application interface: 130 system calls</p>
+<ul>
+<li class="fragment" data-fragment-index="0">Memory management</li>
+<li class="fragment" data-fragment-index="1">Multi-Processing/Threading</li>
+<li class="fragment" data-fragment-index="2">Synchronisation</li>
+<li class="fragment" data-fragment-index="3">Inter-Process Communication</li>
+<li class="fragment" data-fragment-index="4">…</li>
+</ul>
+</section>
+
+<section data-transition="slide-in fade-out"><h2>3DS System Calls</h2>
+<p>System calls on hardware:</p>
+
+<div style="display:flex; justify-content:space-around; align-items:center">
+<img src="images/asm_svc_example.png" style="vertical-align:middle">
+<div class="fragment" data-fragment-index="0">⟶</div>
+<div style="display:inline-block; text-align:center; vertical-align:middle" class="fragment" data-fragment-index="0"><ul><li>CPU software interrupt</li><li>Mode switch (to kernel)</li><li>OS interrupt handler</li><li>Mode switch (to userland)</li></ul></div>
+</div>
+<!-- Stress how SVCs read and write back from/to CPU registers to get arguments/return results -->
+<pre style="visibility:hidden"><code class="cpp">struct CPUContext {
+  uint32_t reg[16];
+} cpu;
+</code></pre>
+</section>
+
+
+<section data-transition="fade-in slide-out"><h2>3DS System Calls</h2>
+<p>High-level emulation:</p>
+
+<div style="display:flex; justify-content:space-around; align-items:center">
+<img src="images/asm_svc_example.png" style="vertical-align:middle">
+<div>⟶</div>
+<div style="display:inline-block; text-align:center; vertical-align:middle">HandleSVC(cpu, 0x54);</div>
+</div>
+<pre><code class="cpp">struct CPUContext {
+  uint32_t reg[16];
+} cpu;
+</code></pre>
+</section>
+
+<section data-transition="slide-in fade-out"><h2>Emulating 3DS System Calls</h2>
+Example handlers:<br>
+<span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="0"><span class="fragment fade-out" data-fragment-index="1"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em; overflow:hidden"><!--
+--><!--
+-->// No inputs, no outputs
+void
+DoExitProcess();<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::ExitCurrentProcess: // 0x3
+    DoExitCurrentProcess();
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="2"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em; overflow:hidden"><!--
+--><!--
+-->// One input, one output
+uint32_t <!-- NOTE: Will return std::tuple<u32> later, but for now a plain u32 is better to convey the idea -->
+DoSleepThread(uint32_t duration);<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::SleepThread: // 0xa
+    uint32_t duration_ns = FromRegister&lt;uint32_t&gt;(cpu.reg[0]);
+
+    auto result = DoSleepThread(duration_ns);
+
+    cpu.reg[0] = ToRegister&lt;uint32_t&gt;(result); // result code
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="2"><span class="fragment fade-out" data-fragment-index="3"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em; overflow:hidden"><!--
+--><!--
+-->// Three inputs, two outputs
+std::tuple&lt;uint32_t, VAddr&gt;
+DoControlMemory(uint32_t size, uint32_t perm, uint32_t mode);<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::ControlMemory: // 0x1
+    uint32_t size        = FromRegister&lt;uint32_t&gt;(cpu.reg[1]); 
+    uint32_t mode        = FromRegister&lt;uint32_t&gt;(cpu.reg[2]);
+    uint32_t permissions = FromRegister&lt;uint32_t&gt;(cpu.reg[3]);
+    auto outputs = DoControlMemory(size, permissions, mode);
+    cpu.reg[0] = ToRegister&lt;uint32_t&gt;(std::get&lt;0&gt;(outputs)); // Error code
+    cpu.reg[1] = ToRegister&lt;VAddr   &gt;(std::get&lt;1&gt;(outputs)); // Block address
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="3"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em; overflow:hidden"><!--
+--><!--
+-->// Three inputs, two outputs
+std::tuple&lt;uint32_t, VAddr&gt;
+DoControlMemory(uint32_t size, uint32_t perm, uint32_t mode);<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::ControlMemory: // 0x1
+    uint32_t size        = FromRegister&lt;uint32_t&gt;(cpu.reg[1]); <font color="red">/​/ Starts at r1??</font>
+    uint32_t mode        = FromRegister&lt;uint32_t&gt;(cpu.reg[2]);
+    uint32_t permissions = FromRegister&lt;uint32_t&gt;(cpu.reg[3]);
+    auto outputs = DoControlMemory(size, permissions, mode);
+    cpu.reg[0] = ToRegister&lt;uint32_t&gt;(std::get&lt;0&gt;(outputs)); // Error code
+    cpu.reg[1] = ToRegister&lt;VAddr   &gt;(std::get&lt;1&gt;(outputs)); // Block address
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span>
+</section>
+
+
+<section data-transition="fade-in slide-out"><h2>Emulating 3DS System Calls</h2>
+<!-- Showing the CreateMutex and LockMutex handlers, now that the kernel objects have been introduced -->
+Example handlers:<br>
+<span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="0"><span class="fragment fade-out" data-fragment-index="1"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em"><!--
+--><!--
+-->// No inputs, two outputs
+std::tuple&lt;Result, Mutex*&gt;
+DoCreateMutex();<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::CreateMutex: // 0x13
+    auto outputs = DoCreateMutex();
+    cpu.reg[0] = ToRegister&lt;uint32_t&gt;(std::get&lt;0&gt;(outputs)); // Error code
+    cpu.reg[1] = ToRegister&lt;Mutex*  &gt;(std::get&lt;1&gt;(outputs)); // Handle of created mutex
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="1"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em"><!--
+--><!--
+-->// One input, one output
+Result
+DoLockMutex(Mutex* mutex, uint32_t timeout);<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::LockMutex: // 0x24
+    Mutex*   mutex   = FromRegister&lt;Mutex*  &gt;(cpu.reg[0]);
+    uint32_t timeout = FromRegister&lt;uint32_t&gt;(cpu.reg[1]);
+    auto output = DoLockMutex(mutex, timeout);
+    cpu.reg[0] = ToRegister&lt;uint32_t&gt;(output);
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span>
+</section>
+
+
+<section><h2>Emulating 3DS System Calls</h2>
+Common structure:
+<ul>
+<li class="fragment" data-fragment-index="0">Read inputs from CPU registers (cpu.reg[n])</li>
+<ul><li class="fragment" data-fragment-index="1">Handle→Object* lookup via <span style=" vertical-align: baseline; font-family: monospace; font-size:60%">FromReg&lt;Object*&gt;(handle)</span></li></ul>
+<li class="fragment" data-fragment-index="2">Invoke main handler: <span style="font-size:60%"><span style=" vertical-align: baseline; font-family: monospace">DoCreateMutex</span>, <span style=" vertical-align: baseline; font-family: monospace">DoLockMutex</span>,…</span></li>
+<li class="fragment" data-fragment-index="3">Write outputs back to CPU registers</li>
+<ul><li class="fragment" data-fragment-index="4">Object*⟶Handle via <span style=" vertical-align: baseline; font-family: monospace; font-size:60%">ToRegister&lt;Object*&gt;(object)</span></li></ul>
+</ul>
+</section>
+
+
+<section><h2>Repetitive logic makes code ...</h2>
+<li class="fragment" data-fragment-index="0" style="line-height:1.1">Hard to write<br><small>more typing, mental arithmetic</small></li>
+<li class="fragment" data-fragment-index="1" style="line-height:1.1">Hard to modify<br><small>consistency<!-- across instances-->? <!-- no compile-time consistency checking!--> </small></li>
+<li class="fragment" data-fragment-index="2" style="line-height:1.1">Hard to document<br><small><!--discoverability: -->where to put docstrings?</small></li>
+<li class="fragment" data-fragment-index="3" style="line-height:1.1">Hard to understand<br><small><!--hard to reason about -->scattered information<br>magic numbers<!-- are bad--></small></li>
+<li class="fragment" data-fragment-index="4" style="line-height:1.1">Hard to review & validate<br><small>"given enough eyeballs" notwithstanding</small></li> <!-- "given enough eyeballs, all bugs are shallow" not so much -->
+</ul>
+
+<b class="fragment" data-fragment-index="5">Don't Repeat Yourself</b><br>
+<span class="fragment" data-fragment-index="6">But how?</span>
+</section>
+
+
+<section><h2>Enter Compile-time Programming</h2>
+<p>Building blocks:</p>
+<ul>
+<li class="fragment" data-fragment-index="1"><font color="#f6ba4a">Code generation</font>: <font color="#f7f749">Type lists</font> ⟶ <font color="#f64a4a">Runtime logic</font></li>
+<li class="fragment" data-fragment-index="2"><font color="#49f749">Reflection</font>: Capture <font color="#0049f7">code properties</font> in <font color="#f7f749">type lists</font></li>
+<li class="fragment" data-fragment-index="3"><font color="#f7f749">TMP</font>: Transform <font color="#f7f749">type list</font> into <font color="#f7f749">type lists</font></li>
+</ul>
+
+<img class="fragment" data-fragment-index="0" src="images/metaprogramming.svg" style="background:#2a2a2a">
+</section>
+
+
+<section><h2>Our Vision</h2>
+<!-- Showing the DoStartDma handler -->
+"Worst case" handler:<br>
+<span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="2"><!-- Separation of Concerns: Decoding logic separate from core logic -->
+<pre style="width:105%"><code class="cpp" data-trim data-noescape style="padding-bottom:0; height:21em; max-height:21em"><!--
+--><!--
+-->// Three inputs, two outputs
+std::tuple&lt;uint32_t, DmaTracker*&gt;
+DoStartDma(Process* dst_process, VAddr dst_addr,
+           Process* src_proces, VAddr src_addr, uint32_t size);<!--
+-->
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+<!--
+-->  case SvcId::StartDma: // 0x1
+    Process* dst_proc  = FromRegister&lt;Process*&gt;(cpu.reg[1]); 
+    VAddr    dst_addr  = FromRegister&lt;VAddr   &gt;(cpu.reg[2]);
+    Process* src_proc  = FromRegister&lt;Process*&gt;(cpu.reg[3]);
+    VAddr    src_addr  = FromRegister&lt;VAddr   &gt;(cpu.reg[0]); 
+    uint32_t data_size = FromRegister&lt;uint32_t&gt;(cpu.reg[4]); 
+    auto outputs = DoStartDma(dst_proc, dst_addr, src_proc, src_addr, data_size);
+    cpu.reg[0] = ToRegister&lt;uint32_t  &gt;(std::get&lt;0&gt;(outputs)); // Error code
+    cpu.reg[1] = ToRegister&lt;DmaObject*&gt;(std::get&lt;1&gt;(outputs)); // DMA object
+    break;<!--
+-->
+  // ...
+  }
+}</code></pre>
+</span></span>
+</section>
+
+
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, DmaObject*&gt;
+DoStartDma(Process* dst_process, VAddr dst_data_addr,
+           Process* src_process, VAddr src_data_addr,
+           uint32_t data_size);
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<pre style="width:100%"><code class="cpp">using InData  = std::tuple&lt;Process*, VAddr, Process*, VAddr, uint32_t>
+using OutData = std::tuple&lt;Result, DmaObject*>
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">template&lt;typename  InData&gt; InData Decode(CPU& cpu)
+template&lt;typename OutData&gt; void   Encode(CPU& cpu, OutData... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">case SvcId::StartDma:
+  WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+  break;
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+
+
+<section><h2>Our Vision</h2>
+What we end up with:
+<pre><code class="cpp" data-trim data-noescape style="max-height:200em"><!--
+-->std::tuple&lt;uint32_t, DmaTracker*&gt;
+DoStartDma(Process* dst_process, VAddr dst_addr,
+           Process* src_process, VAddr src_addr, uint32_t size)
+
+void HandleSVC(CPUContext& cpu, uint32_t index) {
+  switch (index) {
+  // ...
+  case SvcId::StartDma:
+    WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+    break;
+  // ...
+  }
+}
+</code></pre>
+
+</section>
+
+<section><h1>Our Toolbox</h1>
+</section>
+
+
+<section><h2 style="color:#f6ba4a">Variadic Templates</h2>
+<span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="0"><span class="fragment fade-out" data-fragment-index="1"><pre><code class="cpp">template&lt;typename F, typename T&gt;
+T TransformOne(F func, T value) {
+  return func(value);
+}
+</code></pre>
+</span></span><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="1"><pre><code class="cpp">template&lt;typename F, typename T1, typename T2&gt;
+std::tuple&lt;T1, T2&gt; TransformTwo(F func, T1 value1, T2 value2) {
+  return std::tuple&lt;T1, T2&gt; { func(value1), func(value2) };
+}
+</code></pre>
+</span></span>
+</section>
+
+
+<section><h2 style="color:#f6ba4a">Variadic Templates</h2>
+<p class="fragment" data-fragment-index="0">Can take any number of arguments</p>
+<p class="fragment" data-fragment-index="1">Implementation using <i>parameter pack expansion</i></p>
+<div><span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="2"><span class="fragment fade-out" data-fragment-index="3"><pre><code class="cpp">template&lt;typename F, typename... T&gt;
+std::tuple&lt;T...&gt; TransformMany(F func, T... values) {
+  
+}
+</code></pre>
+</span></span><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="3"><pre><code class="cpp">template&lt;typename F, typename... T&gt;
+std::tuple&lt;T...&gt; TransformMany(F func, T... values) {
+  return std::tuple&lt;T...&gt; { func(values) ... };
+}
+</code></pre>
+</span></span></div>
+<p>&nbsp</p>
+<p>&nbsp</p>
+<p class="fragment" data-fragment-index="4">TransformMany&lt;T1&gt; == TransformOne&lt;T1&gt;</p>
+<p class="fragment" data-fragment-index="5">TransformMany&lt;T1, T2&gt; == TransformTwo&lt;T1, T2&gt;</p>
+</section>
+
+
+<section><h2 style="color:#f7f749">Tuples and Functions</h2>
+std::tuple(num, str) ⇒ func(num, str) ?
+<ul>
+<li class="fragment" data-fragment-index="0">std::apply: Call function with tuple elements</li>
+</ul>
+<pre class="fragment" data-fragment-index="1"><code class="cpp">void PrintNumberAndString(int num, const char* str) {
+  std::cout << "Number: " << num << std::endl;
+  std::cout << "String: " << str << std::endl;
+}
+
+auto tuple = std::make_tuple(5, "Hello World");
+std::apply(PrintNumberAndString, tup);
+</code></pre>
+<pre style="background:#121212" class="fragment" data-fragment-index="2">
+Number: 5
+String: Hello World
+</pre>
+</section>
+
+
+<section data-transition="slide-in fade-out"><h2 style="color:#f6ba4a">Variadic Templates</h2>
+Smart register decoding:
+
+<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
+std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+  unsigned reg_index = 0;
+  return                    FromRegister&lt;T&gt;(cpu.reg[reg_index++])      ;
+}
+</code></pre>
+<pre style="width:100%;visibility:hidden"><code class="cpp">  case SvcId::StartDma:
+    auto inputs  = Decode&lt;Process*,Vaddr,Process*,VAddr,uint32_t&gt;(cpu);
+    auto outputs = std::apply(DoStartDma, inputs);
+</code></pre>
+</section>
+
+
+<section data-transition="slide-out fade-in"><h2 style="color:#f6ba4a">Variadic Templates</h2>
+Smart register decoding:
+
+<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
+std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+  unsigned reg_index = 0;
+  return std::tuple&lt;T...&gt; { FromRegister&lt;T&gt;(cpu.reg[reg_index++]) ... };
+}
+</code></pre>
+<pre style="width:100%" class="fragment" data-fragment-index="0"><code class="cpp">  case SvcId::StartDma:
+    auto inputs  = Decode&lt;Process*,Vaddr,Process*,VAddr,uint32_t&gt;(cpu);
+    auto outputs = std::apply(DoStartDma, inputs);
+</code></pre>
+</section>
+
+
+<section><h2 style="color:#f6ba4a">Variadic Templates</h2>
+Smart register decoding:
+
+<pre style="width:100%"><code class="cpp">  case SvcId::StartDma:
+    auto inputs  = Decode&lt;Process*,Vaddr,Process*,VAddr,uint32_t&gt;(cpu);
+    auto outputs = std::apply(DoStartDma, inputs);
+</code></pre>
+<p class="fragment" data-fragment-index="0">vs.</p>
+<pre style="width:100%" class="fragment" data-fragment-index="0"><code class="cpp">  case SvcId::StartDma:
+    auto dst_proc  = FromRegister&lt;Process*&gt;(cpu.reg[1]);
+    auto dst_addr  = FromRegister&lt;VAddr   &gt;(cpu.reg[2]);
+    auto src_proc  = FromRegister&lt;Process*&gt;(cpu.reg[3]);
+    auto src_addr  = FromRegister&lt;VAddr   &gt;(cpu.reg[0]);
+    auto data_size = FromRegister&lt;uint32_t&gt;(cpu.reg[4]);
+    DoStartDma(dst_proc, dst_addr, src_proc, src_addr, data_size);
+</code></pre>
+</section>
+
+
+<section><h2 style="color:#f6ba4a">Fold Expressions</h2>
+<p>Pack expansion while applying an operator</p>
+<p class="fragment" data-fragment-index="0" style="margin-bottom:0">Syntax:</p>
+<p><div class="fragment" data-fragment-index="1"><span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="1"><pre><code class="cpp">template&lt;typename F, typename... T&gt;
+auto AccumulateMany(F func, T... values) {
+  return (func(values) + ... );
+}
+</code></pre>
+</span></span></div></p><p>&nbsp;</p><p>&nbsp;</p>
+<p><pre class="fragment" data-fragment-index="2"><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
+AccumulateMany(twice, 5, 64) == twice(5)+twice(64)
+</code></pre></p>
+<ul>
+<li class="fragment" data-fragment-index="3">All binary operators supported …</li>
+<li class="fragment" data-fragment-index="4">… including the comma operator</li> <!-- Guess which one we'll fold over -->
+</ul>
+</section>
+
+
+<section><h2 style="color:#f6ba4a">Fold Expressions</h2>
+Smart register encoding:
+<ul>
+  <li>
+  Sequentially apply this function on each input type:
+  <pre style="width:100%"><code class="cpp">cpu->reg[reg_index++] = ToRegister&lt;T&gt;(t)</code></pre>
+  </li>
+  <li class="fragment" data-fragment-index="2">Fold expression using comma!
+<pre style="width:100%"><code class="cpp" class="fragment" data-fragment-index="2" style="padding-bottom:0">template&lt;typename... T&gt;
+void Encode(const T&... values) {
+  unsigned reg_index = 0;
+  ((cpu.reg[reg_index++] = ToRegister&lt;T&gt;(values)), ...);
+}
+</code></pre>
+</li>
+<li class="fragment" data-fragment-index="3">
+<pre style="width:100%"><code class="cpp" class="fragment" data-fragment-index="2" style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
+std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
+</code></pre>
+  </li>
+</ul>
+
+<small class="fragment" data-fragment-index="5" class="footer">Further reading: Vittorio Romeo, Introduction to C++ origami @ C++::London Jan 2018<br><a href="https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami">https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami</a></small>
+</section>
+
+
+<section><h2 style="color:#49f749">Function traits</h2>
+<ul>
+<li class="fragment" data-fragment-index="0">Type traits: Get info about a type at compile-time</li>
+<li class="fragment" data-fragment-index="1">E.g: std::is_pointer, std::is_copy_constructible, …</li>
+<li class="fragment" data-fragment-index="2">Structure in pseudo-code:</li>
+<div class="fragment" data-fragment-index="2" style="display:flex">
+<pre><code class="cpp">struct is_pointer&lt;int*&gt; {
+  bool value = true;
+};
+</code></pre>
+<p style="width:10%">&nbsp;</p>
+<pre><code class="cpp">struct is_pointer&lt;int&gt; {
+  bool value = false;
+};
+</code></pre>
+<p style="width:50%">&nbsp;</p>
+</div>
+<li class="fragment" data-fragment-index="3">Function traits:
+<ul>
+<li>Type traits for functions</li>
+<li class="fragment" data-fragment-index="4">Get parameter list & return type</li>
+</ul>
+</ul>
+<br>
+</section>
+
+
+<section><h2 style="color:#49f749">Function Traits</h2>
+<span class="fragment">
+<pre style="width:100%"><code class="cpp">template&lt;typename F&gt;
+struct FunctionTraits {
+  using Args   = std::tuple&lt; /* Parameter list of F */ &gt;;
+  using Result = /* Return type of F */;
+};
+</code></pre>
+</span>
+<span class="fragment">
+<p>Implementations available in</p>
+<ul>
+  <li>Boost.FunctionTypes (C++98?)</li>
+  <li>Boost.CallableTraits (C++11)<br><small class="footer">Standalone: https://github.com/badair/callable_traits</small></li>
+</span>
+</section>
+
+
+<section><h2 style="color:#49f749">Function Traits</h2>
+<p>Minimal implementation for our use case</p>
+<span class="fragment">
+<pre style="width:100%"><code class="cpp">template&lt;typename F&gt;
+struct FunctionTraits;
+
+// Specialisation
+template&lt;typename FuncResult, typename... FuncArgs&gt;
+struct FunctionTraits&lt;Result(Args...)&gt; {
+  using Args   = std::tuple&lt;FuncArgs...&gt;;
+  using Result = FuncResult;
+};
+</code></pre>
+Very limited, but good enough here
+</section>
+
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, DmaObject*&gt;
+DoStartDma(Process* dst_process, VAddr dst_data_addr,
+           Process* src_process, VAddr src_data_addr,
+           uint32_t data_size);
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<pre style="width:100%"><code class="cpp">using InData  = FunctionTraits&lt;decltype(DoStartDma)&gt;::Args;
+using OutData = FunctionTraits&lt;decltype(DoStartDma)&gt;::Result;
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">InData Decode&lt;InData&gt;(CPU& cpu)
+void   Encode&lt;OutData&gt;(CPU& cpu, OutData... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">case SvcId::StartDma:
+  WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+  break;
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+
+
+<section>Putting things together:<br><h1>Live Coding!</h1>
+<!-- Show the full "naive" code to illustrate how many LOCs we need just for reg encoding/decoding -->
+</section>
+
+
+
+
+<section><h1>THX && FAQ ? OK : EOF</h1>
+<div width="50%" style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
+  <img src="images/twitter.png" style="border:none">&nbsp;@fail_cluez
+</div>
+<div width="50%" style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
+<img src="images/github.png" style="border:none">&nbsp;neobrain
+</div>
+<img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle">
+</section>
+
+ <!-- enableMovedContent -->
+
+<!-- Misc TODOs:
+* Show generated assembly for SVCRaw loop with dummy implementations for all SVCs (Just call "ExternalFunc(arglist)" to make sure the compiler doesn't generate NOPs)
+    * Explain why the generated assembly is so good (... if it actually is): Compiler optimisations play a big role, but also TMP not producing any runtime-overhead
+-->
+
+      </div>
+    </div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      Reveal.initialize({
+        controls: false,
+        transition: 'slide',
+        transitionSpeed: 'fast',
+        fragments: 'false', // TODO: Disable in the final presentation!
+        dependencies: [
+          // Highlighting for code blocks
+         { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+		// Interpret Markdown in <section> elements
+		{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+		{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+
+		// Syntax highlight for <code> elements
+		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+window.addEventListener("mousedown", handleClick, false);
+window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+
+function handleClick(e) {
+	e.preventDefault();
+	if(e.button === 0) Reveal.next();
+	if(e.button === 2) Reveal.prev();
+}
+    </script>
+  </body>
+</html>
