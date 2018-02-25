@@ -14,7 +14,8 @@ test:
     - stack build
   post:
     - rm -rf _site
-    - git clone -b cpplondon_feb2018 $CIRCLE_REPOSITORY_URL _site
+    - rsync -Rr ./ ./_site
+    - cd _site && git checkout cpplondon_feb2018
     - stack exec site build
 
 deployment:
