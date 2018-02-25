@@ -30,6 +30,7 @@ deployment:
       - cd _site && git push origin cpplondon_feb2018
 
       - git checkout dev
+      - git pull
       - git status
       - git submodule update --init
       - cd cpplondon_feb2018 && git pull
@@ -37,6 +38,7 @@ deployment:
       - git push origin dev
 
       - git checkout master
+      - git pull
       - git status
       - git submodule update --init
       - cd cpplondon_feb2018 && git pull
