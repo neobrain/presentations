@@ -99,6 +99,11 @@ main = hakyll $ do
         route idRoute
         compile getResourceBody
 
+    -- Raw code snippets
+    match "live/*.cpp" $ do
+        route idRoute
+        compile getResourceBody
+
 getCompiledCodeSnippet :: String -> String -> Compiler String
 getCompiledCodeSnippet file_path step =
     fmap itemBody $ loadBody (fromFilePath file_path) >>= makeItem >>= applyAsTemplate codeCtx >>= relativizeUrls

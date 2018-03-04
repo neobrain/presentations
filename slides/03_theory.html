@@ -11,8 +11,8 @@ $code("code/variadic_templates_theory.html", "0", "1")$
 <p $make_fragment("0")$>Can take any number of arguments</p>
 <p $make_fragment("1")$>Implementation using <i>parameter pack expansion</i></p>
 <div>$code("code/variadic_templates_theory.html", "2", "3")$</div>
-<p>&nbsp</p>
-<p>&nbsp</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <p $make_fragment("4")$>TransformMany&lt;T1&gt; == TransformOne&lt;T1&gt;</p>
 <p $make_fragment("5")$>TransformMany&lt;T1, T2&gt; == TransformTwo&lt;T1, T2&gt;</p>
 </section>
@@ -24,8 +24,8 @@ std::tuple(num, str) ⇒ func(num, str) ?
 <li $make_fragment("0")$>std::apply: Call function with tuple elements</li>
 </ul>
 <pre $make_fragment("1")$><code class="cpp">void PrintNumberAndString(int num, const char* str) {
-  std::cout << "Number: " << num << std::endl;
-  std::cout << "String: " << str << std::endl;
+  std::cout &lt;&lt; "Number: " &lt;&lt; num &lt;&lt; std::endl;
+  std::cout &lt;&lt; "String: " &lt;&lt; str &lt;&lt; std::endl;
 }
 
 auto tuple = std::make_tuple(5, "Hello World");
@@ -42,7 +42,7 @@ String: Hello World
 Smart register decoding:
 
 <pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
-std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+std::tuple&lt;T...&gt; Decode(CPUContext&amp; cpu) {
   unsigned reg_index = 0;
   return                    FromRegister&lt;T&gt;(cpu.reg[reg_index++])      ;
 }
@@ -58,7 +58,7 @@ std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
 Smart register decoding:
 
 <pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
-std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+std::tuple&lt;T...&gt; Decode(CPUContext&amp; cpu) {
   unsigned reg_index = 0;
   return std::tuple&lt;T...&gt; { FromRegister&lt;T&gt;(cpu.reg[reg_index++]) ... };
 }
@@ -92,10 +92,10 @@ Smart register decoding:
 <section><h2 style="color:#f6ba4a">Fold Expressions</h2>
 <p>Pack expansion while applying an operator</p>
 <p $make_fragment("0")$ style="margin-bottom:0">Syntax:</p>
-<p><div $make_fragment("1")$>$code("code/foldexpr_theory.html", "1")$</div></p><p>&nbsp;</p><p>&nbsp;</p>
-<p><pre $make_fragment("2")$><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
+<div $make_fragment("1")$>$code("code/foldexpr_theory.html", "1")$</div><p>&nbsp;</p><p>&nbsp;</p>
+<div><pre $make_fragment("2")$><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
 AccumulateMany(twice, 5, 64) == twice(5)+twice(64)
-</code></pre></p>
+</code></pre></div>
 <ul>
 <li $make_fragment("3")$>All binary operators supported &#8230;</li>
 <li $make_fragment("4")$>&#8230; including the comma operator</li> <!-- Guess which one we'll fold over -->
@@ -111,21 +111,19 @@ Smart register encoding:
   <pre style="width:100%"><code class="cpp">cpu->reg[reg_index++] = ToRegister&lt;T&gt;(t)</code></pre>
   </li>
   <li $make_fragment("2")$>Fold expression using comma!
-<pre style="width:100%"><code class="cpp" $make_fragment("2")$ style="padding-bottom:0">template&lt;typename... T&gt;
-void Encode(const T&... values) {
+<pre style="width:100%" $make_fragment("2")$><code class="cpp" style="padding-bottom:0">template&lt;typename... T&gt;
+void Encode(const T&amp;... values) {
   unsigned reg_index = 0;
   ((cpu.reg[reg_index++] = ToRegister&lt;T&gt;(values)), ...);
 }
 </code></pre>
 </li>
 <li $make_fragment("3")$>
-<pre style="width:100%"><code class="cpp" $make_fragment("2")$ style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
+<pre style="width:100%" $make_fragment("2")$><code class="cpp" style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
 std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 </code></pre>
   </li>
 </ul>
-
-<small $make_fragment("5")$ class="footer">Further reading: Vittorio Romeo, Introduction to C++ origami @ C++::London Jan 2018<br><a href=https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami>https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami</a></small>
 </section>
 
 
@@ -149,7 +147,7 @@ std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 <li $make_fragment("3")$>Function traits:
 <ul>
 <li>Type traits for functions</li>
-<li $make_fragment("4")$>Get parameter list & return type</li>
+<li $make_fragment("4")$>Get parameter list &amp; return type</li>
 </ul>
 </ul>
 <br>
@@ -170,6 +168,7 @@ struct FunctionTraits {
 <ul>
   <li>Boost.FunctionTypes (C++98?)</li>
   <li>Boost.CallableTraits (C++11)<br><small class="footer">Standalone: https://github.com/badair/callable_traits</small></li>
+</ul>
 </span>
 </section>
 
@@ -188,4 +187,5 @@ struct FunctionTraits&lt;Result(Args...)&gt; {
 };
 </code></pre>
 Very limited, but good enough here
+</span>
 </section>

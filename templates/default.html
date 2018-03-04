@@ -23,51 +23,11 @@
   <body>
     <div class="reveal">
       <div class="slides">
-		<div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
-          neobrain.github.io | @fail_cluez
-        </div>
+        <!-- <div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
+          neobrain.github.io | <span style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif">@</span>fail_cluez
+        </div> -->
 
 $body$
-
-<section><h1>THX && FAQ ? OK : EOF</h1>
-<div width=50% style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
-  <img src="images/twitter.png" style="border:none">&nbsp;@fail_cluez
-</div>
-<div width=50% style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
-<img src="images/github.png" style="border:none">&nbsp;neobrain
-</div>
-<img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle">
-</section>
-
-$if(enableMovedContent)$ <!-- TODO: Turn this into a bonus slide mentioning "fold over comma" in C++11 -->
-<section style="line-height:0.7"><h2>Step 2b: Register Encoding</i></h2>
-<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">(cpu-&gt;reg[reg_index++] = data)...; // Doesn't compile :(
-</code></pre>
-
-<span class="fragment">C++17: Fold expression on the comma-operator:
-<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">((cpu-&gt;reg[reg_index++] = data), ...);
-</code></pre>
-
-<span class="fragment">C++11: Black magic¹
-<pre style="width:100%"><code class="cpp" class="fragment" style="padding-bottom:0">template&lt;typename... T&gt;
-void EncodeOutData(CPU* cpu, const T&... data) {
-  unsigned reg_index = 0;
-  (void)std::initializer_list&lt;uint32_t&gt;{
-      (cpu-&gt;regs[reg_index++] = data)...
-  };
-}
-</code></pre>
-<p class="fragment">Take care not to walk into the execution-order trap!</p>
-<small class="footer">¹ Vittorio Romeo: for_each_argument explained and expanded<br><a href=https://www.youtube.com/watch?v=2l83JlqkzBk>https://www.youtube.com/watch?v=2l83JlqkzBk</a></small>
-</span>
-</span>
-</section>
-$endif$ <!-- enableMovedContent -->
-
-<!-- Misc TODOs:
-* Show generated assembly for SVCRaw loop with dummy implementations for all SVCs (Just call "ExternalFunc(arglist)" to make sure the compiler doesn't generate NOPs)
-    * Explain why the generated assembly is so good (... if it actually is): Compiler optimisations play a big role, but also TMP not producing any runtime-overhead
--->
 
       </div>
     </div>
@@ -90,14 +50,16 @@ $endif$ <!-- enableMovedContent -->
 		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
         ]
       });
-window.addEventListener("mousedown", handleClick, false);
-window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
 
-function handleClick(e) {
-	e.preventDefault();
-	if(e.button === 0) Reveal.next();
-	if(e.button === 2) Reveal.prev();
-}
+// Make left/right mouseclicks move to the next/previous slide. Disabled in the published version to make clicking on links possible.
+// window.addEventListener("mousedown", handleClick, false);
+// window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+//
+// function handleClick(e) {
+// 	e.preventDefault();
+// 	if(e.button === 0) Reveal.next();
+// 	if(e.button === 2) Reveal.prev();
+// }
     </script>
   </body>
 </html>
