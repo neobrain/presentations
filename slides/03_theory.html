@@ -31,8 +31,8 @@ std::tuple&lt;T...&gt; TransformMany(F func, T... values) {
 }
 </code></pre>
 </span></span></div>
-<p>&nbsp</p>
-<p>&nbsp</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <p class="fragment" data-fragment-index=4>TransformMany&lt;T1&gt; == TransformOne&lt;T1&gt;</p>
 <p class="fragment" data-fragment-index=5>TransformMany&lt;T1, T2&gt; == TransformTwo&lt;T1, T2&gt;</p>
 </section>
@@ -44,8 +44,8 @@ std::tuple(num, str) ⇒ func(num, str) ?
 <li class="fragment" data-fragment-index=0>std::apply: Call function with tuple elements</li>
 </ul>
 <pre class="fragment" data-fragment-index=1><code class="cpp">void PrintNumberAndString(int num, const char* str) {
-  std::cout << "Number: " << num << std::endl;
-  std::cout << "String: " << str << std::endl;
+  std::cout &lt;&lt; "Number: " &lt;&lt; num &lt;&lt; std::endl;
+  std::cout &lt;&lt; "String: " &lt;&lt; str &lt;&lt; std::endl;
 }
 
 auto tuple = std::make_tuple(5, "Hello World");
@@ -62,7 +62,7 @@ String: Hello World
 Smart register decoding:
 
 <pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
-std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+std::tuple&lt;T...&gt; Decode(CPUContext&amp; cpu) {
   unsigned reg_index = 0;
   return                    FromRegister&lt;T&gt;(cpu.reg[reg_index++])      ;
 }
@@ -78,7 +78,7 @@ std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
 Smart register decoding:
 
 <pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
-std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+std::tuple&lt;T...&gt; Decode(CPUContext&amp; cpu) {
   unsigned reg_index = 0;
   return std::tuple&lt;T...&gt; { FromRegister&lt;T&gt;(cpu.reg[reg_index++]) ... };
 }
@@ -112,15 +112,15 @@ Smart register decoding:
 <section><h2 style="color:#f6ba4a">Fold Expressions</h2>
 <p>Pack expansion while applying an operator</p>
 <p class="fragment" data-fragment-index=0 style="margin-bottom:0">Syntax:</p>
-<p><div class="fragment" data-fragment-index=1><span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index=1><pre><code class="cpp">template&lt;typename F, typename... T&gt;
+<div class="fragment" data-fragment-index=1><span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index=1><pre><code class="cpp">template&lt;typename F, typename... T&gt;
 auto AccumulateMany(F func, T... values) {
   return (func(values) + ... );
 }
 </code></pre>
-</span></span></div></p><p>&nbsp;</p><p>&nbsp;</p>
-<p><pre class="fragment" data-fragment-index=2><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
+</span></span></div><p>&nbsp;</p><p>&nbsp;</p>
+<div><pre class="fragment" data-fragment-index=2><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
 AccumulateMany(twice, 5, 64) == twice(5)+twice(64)
-</code></pre></p>
+</code></pre></div>
 <ul>
 <li class="fragment" data-fragment-index=3>All binary operators supported &#8230;</li>
 <li class="fragment" data-fragment-index=4>&#8230; including the comma operator</li> <!-- Guess which one we'll fold over -->
@@ -136,21 +136,19 @@ Smart register encoding:
   <pre style="width:100%"><code class="cpp">cpu->reg[reg_index++] = ToRegister&lt;T&gt;(t)</code></pre>
   </li>
   <li class="fragment" data-fragment-index=2>Fold expression using comma!
-<pre style="width:100%"><code class="cpp" class="fragment" data-fragment-index=2 style="padding-bottom:0">template&lt;typename... T&gt;
-void Encode(const T&... values) {
+<pre style="width:100%" class="fragment" data-fragment-index=2><code class="cpp" style="padding-bottom:0">template&lt;typename... T&gt;
+void Encode(const T&amp;... values) {
   unsigned reg_index = 0;
   ((cpu.reg[reg_index++] = ToRegister&lt;T&gt;(values)), ...);
 }
 </code></pre>
 </li>
 <li class="fragment" data-fragment-index=3>
-<pre style="width:100%"><code class="cpp" class="fragment" data-fragment-index=2 style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
+<pre style="width:100%" class="fragment" data-fragment-index=2><code class="cpp" style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
 std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 </code></pre>
   </li>
 </ul>
-
-<small class="fragment" data-fragment-index=5 class="footer">Further reading: Vittorio Romeo, Introduction to C++ origami @ C++::London Jan 2018<br><a href=https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami>https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami</a></small>
 </section>
 
 
@@ -174,7 +172,7 @@ std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 <li class="fragment" data-fragment-index=3>Function traits:
 <ul>
 <li>Type traits for functions</li>
-<li class="fragment" data-fragment-index=4>Get parameter list & return type</li>
+<li class="fragment" data-fragment-index=4>Get parameter list &amp; return type</li>
 </ul>
 </ul>
 <br>
@@ -195,6 +193,7 @@ struct FunctionTraits {
 <ul>
   <li>Boost.FunctionTypes (C++98?)</li>
   <li>Boost.CallableTraits (C++11)<br><small class="footer">Standalone: https://github.com/badair/callable_traits</small></li>
+</ul>
 </span>
 </section>
 
@@ -213,5 +212,6 @@ struct FunctionTraits&lt;Result(Args...)&gt; {
 };
 </code></pre>
 Very limited, but good enough here
+</span>
 </section>
 

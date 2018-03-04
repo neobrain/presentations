@@ -157,15 +157,16 @@ Common structure:
 
 
 <section><h2>Repetitive logic makes code ...</h2>
+<ul style="margin-top:-20px">
 <li class="fragment" data-fragment-index=0 style="line-height:1.1">Hard to write<br><small>more typing, mental arithmetic</small></li>
 <li class="fragment" data-fragment-index=1 style="line-height:1.1">Hard to modify<br><small>consistency<!-- across instances-->? <!-- no compile-time consistency checking!--> </small></li>
 <li class="fragment" data-fragment-index=2 style="line-height:1.1">Hard to document<br><small><!--discoverability: -->where to put docstrings?</small></li>
 <li class="fragment" data-fragment-index=3 style="line-height:1.1">Hard to understand<br><small><!--hard to reason about -->scattered information<br>magic numbers<!-- are bad--></small></li>
-<li class="fragment" data-fragment-index=4 style="line-height:1.1">Hard to review & validate<br><small>"given enough eyeballs" notwithstanding</small></li> <!-- "given enough eyeballs, all bugs are shallow" not so much -->
+<li class="fragment" data-fragment-index=4 style="line-height:1.1">Hard to review &amp; validate<br><small>"given enough eyeballs" notwithstanding</small></li> <!-- "given enough eyeballs, all bugs are shallow" not so much -->
 </ul>
 
-<b class="fragment" data-fragment-index=5>Don't Repeat Yourself</b><br>
-<span class="fragment" data-fragment-index=6>But how?</span>
+<p><b class="fragment" data-fragment-index=5>Don't Repeat Yourself</b><br>
+<span class="fragment" data-fragment-index=6>But how?</span></p>
 </section>
 
 
@@ -228,8 +229,8 @@ using OutData = std::tuple&lt;Result, DmaObject*>
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f6ba4a">Generators</font> ↓
-<pre style="width:100%"><code class="cpp">template&lt;typename  InData&gt; InData Decode(CPU& cpu)
-template&lt;typename OutData&gt; void   Encode(CPU& cpu, OutData... data)
+<pre style="width:100%"><code class="cpp">template&lt;typename  InData&gt; InData Decode(CPU&amp; cpu)
+template&lt;typename OutData&gt; void   Encode(CPU&amp; cpu, OutData... data)
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f7f749">Combine</font> ↓

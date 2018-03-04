@@ -23,17 +23,15 @@
   <body>
     <div class="reveal">
       <div class="slides">
-		<div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
-          neobrain.github.io | @fail_cluez | tony.wasserka@gmx.de
-        </div>
+        <!-- <div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
+          neobrain.github.io | <span style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif">@</span>fail_cluez
+        </div> -->
 
 <section><h2>Generative Programming in Action</h2><h3>Emulating the Nintendo 3DS</h3>
-<p>
 <div style="display:flex; justify-content:space-around">
 <p style="width:25%; font-size:80%; color:#c0c0c0">Tony Wasserka<br><small>@fail_cluez</small></p>
 <p style="width:25%; font-size:80%; color:#c0c0c0">C++::London<br><small>19 Feb 2018</small></p>
 </div>
-</p>
 </section>
 
 <section><h2>What this will be about</h2>
@@ -51,7 +49,7 @@
 
 <section><h2>Who am I?</h2>
 <ul>
-<li>C++ enthusiast: Low-level & type-safety</li> <!-- C++ makes the type system effective even for inherently untyped data -->
+<li>C++ enthusiast: Low-level &amp; type-safety</li> <!-- C++ makes the type system effective even for inherently untyped data -->
 <li>Game console emulation: GC/Wii/3DS/PSP</li>
 <div style="display:flex; justify-content:space-around; align-items:center">
 <small style="text-align: center"><img src="images/ppsspp_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>PPSSPP</small>
@@ -109,6 +107,7 @@
               </td>
             </tr>
 </table>
+</div>
 </section>
 
 <section><h2>3DS System Calls</h2>
@@ -311,15 +310,16 @@ Common structure:
 
 
 <section><h2>Repetitive logic makes code ...</h2>
+<ul style="margin-top:-20px">
 <li class="fragment" data-fragment-index="0" style="line-height:1.1">Hard to write<br><small>more typing, mental arithmetic</small></li>
 <li class="fragment" data-fragment-index="1" style="line-height:1.1">Hard to modify<br><small>consistency<!-- across instances-->? <!-- no compile-time consistency checking!--> </small></li>
 <li class="fragment" data-fragment-index="2" style="line-height:1.1">Hard to document<br><small><!--discoverability: -->where to put docstrings?</small></li>
 <li class="fragment" data-fragment-index="3" style="line-height:1.1">Hard to understand<br><small><!--hard to reason about -->scattered information<br>magic numbers<!-- are bad--></small></li>
-<li class="fragment" data-fragment-index="4" style="line-height:1.1">Hard to review & validate<br><small>"given enough eyeballs" notwithstanding</small></li> <!-- "given enough eyeballs, all bugs are shallow" not so much -->
+<li class="fragment" data-fragment-index="4" style="line-height:1.1">Hard to review &amp; validate<br><small>"given enough eyeballs" notwithstanding</small></li> <!-- "given enough eyeballs, all bugs are shallow" not so much -->
 </ul>
 
-<b class="fragment" data-fragment-index="5">Don't Repeat Yourself</b><br>
-<span class="fragment" data-fragment-index="6">But how?</span>
+<p><b class="fragment" data-fragment-index="5">Don't Repeat Yourself</b><br>
+<span class="fragment" data-fragment-index="6">But how?</span></p>
 </section>
 
 
@@ -382,8 +382,8 @@ using OutData = std::tuple&lt;Result, DmaObject*>
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f6ba4a">Generators</font> ↓
-<pre style="width:100%"><code class="cpp">template&lt;typename  InData&gt; InData Decode(CPU& cpu)
-template&lt;typename OutData&gt; void   Encode(CPU& cpu, OutData... data)
+<pre style="width:100%"><code class="cpp">template&lt;typename  InData&gt; InData Decode(CPU&amp; cpu)
+template&lt;typename OutData&gt; void   Encode(CPU&amp; cpu, OutData... data)
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f7f749">Combine</font> ↓
@@ -450,8 +450,8 @@ std::tuple&lt;T...&gt; TransformMany(F func, T... values) {
 }
 </code></pre>
 </span></span></div>
-<p>&nbsp</p>
-<p>&nbsp</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <p class="fragment" data-fragment-index="4">TransformMany&lt;T1&gt; == TransformOne&lt;T1&gt;</p>
 <p class="fragment" data-fragment-index="5">TransformMany&lt;T1, T2&gt; == TransformTwo&lt;T1, T2&gt;</p>
 </section>
@@ -463,8 +463,8 @@ std::tuple(num, str) ⇒ func(num, str) ?
 <li class="fragment" data-fragment-index="0">std::apply: Call function with tuple elements</li>
 </ul>
 <pre class="fragment" data-fragment-index="1"><code class="cpp">void PrintNumberAndString(int num, const char* str) {
-  std::cout << "Number: " << num << std::endl;
-  std::cout << "String: " << str << std::endl;
+  std::cout &lt;&lt; "Number: " &lt;&lt; num &lt;&lt; std::endl;
+  std::cout &lt;&lt; "String: " &lt;&lt; str &lt;&lt; std::endl;
 }
 
 auto tuple = std::make_tuple(5, "Hello World");
@@ -481,7 +481,7 @@ String: Hello World
 Smart register decoding:
 
 <pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
-std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+std::tuple&lt;T...&gt; Decode(CPUContext&amp; cpu) {
   unsigned reg_index = 0;
   return                    FromRegister&lt;T&gt;(cpu.reg[reg_index++])      ;
 }
@@ -497,7 +497,7 @@ std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
 Smart register decoding:
 
 <pre style="width:100%"><code class="cpp">template&lt;typename... T&gt;
-std::tuple&lt;T...&gt; Decode(CPUContext& cpu) {
+std::tuple&lt;T...&gt; Decode(CPUContext&amp; cpu) {
   unsigned reg_index = 0;
   return std::tuple&lt;T...&gt; { FromRegister&lt;T&gt;(cpu.reg[reg_index++]) ... };
 }
@@ -531,15 +531,15 @@ Smart register decoding:
 <section><h2 style="color:#f6ba4a">Fold Expressions</h2>
 <p>Pack expansion while applying an operator</p>
 <p class="fragment" data-fragment-index="0" style="margin-bottom:0">Syntax:</p>
-<p><div class="fragment" data-fragment-index="1"><span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="1"><pre><code class="cpp">template&lt;typename F, typename... T&gt;
+<div class="fragment" data-fragment-index="1"><span style="position:relative"><span class="fragment fade-in" style="position:absolute; width:1000px; transform:translate(-50%, 0%)" data-fragment-index="1"><pre><code class="cpp">template&lt;typename F, typename... T&gt;
 auto AccumulateMany(F func, T... values) {
   return (func(values) + ... );
 }
 </code></pre>
-</span></span></div></p><p>&nbsp;</p><p>&nbsp;</p>
-<p><pre class="fragment" data-fragment-index="2"><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
+</span></span></div><p>&nbsp;</p><p>&nbsp;</p>
+<div><pre class="fragment" data-fragment-index="2"><code class="cpp">AccumulateMany(twice, 5)     == twice(5)
 AccumulateMany(twice, 5, 64) == twice(5)+twice(64)
-</code></pre></p>
+</code></pre></div>
 <ul>
 <li class="fragment" data-fragment-index="3">All binary operators supported …</li>
 <li class="fragment" data-fragment-index="4">… including the comma operator</li> <!-- Guess which one we'll fold over -->
@@ -555,21 +555,19 @@ Smart register encoding:
   <pre style="width:100%"><code class="cpp">cpu->reg[reg_index++] = ToRegister&lt;T&gt;(t)</code></pre>
   </li>
   <li class="fragment" data-fragment-index="2">Fold expression using comma!
-<pre style="width:100%"><code class="cpp" class="fragment" data-fragment-index="2" style="padding-bottom:0">template&lt;typename... T&gt;
-void Encode(const T&... values) {
+<pre style="width:100%" class="fragment" data-fragment-index="2"><code class="cpp" style="padding-bottom:0">template&lt;typename... T&gt;
+void Encode(const T&amp;... values) {
   unsigned reg_index = 0;
   ((cpu.reg[reg_index++] = ToRegister&lt;T&gt;(values)), ...);
 }
 </code></pre>
 </li>
 <li class="fragment" data-fragment-index="3">
-<pre style="width:100%"><code class="cpp" class="fragment" data-fragment-index="2" style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
+<pre style="width:100%" class="fragment" data-fragment-index="2"><code class="cpp" style="padding-bottom:0">auto outputs = std::apply(DoStartDma, inputs);
 std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 </code></pre>
   </li>
 </ul>
-
-<small class="fragment" data-fragment-index="5" class="footer">Further reading: Vittorio Romeo, Introduction to C++ origami @ C++::London Jan 2018<br><a href="https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami">https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami</a></small>
 </section>
 
 
@@ -593,7 +591,7 @@ std::apply(Encode&lt;uint32_t,DmaObject*&gt;, outputs);
 <li class="fragment" data-fragment-index="3">Function traits:
 <ul>
 <li>Type traits for functions</li>
-<li class="fragment" data-fragment-index="4">Get parameter list & return type</li>
+<li class="fragment" data-fragment-index="4">Get parameter list &amp; return type</li>
 </ul>
 </ul>
 <br>
@@ -614,6 +612,7 @@ struct FunctionTraits {
 <ul>
   <li>Boost.FunctionTypes (C++98?)</li>
   <li>Boost.CallableTraits (C++11)<br><small class="footer">Standalone: https://github.com/badair/callable_traits</small></li>
+</ul>
 </span>
 </section>
 
@@ -632,6 +631,7 @@ struct FunctionTraits&lt;Result(Args...)&gt; {
 };
 </code></pre>
 Very limited, but good enough here
+</span>
 </section>
 
 <section style="line-height:0.5"><h2>Our Vision</h2>
@@ -647,8 +647,8 @@ using OutData = FunctionTraits&lt;decltype(DoStartDma)&gt;::Result;
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f6ba4a">Generators</font> ↓
-<pre style="width:100%"><code class="cpp">InData Decode&lt;InData&gt;(CPU& cpu)
-void   Encode&lt;OutData&gt;(CPU& cpu, OutData... data)
+<pre style="width:100%"><code class="cpp">InData Decode&lt;InData&gt;(CPU&amp; cpu)
+void   Encode&lt;OutData&gt;(CPU&amp; cpu, OutData... data)
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f7f749">Combine</font> ↓
@@ -661,30 +661,322 @@ void   Encode&lt;OutData&gt;(CPU& cpu, OutData... data)
 </span>
 </section>
 
+<section>Putting things together<br><h1>In Practice</h1>
+</section>
 
-<section>Putting things together:<br><h1>Live Coding!</h1>
-<!-- Show the full "naive" code to illustrate how many LOCs we need just for reg encoding/decoding -->
+
+<section><h2>In Practice — Setup</h2>
+Dummy environment<br>Types:
+<pre style="width:100%"><code class="cpp">struct CPU {
+  uint32_t reg[16];
+};
+
+// Dummy kernel object types
+struct Process {};
+struct DmaObject {};
+
+using VAddr = uint32_t;
+</code></pre>
+</section>
+
+<section><h2>In Practice — Setup</h2>
+Dummy environment<br>Stub handler:
+<pre style="width:100%"><code class="cpp">std::tuple&lt;uint32_t, DmaObject*&gt;
+DoStartDma(Process* dst_process, VAddr dst_addr,
+           Process* src_process, VAddr src_addr, uint32_t data_size) {
+  std::cout &lt;&lt; /* log input arguments */ &lt;&lt; std::endl;
+
+  // Return some unique-ish dummy values
+  return std::tuple(uint32_t{src_addr * dst_addr}, new DmaObject);
+}
+</code></pre>
+</section>
+
+<section><h2>In Practice — Setup</h2>
+Dummy environment<br>Verbose conversion from CPU registers:
+<pre style="width:100%"><code class="cpp">template&lt;typename T&gt;
+T FromRegister(uint32_t value) {
+  std::cout &lt;&lt; "Decoding value " &lt;&lt; value &lt;&lt; '\n';
+
+  if constexpr (!std::is_pointer_v&lt;T&gt;) {
+    return static_cast&lt;T&gt;(value);
+  } else {
+    // Just hack together some pointer based on the given value
+    return reinterpret_cast&lt;T&gt;(static_cast&lt;uintptr_t&gt;(value));
+  }
+}</code></pre>
+</section>
+
+<section><h2>In Practice — Setup</h2>
+Dummy environment<br>Verbose conversion from CPU registers:
+<pre style="width:100%"><code class="cpp">template&lt;typename T&gt;
+uint32_t ToRegister(T value) {
+  std::cout &lt;&lt; "Encoding value " &lt;&lt; value &lt;&lt; '\n';
+
+  if constexpr (!std::is_pointer_v&lt;T&gt;) {
+    return static_cast&lt;uint32_t&gt;(value);
+  } else {
+    // Just return the raw object address as a value
+    return static_cast&lt;uint32_t&gt;(reinterpret_cast&lt;uintptr_t&gt;(value));
+  }
+}</code></pre>
+</section>
+
+<section><h2>In Practice — Decoder</h2>
+<p class="fragment" data-fragment-index="0" style="margin-top:-20px">Decode requires a parameter pack:</p>
+<pre class="fragment" data-fragment-index="0" style="width:100%"><code class="cpp">template&lt;typename... Args&gt;
+std::tuple&lt;Args...&gt; Decode(CPU&amp; cpu) { /* ... */ }
+</code></pre>
+<p class="fragment" data-fragment-index="2">… but FunctionTraits gave us a std::tuple</p>
+<p class="fragment" data-fragment-index="3">Let's try partial template specialisation:</p>
+<pre class="fragment" data-fragment-index="4" style="width:100%"><code class="cpp">template&lt;typename ArgsTuple&gt;
+ArgsTuple Decode(CPU&amp;);
+
+template&lt;typename... Args&gt;
+std::tuple&lt;Args...&gt; Decode&lt;std::tuple&lt;Args...&gt;&gt;(CPU&amp;) {
+  // ...
+}
+</code></pre>
+<pre style="background:#121212; width:100%" class="fragment" data-fragment-index="5"><span style="color:red">error: </span>function template partial specialization is not allowed</pre>
+</section>
+
+<section><h2>In Practice — Decoder</h2>
+<p>We can't partially specialise functions…</p>
+<p class="fragment" data-fragment-index="0">… but we can partially specialise function objects!</p>
+
+<pre style="width:100%" class="fragment" data-fragment-index="1"><code class="cpp">template&lt;typename ArgsTuple&gt;
+struct Decoder;
+
+template&lt;typename... Args&gt;
+struct Decoder&lt;std::tuple&lt;Args...&gt;&gt; {
+  static std::tuple&lt;Args...&gt; Decode(CPU&amp; cpu) {
+    size_t reg_index = 0;
+    return std::tuple&lt;Args... &gt; {
+             FromRegister&lt;Args&gt;(cpu.reg[reg_index++])
+             ...
+           };
+  }
+};
+</code></pre>
+</section>
+
+<section><h2>In Practice — Encoder</h2>
+<p class="fragment" data-fragment-index="0">Similarly, the Encoder must be a function object too:</p>
+
+<pre class="fragment" data-fragment-index="1" style="width:100%"><code class="cpp">template&lt;typename ArgsTuple&gt;
+struct Encoder;
+
+template&lt;typename... Args&gt;
+struct Encoder&lt;std::tuple&lt;Args...&gt;&gt; {
+  CPU&amp; cpu;
+
+  void operator()(Args... args) {
+    size_t reg_index = 0;
+    ((cpu.reg[reg_index++] = ToRegister&lt;Args&gt;(args)), ...);
+  }
+};
+</code></pre>
+
+<pre class="fragment" data-fragment-index="3" style="width:100%"><code class="cpp">Encoder&lt;OutArgs&gt; encoder{cpu}; // construct stateful function object
+std::apply(encoder, outputs);
+</code></pre>
+</section>
+
+
+<section><h2>In Practice — The Glue</h2>
+<pre style="width:100%"><code class="cpp" style="max-height:30em">template&lt;auto SVCImpl&gt;
+void WrapSVCImpl(CPU&amp; cpu) {
+  // Turn handler's function signature into std::tuples
+  using InArgs = typename FunctionTraits&lt;decltype(SVCImpl)&gt;::InArgs;
+  using OutArgs = typename FunctionTraits&lt;decltype(SVCImpl)&gt;::OutArgs;
+
+  // Decode registers by calling stateless function object
+  auto args = Decoder&lt;OutArgs, InArgs&gt;::Decode(cpu);
+
+  // Call handler
+  auto result = std::apply(SVCImpl, args);
+
+  // Encode registers by calling stateful function object
+  Encoder&lt;OutArgs&gt; encoder{cpu};
+  std::apply(encoder, result);
+}
+</code></pre>
+</section>
+
+<section><h2>In Practice — The Result</h2>
+<pre style="width:100%"><code class="cpp" style="max-height:30em">void HandleSVC(CPU&amp; cpu, uint32_t index) {
+  switch (index) {
+  // ...
+  case 0x55:
+    WrapSVCImpl&lt;DoStartDma&gt;(cpu);
+    break;
+  case 0x56:
+    WrapSVCImpl&lt;DoStopDma&gt;(cpu);
+    break;
+  case 0x57:
+    WrapSVCImpl&lt;GetDmaState&gt;(cpu);
+    break;
+  case 0x58:
+    WrapSVCImpl&lt;DoRestartDma&gt;(cpu);
+    break;
+  // ...
+  }
+}
+</code></pre>
+</section>
+
+<section><h2>In Practice — The Result</h2>
+<pre style="width:100%"><code data-noescape class="cpp" style="max-height:30em">int main() {
+  CPU cpu {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
+  HandleSVC(cpu, 0x55);
+
+  std::cout &lt;&lt; '\n' &lt;&lt; "CPU registers on return:" &lt;&lt; '\n';
+  for (auto reg : cpu.reg)
+    std::cout &lt;&lt; "0x" &lt;&lt; std::hex &lt;&lt; reg &lt;&lt; ' ';
+}
+</code></pre>
+
+<p class="fragment" data-fragment-index="0"><a href="./live/live.cpp" target="_blank">Full example code online</a></p>
+<p class="fragment" data-fragment-index="1">g++&ensp;–std=c++1z&ensp;example.cpp</p>
+</section>
+
+
+<section><h2>In Practice — The Result</h2>
+  <pre style="width:100%; margin-top:-20px"><code data-noescape class="cpp" style="max-height:30em">int main() {
+  CPU cpu {{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }};
+  HandleSVC(cpu, 0x55);
+
+  std::cout &lt;&lt; '\n' &lt;&lt; "CPU registers on return:" &lt;&lt; '\n';
+  for (auto reg : cpu.reg)
+    std::cout &lt;&lt; "0x" &lt;&lt; std::hex &lt;&lt; reg &lt;&lt; ' ';
+}</code></pre>
+
+  <pre style="background:#121212; width:100%" class="fragment" data-fragment-index="1">
+  Decoding value 0
+  Decoding value <font color="Ultramarine Blue">1</font>
+  Decoding value 2
+  Decoding value <font color="Ultramarine Blue">3</font>
+  Decoding value 4
+  DoStartDma: dst_proc=0x0, dst_addr=1, src_proc=0x2, src_addr=3, size=4
+              returning 3 and 0x240b280
+  Encoding value <font color="#87cefa">3   = <font color="Ultramarine Blue">1</font> * <font color="Ultramarine Blue">3</font></font>
+  Encoding value <font color="#32cd32">0x25ea280</font>
+
+  CPU registers on return:
+  <font color="#87cefa">0x3</font> <font color="#32cd32">0x25ea280</font> 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0x0 0x0 0x0 0x0 0x0 0x0
+  </pre>
+</section>
+
+
+<section><h1>Conclusion</h1>
+</section>
+
+
+<section><h2>Conclusion</h2>
+<ul>
+  <li>Vastly simplified implementation</li>
+    <ul><li>Easier to read, validate, and extend</li></ul>
+  <li>Zero performance overhead</li>
+  <li>Metaprogramming can be powerful <b>and</b> simple
+    <ul><li>Especially in C++17</li></ul>
+  </li>
+<br>
+</ul>
+
+<p><b>The best code is the code you didn't have to write!</b></p>
+</section>
+
+
+<section><h2>Further Reading</h2>
+<p><small class="fragment" data-fragment-index="0">Introduction to template metaprogramming:<br>Arthur O'Dwyer, <a href="https://www.youtube.com/watch?v=vwrXHznaYLA" target="_blank">Template Normal Programming</a></small></p>
+<p><small class="fragment" data-fragment-index="1">Fold expressions in detail:<br>Vittorio Romeo, <a href="https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami" target="_blank">Introduction to C++ origami</a></small></p>
+</section>
+
+
+<section><h1>THX &amp;&amp; FAQ ? OK : EOF</h1>
+<div><a href="https://twitter.com/fail_cluez" target="_blank"><img src="images/Twitter_Logo_Custom.svg" height="75pt" style="vertical-align:middle; border:none; background-color:transparent; box-shadow:none"><span style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif">@</span>fail_cluez</a></div>
+<div><a href="https://github.com/neobrain" target="_blank"><img src="images/GitHub-Mark-Custom.svg" height="38px" style="vertical-align:middle; border:none; background-color:transparent; box-shadow:none">&nbsp; neobrain</a></div>
+<img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle; margin-top:36px">
+</section>
+
+
+<section><h1>Bonus</h1>
+</section>
+
+
+<section><h2>Counting Registers</h2>
+<p>Decode() was cheating before:</p>
+
+<pre style="width:100%; margin-top:-20px"><code data-noescape class="cpp" style="max-height:30em">size_t reg_index = 0;
+return std::tuple&lt;Args... &gt; {
+           FromRegister&lt;Args&gt;(cpu.reg[<span style="color:#e00">reg_index++</span>]) ...
+       };
+</code></pre>
+
+<p class="fragment" data-fragment-index="0">This doesn't reflect the proper register order:</p>
+<p class="fragment" data-fragment-index="0">r1 → r2 → r3 → r0 → r4</p>
+<p class="fragment" data-fragment-index="1">Luckily, we can just replace reg_index++ with</p>
+<pre class="fragment" data-fragment-index="1" style="width:100%"><code data-noescape class="cpp" style="max-height:30em">template&lt;size_t first_reg&gt;
+size_t GetAndThenUpdateRegIndex(size_t&amp; cur_index);
+</code></pre>
+</section>
+
+
+<section><h2>Counting Registers</h2>
+<p class="fragment" data-fragment-index="0">Ad-hoc logic to reproduce the 3DS register order:</p>
+<pre class="fragment" data-fragment-index="1" style="width:100%"><code data-noescape class="cpp" style="max-height:30em">template&lt;size_t first_reg&gt;
+size_t GetAndThenUpdateRegIndex(size_t&amp; cur_index) {
+  size_t old_index = cur_index;
+  ++cur_index;
+  if (cur_index == 4) cur_index = 0;
+  if (cur_index == first_reg) cur_index = 4;
+  return old_index;
+}
+</code></pre>
+<pre class="fragment" data-fragment-index="1" style="width:100%"><code data-noescape class="cpp" style="max-height:30em">constexpr size_t first_reg = std::tuple_size_v&lt;OutData&gt; - 1;
+</code></pre>
+<ul>
+<li class="fragment" data-fragment-index="2" style="font-size:90%">Gets current index &amp; then advances cur_index inplace</li>
+<li class="fragment" data-fragment-index="4" style="font-size:90%">first_reg is determined by the number of output values</li>
+</ul>
+</section>
+
+
+<section><h2>Counting Registers</h2>
+<pre style="width:100%" class="fragment" data-fragment-index="1"><code class="cpp">template&lt;typename OutData, typename... Args&gt;
+static std::tuple&lt;Args...&gt; Decode(CPU&amp; cpu) {
+  constexpr size_t first_reg = std::tuple_size_v&lt;OutData&gt; - 1;
+  size_t reg_index = first_reg;
+  return std::tuple&lt;Args... &gt; {
+             FromRegister&lt;Args&gt;(
+                 cpu.reg[GetAndThenUpdateRegIndex&lt;first_reg&gt;(reg_index)])
+             ...
+         };
+}</code></pre>
+</section>
+
+
+<section><h2>Counting Registers</h2>
+<p class="fragment" data-fragment-index="0"><a href="./live/live_regcount.cpp" target="_blank">Adapted example code online</a></p>
+
+<pre style="background:#121212; width:100%; font-size:50%" class="fragment" data-fragment-index="1">
+Decoding value 1
+Decoding value <font color="Ultramarine Blue">2</font>
+Decoding value 3
+Decoding value <font color="Ultramarine Blue">0</font>
+Decoding value 4
+DoStartDma: dst_proc=0x1, dst_addr=2, src_proc=0x3, src_addr=0, size=4
+            returning 0 and 0x240b280
+Encoding value <font color="#87cefa">0   = <font color="Ultramarine Blue">2</font> * <font color="Ultramarine Blue">0</font></font>
+Encoding value <font color="#32cd32">0x25ea280</font>
+
+CPU registers on return:
+<font color="#87cefa">0x0</font> <font color="#32cd32">0x25ea280</font> 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0x0 0x0 0x0 0x0 0x0 0x0
+</pre>
 </section>
 
 
 
-
-<section><h1>THX && FAQ ? OK : EOF</h1>
-<div width="50%" style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
-  <img src="images/twitter.png" style="border:none">&nbsp;@fail_cluez
-</div>
-<div width="50%" style="text-align:center; display:flex; align-items:bottom; justify-content:center; align-content:center">
-<img src="images/github.png" style="border:none">&nbsp;neobrain
-</div>
-<img src="images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle">
-</section>
-
- <!-- enableMovedContent -->
-
-<!-- Misc TODOs:
-* Show generated assembly for SVCRaw loop with dummy implementations for all SVCs (Just call "ExternalFunc(arglist)" to make sure the compiler doesn't generate NOPs)
-    * Explain why the generated assembly is so good (... if it actually is): Compiler optimisations play a big role, but also TMP not producing any runtime-overhead
--->
 
       </div>
     </div>
@@ -707,14 +999,16 @@ void   Encode&lt;OutData&gt;(CPU& cpu, OutData... data)
 		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
         ]
       });
-window.addEventListener("mousedown", handleClick, false);
-window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
 
-function handleClick(e) {
-	e.preventDefault();
-	if(e.button === 0) Reveal.next();
-	if(e.button === 2) Reveal.prev();
-}
+// Make left/right mouseclicks move to the next/previous slide. Disabled in the published version to make clicking on links possible.
+// window.addEventListener("mousedown", handleClick, false);
+// window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+//
+// function handleClick(e) {
+// 	e.preventDefault();
+// 	if(e.button === 0) Reveal.next();
+// 	if(e.button === 2) Reveal.prev();
+// }
     </script>
   </body>
 </html>
