@@ -4,38 +4,61 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/css/default.css" />
+        <link rel="stylesheet" href="/css/reveal.css">
+        <link rel="stylesheet" href="/css/theme/league.css" id="theme">
+        <link rel="stylesheet" href="/lib/css/zenburn.css">
         <link rel="stylesheet" type="text/css" href="/css/generated.css">
+        <title>Generative Programming in Action: Emulating the 3DS</title>
+        <style>
+          .comment { color: #bbb; font-size: 22pt !important; }
+          .fixed { color: purple; font-size: 13pt !important; }
+          table, td, th { border: 3px solid #b0b0b0 !important; border-collapse: collapse !important; border-radius:5px !important; }
+          img { border-radius:10px; }
+          .main_cpu { border-color: #FFA500 !important; border-collapse: separate !important; }
+          .chip { display: inline; border-color: #D8BFD8 !important; border-collapse: separate !important; }
+          .chip td { border-width: 0 !important; }
+          .chip tr { border-width: 0 !important; }
+        </style>
     </head>
     <body>
+      <div class="reveal">
+        <div class="slides">
+          <div class="share-reveal" style="display: block; position: absolute; top: -8pt; right:0pt; z-index: 20; font-size:50%; color:#808080; white-space:nowrap">
+            neobrain.github.io | <span style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif">@</span>fail_cluez
+          </div>
+  $body$
+        </div>
+      </div>
+      <script src="/lib/js/head.min.js"></script>
+      <script src="/js/reveal.js"></script>
+      <script>
+        Reveal.initialize({
+          controls: false,
+          transition: 'slide',
+          transitionSpeed: 'fast',
+          fragments: 'true', // TODO: Disable in the final presentation!
+          dependencies: [
+            // Highlighting for code blocks
+           { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          // Interpret Markdown in <section> elements
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 
-<h1 class="spin-gears"></h1>
-<p class="spin-gears"></p>
+          // Syntax highlight for <code> elements
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+          ]
+        });
 
-<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
-<span>
-<p style="font-size:36px">App</p>
-<div class="original-ipc-cmd-block" style="border:solid 1px">
-<span class="original-ipc-cmd-block-entry0">Command header</span><br>
-<span class="original-ipc-cmd-block-entry1">Argument 1</span><br>
-<span class="original-ipc-cmd-block-entry2">Argument 2</span><br>
-<span class="original-ipc-cmd-block-entry3">…</span><br>
-</div>
-</span>
-<img src="/images/stuff0.svg">
-<span>
-<p style="font-size:36px">Kernel</p>
-<div class="copied-ipc-cmd-block" style="border:solid 1px">
-<span class="original-ipc-cmd-block-entry0">Command header<br></span>
-<span class="original-ipc-cmd-block-entry1">Argument 1<br></span>
-<span class="original-ipc-cmd-block-entry2">Argument 2<br></span>
-<span class="original-ipc-cmd-block-entry3">…XX<br></span>
-</div>
-</span>
-<img src="/images/stuff1.svg" style="animation-delay:1s">
-<p style="font-size:36px">Service</p>
-</div>
-
-
+  // Make left/right mouseclicks move to the next/previous slide. Disabled in the published version to make clicking on links possible.
+  // window.addEventListener("mousedown", handleClick, false);
+  // window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+  //
+  // function handleClick(e) {
+  //  e.preventDefault();
+  //  if(e.button === 0) Reveal.next();
+  //  if(e.button === 2) Reveal.prev();
+  // }
+      </script>
     </body>
+
 </html>

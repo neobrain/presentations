@@ -18,7 +18,7 @@ animateMotion_' :: Term arg result => arg -> result
 animateMotion_' = term "animateMotion"
 
 animatedArrow initialDelay = do
-  path_ [id_ "mypath", class_ "path", fill_ "#FFFFFF", stroke_ "#000000", stroke_width_ "5", stroke_miterlimit_ "10",
+  path_ [id_ "mypath", class_ "path", fill_ "#FFFFFF00", stroke_ "#ffffff", stroke_width_ "5", stroke_miterlimit_ "10",
          d_ "M0,20  a100,100 0 0 1 100,0", -- endpoint radius axis-rotation flag1 flag2 endpoint
          stroke_dasharray_ "0,5 10,10 10,10 10,10 10,10 10,10 10,10 10,200",
          stroke_dashoffset_ "140"]
@@ -31,8 +31,8 @@ animatedArrow initialDelay = do
            fill_ "freeze",
             repeatCount_ "indefinite"]
   g_ $ do
-    rect_ [width_ "10", height_ "5", transform_ "rotate(125)"]
-    rect_ [width_ "5", height_ "10", transform_ "rotate(145)"]
+    rect_ [width_ "10", height_ "5", fill_ "#FFFFFF", transform_ "rotate(125)"]
+    rect_ [width_ "5", height_ "10", fill_ "#FFFFFF", transform_ "rotate(145)"]
     animateMotion_' [begin_ initialAnimBegin, dur_ "1s", repeatCount_ "indefinite", rotate_ "auto"] (mpath_ [xlinkHref_ "#mypath"])
 
 genSvg :: Double -> T.Text

@@ -32,6 +32,26 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
+    match "css/theme/*" $ do
+        route   idRoute
+        compile compressCssCompiler
+
+    match "js/*" $ do
+        route   idRoute
+        compile getResourceBody
+
+    match "lib/js/*" $ do
+        route   idRoute
+        compile getResourceBody
+
+    match "lib/font/league-gothic/*" $ do
+        route   idRoute
+        compile getResourceLBS
+
+    match "lib/css/*" $ do
+        route   idRoute
+        compile compressCssCompiler
+
     match "index.html" $ do
         route   idRoute
         compile $ getResourceBody >>= loadAndApplyTemplate "templates/default.html" defaultContext >>= relativizeUrls
