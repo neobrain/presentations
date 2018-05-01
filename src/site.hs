@@ -54,6 +54,17 @@ main = hakyll $ do
 
     match "index.html" $ do
         route   idRoute
-        compile $ getResourceBody >>= loadAndApplyTemplate "templates/default.html" defaultContext >>= relativizeUrls
+        compile $ do
+            slides <- loadAll "slides/*.html"
+            let context = listField "slides" defaultContext (return slides) `mappend`
+                          defaultContext
+            getResourceBody >>= applyAsTemplate context >>= loadAndApplyTemplate "templates/default.html" context >>= relativizeUrls
+
+    match "slides/*.html" $ do
+        route   idRoute
+        compile $ getResourceBody
+            >>= applyAsTemplate defaultContext
+            >>= loadAndApplyTemplate "templates/slide.html" defaultContext
+            >>= relativizeUrls
 
     match "templates/*" $ compile templateBodyCompiler
