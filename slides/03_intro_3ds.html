@@ -1,0 +1,48 @@
+<section><h2>The Nintendo 3DS</h2>
+<div style="display:flex; justify-direction:column">
+<img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+<ul>
+<li>Released in 2011</li>
+<li $make_fragment("0")$>CPU: 2x ARM11 MPCore @ 268 MHz</li> <!-- "Big embedded system" -->
+<li $make_fragment("0")$>GPU: DMP PICA200</li>
+<li $make_fragment("0")$>RAM: 128 MB FCRAM, 6 MB VRAM</li>
+<li $make_fragment("1")$>Software stack:
+<ul $make_fragment("1")$>
+<li>Microkernel (fully multitasking)</li>
+<li>Microservices</li>
+</ul>
+</ul>
+</div>
+</section>
+
+<section><h2>The 3DS Software Stack</h2> <!-- Three layers that are relevant to emulation -->
+<div style="display:flex; justify-direction:column">
+<img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+<table width="65%">
+            <tr>
+              <td class="fragment fade-in" data-fragment-index=2 colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <div><font color="#40c030">Game/Application</font></div>
+                  <div class="comment" style="font-size:17pt !important; text-align:right">Runs on emulated CPU</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index=1 colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <font color="#e06130">Kernel: Horizon</font>
+                  <div class="comment">API emulation</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index=0 colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                   <font color="#d02030">ARM11 CPUs</font>
+                   <div class="comment">Interpreter</div>
+                </div>
+              </td>
+            </tr>
+</table>
+</div>
+</section>
