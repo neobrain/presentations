@@ -52,6 +52,10 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
+    match "plugin/*/*.js" $ do
+        route   idRoute
+        compile getResourceBody
+
     match "index.html" $ do
         route   idRoute
         compile $ do
@@ -62,8 +66,15 @@ main = hakyll $ do
 
     match "slides/*.html" $ do
         route   idRoute
+
+        let context = functionField "make_fragment" (\[index] _ -> return $"class=\"fragment\" data-fragment-index=" ++ index) `mappend`
+                      constField "color_codegen" "#f6ba4a" `mappend`
+                      constField "color_reflection" "#49f749" `mappend`
+                      constField "color_tmp" "#f7f749" `mappend`
+                      defaultContext
+
         compile $ getResourceBody
-            >>= applyAsTemplate defaultContext
+            >>= applyAsTemplate context
             >>= loadAndApplyTemplate "templates/slide.html" defaultContext
             >>= relativizeUrls
 

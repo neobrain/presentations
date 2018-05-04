@@ -1,15 +1,23 @@
 <section><h2>The Nintendo 3DS</h2>
+<img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+</section>
+
+
+<section><h2>The Nintendo 3DS</h2>
 <div style="display:flex; justify-direction:column">
 <img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
 <ul>
 <li>Released in 2011</li>
-<li $make_fragment("0")$>CPU: 2x ARM11 MPCore @ 268 MHz</li> <!-- "Big embedded system" -->
-<li $make_fragment("0")$>GPU: DMP PICA200</li>
-<li $make_fragment("0")$>RAM: 128 MB FCRAM, 6 MB VRAM</li>
+<!-- "Big embedded system" -->
+<!--<li $make_fragment("0")$>CPU: 2x ARM11 MPCore @ 268 MHz</li> -->
+<li $make_fragment("0")$>2 CPU cores: ARMv6 @ 268 MHz</li>
+<li $make_fragment("0")$>Unique-ish GPU (DMP PICA200)</li>
+<li $make_fragment("0")$>128 MB FCRAM</li>
 <li $make_fragment("1")$>Software stack:
 <ul $make_fragment("1")$>
 <li>Microkernel (fully multitasking)</li>
-<li>Microservices</li>
+<li>About 40 microservices</li>
+<li>Games (+ web browser)</li>
 </ul>
 </ul>
 </div>
@@ -20,10 +28,19 @@
 <img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
 <table width="65%">
             <tr>
+              <td class="fragment fade-in" data-fragment-index=3 colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <div><font color="#40c030">Game/Browser</font></div>
+                  <div class="comment" style="font-size:17pt !important; text-align:right">Runs on emulated CPU</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
               <td class="fragment fade-in" data-fragment-index=2 colspan="6">
                 <div style="display:flex; align-items:center; justify-content:space-between">
-                  <div><font color="#40c030">Game/Application</font></div>
-                  <div class="comment" style="font-size:17pt !important; text-align:right">Runs on emulated CPU</div>
+                  <!-- TODO: Pick different color from "Game" -->
+                  <div><font color="#40c030">Services</font></div>
+                  <div class="comment" style="font-size:17pt !important; text-align:right">API emulation<br><span $make_fragment("9")$>(or could run on emulated CPU)</span></div>
                 </div>
               </td>
             </tr>
