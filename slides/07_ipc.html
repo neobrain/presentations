@@ -5,25 +5,23 @@
 <section><h2>InterProcess Communication</h2>
 <p>IPC is crucial to everything:</p> <!-- NB: Crucial for games -->
 <ul>
-  <!-- TODO: Just display small graphics instead -->
-  <li>Rendering graphics &amp; playing audio</li>
-  <li>Accessing WiFi &amp; connecting to friends</li>
-  <li>Loading assets &amp; saving progress</li>
+  <li>Rendering graphics <span $make_fragment("0")$ style="color:#40c030">(gsp)</span> &amp; playing audio <span $make_fragment("1")$ style="color:#40c030">(dsp)</span></li>
+  <li>Accessing WiFi <span $make_fragment("2")$ style="color:#40c030">(soc)</span> &amp; connecting to friends <span $make_fragment("3")$ style="color:#40c030">(frd)</span></li>
+  <li>Loading assets &amp; saving progress <span $make_fragment("4")$ style="color:#40c030">(fs)</span></li>
   <li>…</li>
 </ul>
 
-<p $make_fragment("13")$>Protocol design:</p>
-<ul>
-<li $make_fragment("14")$>Client-Server architecture: Games &lt;-&gt; Services</li> <!-- TODO: Use proper arrow -->
-<li $make_fragment("15")$>Request-response exchange via command blocks</li>
-<li $make_fragment("16")$>Sensitive data is marshalled by the OS kernel<!-- NB: <br>
-  (e.g. shared buffers or kernel object handles)--></li>
-<li $make_fragment("17")$>Hierarchy: Abstraction, Access protection</li>
-</ul>
+<p $make_fragment("5")$><span style="color:#40c030">~40 processes ("services")</span> in total,<br>each serving different functionality</p>
+</section>
 
-Prototypical example of serialization in emulation:
-* Requests should be decoded and handled by C++ functions
-* C++ function return value should be encoded into response
+<section><h2>IPC Protocol</h2>
+<ul>
+<li $make_fragment("14")$><span style="color:#f0b0b0">Client-Server</span> based: Games ⇄ Services</li> <!-- NB: Services ⇄ Services also works -->
+<li $make_fragment("15")$><span style="color:#f0b0b0">Request-response</span> exchange via command blocks</li>
+<li $make_fragment("16")$><span style="color:#f0b0b0">Marshalling</span> of sensitive data by the OS kernel<!-- NB: <br>
+  (e.g. shared buffers or kernel object handles)--></li>
+<li $make_fragment("17")$><span style="color:#f0b0b0">Hierarchy</span> of abstraction for exploit mitigation</li>
+</ul>
 </section>
 
 <section class="animated-slide"><h2>X</h2>
@@ -70,9 +68,9 @@ Prototypical example of serialization in emulation:
 <p style="margin-top:-15px; margin-bottom:0px">Common structure on handler dispatch:</p>
 <ul>
   <li $make_fragment("0")$>Select C++ handler function based on command index<br>
-  <pre><code class="cpp" style="font-size:90%">Result HandleReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
+  <pre style="width:100%"><code class="cpp" style="font-size:90%">Result DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
   <li $make_fragment("1")$>Verify command header (number of parameters)<br>
-  <pre><code class="cpp">(cmd_header &amp; 0xFF == 5) &nbsp;&amp;&amp;&nbsp; ((cmd_header &gt;&gt; 8) &amp; 0xff == 2)</code></pre></li>
+  <pre style="width:100%"><code class="cpp">(cmd_header &amp; 0xFF == 5) &nbsp;&amp;&amp;&nbsp; ((cmd_header &gt;&gt; 8) &amp; 0xff == 2)</code></pre></li>
   <li $make_fragment("2")$>Parse parameters from command block
   <table style="font-size:50%" align="center">
     <tr>
@@ -80,11 +78,11 @@ Prototypical example of serialization in emulation:
     </tr>
   </table></li>
   <li $make_fragment("3")$>Invoke C++ handler function<br>
-  <pre><code class="cpp">HandleStuff(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
+  <pre style="width:100%"><code class="cpp">DoReadFile(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
   <li $make_fragment("4")$>Write response back to command block
   <table style="font-size:60%">
     <tr>
-      <td>header: 0x8020002</td><td>Result: 0x0</td>
+      <td>header: 0x8020002</td><td>Result: 0x0</td><td>Result 2: 0xd00f</td>
     </tr>
   </table></li>
 </ul>

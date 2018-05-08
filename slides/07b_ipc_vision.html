@@ -13,11 +13,11 @@
 <section style="line-height:0.5"><h2>Our Vision</h2>
 <pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
 DoReadFile(uint32_t file_descriptor, uint64_t offset,
-           uint64_t num_bytes, $cpptype_writeablebuffer$&amp; output);
+           uint64_t num_bytes, $cpptype_writeablebuffer$&amp; output)
 </code></pre>
 <span class="fragment">
 ↓ <font color="#49f749">Function Traits</font> ↓
-<pre style="width:100%"><code class="cpp">using RequestList  = std::tuple&lt;uint32_t, uint64_t, uint64_t, WrBuffer>
+<pre style="width:100%"><code class="cpp">using RequestList  = std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$>
 using ResponseList = std::tuple&lt;Result, uint32_t>
 </code></pre>
 <span class="fragment">
@@ -27,7 +27,7 @@ template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f7f749">Combine</font> ↓
-<pre style="width:100%"><code class="cpp">GlueCommandHandler&lt;RequestList, ResponseList&gt;(CmdBlock&amp;, DoReadFile);
+<pre style="width:100%"><code class="cpp">GlueCommandHandler&lt;RequestList, ResponseList&gt;(CmdBlock&amp;, DoReadFile)
 </code></pre>
 </span>
 </span>

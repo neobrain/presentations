@@ -72,6 +72,7 @@ main = hakyll $ do
                       constField "color_reflection" "#49f749" `mappend`
                       constField "color_tmp" "#f7f749" `mappend`
                       constField "color_declint" "#008f8f" `mappend`
+                      constField "color_runtime" "#f64a4a" `mappend`
                       constField "cpptype_writeablebuffer" "WriteableBuffer" `mappend`
                       defaultContext
 

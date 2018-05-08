@@ -12,20 +12,19 @@ Need four different type lists:
 <ul>
   <li class="fragment">Value-based "normal" parameters (simple copy)</li>
   <li class="fragment">Special parameters (require preprocessing/translation)</li>
-  <li class="fragment">The same for the response</li>
+  <li class="fragment">Normal and Special parameters for the response</li>
 </ul>
 <br>&nbsp;<br>
-<span class="fragment">E.g. FS::OpenFile:
+<p class="fragment">E.g. FS::OpenFile:</p>
 <ul>
   <li class="fragment">Request takes <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, and <pre style="display:inline">uint32_t</pre>, but also</li>
   <li class="fragment">Request takes a <pre style="display:inline">StaticBuffer</pre></li>
   <li class="fragment">Response gives a <pre style="display:inline">FileDescriptor</pre>, and</li>
   <li class="fragment">Response gives no special parameters</li>
 </ul>
-</span>
 </section>
 
-<section><h2>Building <span style="color:$color_tmp$">Type Lists</span></h2>
+<section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
 <pre style="width:100%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
 struct IPCCmd {
   <span $make_fragment("5")$>template&lt;typename... NormalParams&gt;
@@ -51,7 +50,7 @@ using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("7")$>
 </code></pre>
 </section>
 
-<section><h2>Building <span style="color:$color_tmp$">Type Lists</span></h2>
+<section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
   Adding IPC response layout information is trivial:
 <pre style="width:110%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
 struct IPCCmd {
@@ -77,21 +76,21 @@ using GetFileSize = IPCCmd&lt;0x804&gt;
 </code></pre>
 </section>
 
-<section><h2>Building <span style="color:$color_tmp$">Type Lists</span></h2>
+<section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
 <pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
                       ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
                       ::response&lt;uint64_t&gt;;</code></pre>
-<p class="fragment">Builder pattern for type lists:</p>
+<p class="fragment">Builder-like pattern:</p>
   <ul>
     <li class="fragment">More expressive than plain type lists</li>
     <li class="fragment">Enforcement of type ordering constraints</li>
     <li class="fragment">Can handle multiple parameter packs</li>
     <li class="fragment">Easy to extend interface to include more information</li> <!-- Referring to how easy it was to add response lists -->
   </ul>
-  <p class="fragment"><span style="color:$color_declint$">Declarative</span> style of defining an interface!</p>
+  <p class="fragment"><span style="color:$color_declint$">Declarative</span> anatomy of the full IPC command structure!</p>
 </section>
 
-<section><h2 style="color:$color_codegen$">Generators</h2>
+<section><h2><span style="color:$color_codegen$">Generators</span> with <span style="color:$color_declint$">declarative</span> interfaces</h2>
 <pre $make_fragment("0")$><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
 void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
   <span $make_fragment("1")$>auto request_header = cmd_block.ReadU32(0);</span>
@@ -105,8 +104,12 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
 </code></pre>
 </section>
 
-<section><h2 style="color:$color_declint$">Declarative Compile-time Programming</h2>
+<section><h2><span style="color:$color_declint$">Declarative</span> Compile-time Programming</h2>
  <!-- Stress how much this *lowers* the barrier for introducing new features (cf. e.g. hypervisor IPC database) -->
 <p>Building blocks:</p>
 <img src="images/metaprogramming_declint.svg" style="background:#2a2a2a">
+</section>
+
+<section><h2><span style="color:$color_declint$">Declarative</span> Compile-time Programming</h2>
+<h2>Mini-Demo!</h2> <!-- NB: source/platform/fs.hpp, source/ipc.hpp, (tests/common/ipc_helper.hpp) -->
 </section>

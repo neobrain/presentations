@@ -5,11 +5,8 @@ High-Level Software:
   <div style="width:100%; position:absolute; top:0; left:0">
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
       <div></div>
-      <!-- TODO: Module A<->B: Trivial, just call functions
-      A<->OS: Trivial, maybe modulo calling conventions. Compiler takes care of it!
-      A<->Hardware: Simple, usually just a memcpy(). -->
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module A</div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Hardware</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Module A</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Hardware</div>
       <div></div>
     </div>
     <br>
@@ -18,8 +15,8 @@ High-Level Software:
     <br>
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
       <div></div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module B</div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Operating System</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Module B</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Operating System</div>
       <div></div>
     </div>
   </div>
@@ -30,8 +27,6 @@ High-Level Software:
 <section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
 Games:
 <div style="position:relative; margin-top:0.5em">
-  <!-- TODO: Add more lines -->
-  <!-- TODO: Show text like "C++ variables" on top of the lines -->
   <div style="width:100%; position:absolute; top:0; left:0">
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
       <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Main Thread</div>
@@ -74,8 +69,6 @@ Games:
 <section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
 Emulated Games:
 <div style="position:relative; margin-top:0.5em">
-  <!-- TODO: Add more lines -->
-  <!-- TODO: Show text like "C++ variables" on top of the lines -->
   <svg width="100%" height="600" style="width=100%; position:absolute; top:0; left:0">
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#fff" />
@@ -158,14 +151,13 @@ Emulated Games:
     <li $make_fragment("3")$>GPU command buffers &amp; driver command queues</li> <!-- TODO: uint32_t[] -> well-typed register struct --> <!-- Good example: DSP firmware -->
   </ul>
 
-  <p $make_fragment("4")$>Problematic issues:</p>
+  <p $make_fragment("4")$>How to do this reliably?</p>
   <ul>
-    <li $make_fragment("5")$>Repetitive boilerplate</li>
-    <li $make_fragment("6")$>Input validation (more boilerplate)</li>
-    <li $make_fragment("7")$>Detection of invalid states in the emulated system</li> <!-- i.e. diagnose when an emulated task returns unexpected errors -->
+    <li $make_fragment("5")$>Avoid repetitive boilerplate</li>
+    <li $make_fragment("6")$>Validate inputs and consistency (more boilerplate)</li>
+    <li $make_fragment("7")$>Detect invalid states in the emulated system</li> <!-- i.e. diagnose when an emulated task returns unexpected errors -->
   </ul>
-  <p $make_fragment("8")$>How to do this reliably?</p>
-  <p $make_fragment("9")$>The answer is: Let the compiler do it!<br>Generative Programming</p>
+  <p $make_fragment("9")$>Today's goal: Let the compiler deal with it!</p>
 </section>
 
 <section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
@@ -173,32 +165,33 @@ Emulated Games:
 Example: System Call Emulation on ARM32
 
 <div style="display:flex; align-items:center; justify-content:space-around">
+<span></span>
 <span>
   Virtual CPU
   <table style="font-size:70%">
    <tr>
      <th>Register</th>
-     <th>Value</th>
+     <th style="text-align:right">Value</th>
    </tr>
    <tr>
      <td>r0</td>
-     <td>0xdeadbeef</td>
+     <td style="text-align:right">0x1800600</td>
    </tr>
    <tr>
      <td>r1</td>
-     <td>0xdeadbeef</td>
+     <td style="text-align:right">5</td>
    </tr>
    <tr>
      <td>r2</td>
-     <td>0xdeadbeef</td>
+     <td style="text-align:right">0x1ff02000</td>
    </tr>
    <tr>
      <td>r3</td>
-     <td>0xdeadbeef</td>
+     <td style="text-align:right">12</td>
    </tr>
    <tr>
      <td>r4</td>
-     <td>0xdeadbeef</td>
+     <td style="text-align:right">0x200</td>
    </tr>
    <tr>
      <td>…</td>
@@ -207,15 +200,16 @@ Example: System Call Emulation on ARM32
   </table>
 </span>
 
-<p>⟶</p>
+<p $make_fragment("0")$ style="line-height:20px"><small>svc 0x55</small><br>⟶</p>
 
-<span>Virtual Operating System
-<pre style="width:100%">auto [result,dma] = SvcStartDma(LookupHandle(0xdeadbeef),
-                                0xdeadbeef,
-                                LookupHandle(0xdeadbeef),
-                                0xdeadbeef,
-                                0xdeadbeef)</pre>
+<span $make_fragment("1")$>Virtual Operating System
+<pre style="width:100%"><code class="cpp">auto [result,dma] = SvcStartDma(LookupHandle(5),
+                                0x1ff02000,
+                                LookupHandle(12),
+                                0x1800600,
+                                0x200)</code></pre>
 </span>
+<span></span>
 </div>
-<p><small $make_fragment("1")$>Previously presented at C++::London:<br><a href="https://skillsmatter.com/skillscasts/11505-generative-programming-in-action-emulating-the-3ds" target="_blank">Generative Programming in Action: Emulating the 3DS</a></small></p>
+<p><small $make_fragment("2")$>Presented at C++::London:<br><a href="https://skillsmatter.com/skillscasts/11505-generative-programming-in-action-emulating-the-3ds" target="_blank">Generative Programming in Action: Emulating the 3DS</a></small></p>
 </section>

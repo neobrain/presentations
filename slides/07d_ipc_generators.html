@@ -1,8 +1,18 @@
 <section><h2 style="color:$color_codegen$">Generators</h2>
-TODO: Outline principle. Pack expansion/Fold expression
+<p>Core idea: Generate <span style="color:$color_runtime$">runtime code</span> based on a <span style="color:$color_tmp$">type list</span> via</p> <!-- NB: Mention this is done via a function or function object -->
+<ul>
+  <li class="fragment">Recursion</li>
+  <li class="fragment"><pre style="display:inline; font-size:85%">for_each(tuple, f)</pre></li> <!-- NB: e.g. via boost mpl -->
+  <li class="fragment">parameter pack expansions (C++11)</li>
+  <li class="fragment">fold expressions (C++17)</li>
+</ul>
+
+<p class="fragment">We got our <span style="color:$color_tmp$">type list</span> from <span style="color:$color_reflection$">FunctionTraits</span></p>
+<p class="fragment">How do we <span style="color:$color_codegen$">generate</span> a command block decoder?</p>
 </section>
 
 <section><h2 style="color:$color_codegen$">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
@@ -19,27 +29,25 @@ struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
   auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
 
   <span $make_fragment("3")$>// Iterate the entire CmdBlock, gather results and apply to "f"
-  template&lt;typename F&gt;
-  auto operator()(CmdBlock&amp; cmd_block, F&amp;&amp; f) {
-    return f(DecodeEntry&lt;T&gt;(cmd_block)... ); <span $make_fragment("4")$>// FIXME: Execution order undefined :(</span>
+  template&lt;typename Handler&gt;
+  auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+    return handler(DecodeEntry&lt;T&gt;(cmd_block)... );
   }</span></span>
 };</span></code></pre>
 </section>
 
-<section><h2 style="color:$color_codegen$">Generators</h2>
+<section data-transition="slide-in fade-out"><h2 style="color:$color_codegen$">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#3f0000">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
     </tr>
   </table>
 Decoding 32-bit values:
-<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
-
-template&lt;typename... Ts&gt;
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename... Ts&gt;
 struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
   uint32_t offset = 0x1; // offset into command block
 
-  // Read a single entry from the CmdBlock and advance "offset"
   template&lt;typename T&gt;
   auto DecodeEntry(CmdBlock&amp; block) {
     <span $make_fragment("0")$>if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
@@ -48,10 +56,15 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
       ...
     }</span>
   }
-};</code></pre>
+};
+
+
+
+</code></pre>
 </section>
 
-<section><h2 style="color:$color_codegen$">Generators</h2>
+<section data-transition="fade-in fade-out"><h2 style="color:$color_codegen$">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
@@ -76,7 +89,8 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 };</code></pre>
 </section>
 
-<section><h2 style="color:$color_codegen$">Generators</h2>
+<section data-transition="fade-in slide-out"><h2 style="color:$color_codegen$">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, <span style="color:#f03040">$cpptype_writeablebuffer$</span> &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center; background:#3f0000">buffer descriptor<br>…</td><td style="text-align:center; background:#3f0000">buffer addr<br>0x1ff00200</td>
@@ -103,6 +117,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 </section>
 
 <section><h2 style="color:$color_codegen$">Generators:</h2>
+  <pre style="width:71.1%">std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">$cpptype_writeablebuffer$</span> &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
@@ -119,9 +134,10 @@ struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
   auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
 
   // Iterate the entire CmdBlock, gather results and apply to "f"
-  template&lt;typename F&gt;
-  auto operator()(CmdBlock&amp; cmd_block, F&amp;&amp; f) {
-    return f(DecodeEntry&lt;T&gt;(cmd_block)... ); <span $make_fragment("0")$>// FIXME: Execution order undefined :(</span>
+  template&lt;typename Handler&gt;
+  auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+    <span $make_fragment("0")$>// FIXME: Execution order undefined :(</span>
+    return handler(DecodeEntry&lt;T&gt;(cmd_block)... );
   }
 };</code></pre>
 </section>
@@ -133,7 +149,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
 <section><h2 style="color:$color_codegen$">Generators: Result encoder</h2>
   <table style="font-size:60%">
     <tr>
-      <td style="text-align:center">header<br>0x8020002</td><td style="text-align:center">Result<br>0x0</td>
+      <td style="text-align:center">header<br>0x8020002</td><td style="text-align:center">Result<br>0x0</td><td style="text-align:center">uint32_t<br>0xd00f</td>
     </tr>
   </table>
 
@@ -141,15 +157,15 @@ struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
 
 <pre $make_fragment("0")$><code class="cpp">template&lt;typename TypeList&gt; struct EncodeAll;
 
-template&lt;typename... T&gt;
-struct EncodeAll&lt;std::tuple&lt;T...&gt;&gt; {
+template&lt;typename... Ts&gt;
+struct EncodeAll&lt;std::tuple&lt;Ts...&gt;&gt; {
   uint32_t offset = 0x1;
 
   template&lt;typename T&gt;
-  auto EncodeEntry(CmdBlock&amp; block) { ... }
+  auto EncodeEntry(CmdBlock&amp; block, T t) { ... }
 
-  void operator()(CmdBlock&amp; cmd_block) {
-    (EncodeEntry&lt;T&gt;(cmd_block, t), ...);
+  void operator()(CmdBlock&amp; cmd_block, Ts... ts) {
+    (EncodeEntry&lt;T&gt;(cmd_block, ts), ...);
   }
 };</code></pre>
 </section>
@@ -172,4 +188,5 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
   <li>Command header verification</li>
   <li>BuildResponseHeader</li>
 </ul>
+<p $make_fragment("7")$>But: This can be used for all IPC commands!</p>
 </section>
