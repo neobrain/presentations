@@ -42,13 +42,17 @@ css = do
 
   -- Animation of filling in the kernel IPC command block elements one-by-one
   ".copied-ipc-cmd-block" ? do
-    animations [(fromString mystuffAnimationName1 :: AnimationName, sec ipcCommandBufferMoveToServiceDur, easeInOut, sec ipcCommandBufferMoveToServiceBegin, iterationCount 1, normal, forwards)]
+    animations [(fromString mystuffAnimationName1 :: AnimationName, sec (5 * ipcCommandBufferMoveToServiceDur), easeInOut, sec ipcCommandBufferMoveToServiceBegin, iterationCount 1, normal, forwards)]
     overflow hidden
   let ipcFontSize = em 1
   let ipcRowHeight = 1.4 *@ ipcFontSize
   fontSize ipcFontSize
   lineHeight ipcRowHeight
-  keyframesFromTo (T.pack mystuffAnimationName1) (transform $ translateX $ em 0) (transform $ translateX $ em 8)
+  let distance = em 16
+  keyframes (T.pack mystuffAnimationName1) [(0.00, transform $ translateX $ em 0),
+                                            (20.0, transform $ translateX distance),
+                                            (80.0, transform $ translateX distance),
+                                            (100.0, transform $ translateX $ em 0)]
 
   let spinGearsAnimationBegin = ipcCommandBufferMoveToServiceBegin + ipcCommandBufferMoveToServiceDur
   let spinGearsAnimationDur = 3

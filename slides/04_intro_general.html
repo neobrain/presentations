@@ -2,19 +2,14 @@
 High-Level Software:
 <br>&nbsp;
 <div style="position:relative; margin-top:0.5em">
-  <!-- TODO: Add more lines -->
-  <!-- TODO: Show text like "C++ variables" on top of the lines -->
-  <svg width="100%" height="600" style="width=100%; position:absolute; top:0; left:0">
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#fff" />
-    </marker>
-    <line x1="525" y1="80" x2="805" y2="265" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
-  </svg>
   <div style="width:100%; position:absolute; top:0; left:0">
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
       <div></div>
+      <!-- TODO: Module A<->B: Trivial, just call functions
+      A<->OS: Trivial, maybe modulo calling conventions. Compiler takes care of it!
+      A<->Hardware: Simple, usually just a memcpy(). -->
       <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module A</div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module B</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Hardware</div>
       <div></div>
     </div>
     <br>
@@ -23,8 +18,8 @@ High-Level Software:
     <br>
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
       <div></div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module C</div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module D</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Module B</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px">Operating System</div>
       <div></div>
     </div>
   </div>
@@ -39,9 +34,9 @@ Games:
   <!-- TODO: Show text like "C++ variables" on top of the lines -->
   <div style="width:100%; position:absolute; top:0; left:0">
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">CPU</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Main Thread</div>
       <div></div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Graphics</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">GPU</div>
     </div>
     <br>
     <br>
@@ -54,11 +49,30 @@ Games:
     </div>
   </div>
 </div>
+<svg width="100%" height="600" style="width=100%; position:absolute; top:0; left:0">
+<g $make_fragment("0")$>
+  <line x1="200" y1="300" x2="200" y2="445" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="260" y="380" font-size="36" fill="#fff">trivial</text>
+  <text x="210" y="408" font-size="24" fill="#fff">(C++ function call)</text>
+</g>
+<g $make_fragment("1")$>
+  <line x1="450" y1="300" x2="880" y2="470" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="580" y="430" font-size="36" fill="#fff">trivial</text>
+  <text x="510" y="458" font-size="24" fill="#fff">(calling conventions</text>
+  <text x="480" y="482" font-size="24" fill="#fff">&nbsp;&nbsp;implemented by compiler)</text>
+</g>
+<g $make_fragment("2")$>
+  <line x1="450" y1="240" x2="880" y2="240" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="740" y="280" font-size="36" fill="#fff">simple</text>
+  <text x="700" y="308" font-size="24" fill="#fff">(basically memcpy)</text>
+</g>
+<line $make_fragment("0")$ x1="200" y1="300" x2="200" y2="445" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
+</svg>
 </section>
 
 
 <section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
-Emulators:
+Emulated Games:
 <div style="position:relative; margin-top:0.5em">
   <!-- TODO: Add more lines -->
   <!-- TODO: Show text like "C++ variables" on top of the lines -->
@@ -72,17 +86,32 @@ Emulators:
     <path
        style="fill:none;stroke:#ffffff;stroke-width:2.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 13.129929,52.982921 c 14.088016,11.530028 5.172884,21.850894 23.709719,15.80634 l 26.343142,-8.59006 c 10.745346,-0.92119 14.441863,10.416282 22.869653,7.459753 7.51809,-2.6374 16.248977,-5.589914 25.068657,-6.836537 17.93266,-2.534703 21.39527,-2.66942 24.8414,-4.899529 14.99773,-9.70559 -24.47125,-8.258219 -8.82196,-19.510679 4.93397,-3.54772 8.42487,-24.538647 -11.18274,-28.0633042 C 104.41447,6.2738801 95.533553,1.5693172 88.073873,2.3640393 78.195193,3.4164709 79.624893,14.763377 63.133309,14.763377 c -9.573668,0 -6.890381,-9.6695182 -20.741188,-6.6817382 -11.310284,2.4397602 -9.241341,5.4606002 -17.841771,8.5526302 -9.028228,3.24582 9.771626,13.59215 -4.46044,18.70886 -12.7263865,4.57539 -19.37110753,9.990572 -6.959981,17.639792 z"
-       sodipodi:nodetypes="csccsssscsc" transform="translate(290, 70) scale(3)">
+       sodipodi:nodetypes="csccsssscsc" transform="translate(430, 130) scale(3)">
      </path>
     </clipPath>
-    <line x1="325" y1="80" x2="655" y2="265" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
-    <path $make_fragment("0")$
+    <g $make_fragment("0")$>
+      <line x1="420" y1="70" x2="910" y2="70" stroke="#fff" stroke-width="3" stroke-dasharray="15,10" marker-end="url(#arrow)"/>
+      <!-- TODO: Need a second line for VirtCPU -> VirtOS -->
+    </g>
+    <g $make_fragment("2")$>
+      <line x1="390" y1="120" x2="455" y2="165" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/> <!-- Serialization -->
+      <text x="200" y="180" font-size="24" fill="#fff">Game writing raw data</text>
+    </g>
+    <g $make_fragment("3")$>
+      <line x1="850" y1="200" x2="950" y2="140" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/> <!-- Deserialize -->
+      <text x="910" y="190" font-size="24" fill="#fff">Deserialization</text>
+    </g>
+    <g $make_fragment("4")$>
+      <line x1="860" y1="310" x2="950" y2="380" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/> <!-- Deserialize -->
+      <text x="910" y="340" font-size="24" fill="#fff">Deserialization</text>
+    </g>
+    <path $make_fragment("1")$
        style="fill:#3c3c3c;stroke:#ffffff;stroke-width:2.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 13.129929,52.982921 c 14.088016,11.530028 5.172884,21.850894 23.709719,15.80634 l 26.343142,-8.59006 c 10.745346,-0.92119 14.441863,10.416282 22.869653,7.459753 7.51809,-2.6374 16.248977,-5.589914 25.068657,-6.836537 17.93266,-2.534703 21.39527,-2.66942 24.8414,-4.899529 14.99773,-9.70559 -24.47125,-8.258219 -8.82196,-19.510679 4.93397,-3.54772 8.42487,-24.538647 -11.18274,-28.0633042 C 104.41447,6.2738801 95.533553,1.5693172 88.073873,2.3640393 78.195193,3.4164709 79.624893,14.763377 63.133309,14.763377 c -9.573668,0 -6.890381,-9.6695182 -20.741188,-6.6817382 -11.310284,2.4397602 -9.241341,5.4606002 -17.841771,8.5526302 -9.028228,3.24582 9.771626,13.59215 -4.46044,18.70886 -12.7263865,4.57539 -19.37110753,9.990572 -6.959981,17.639792 z"
-       sodipodi:nodetypes="csccsssscsc" transform="translate(290, 70) scale(3)">
+       sodipodi:nodetypes="csccsssscsc" transform="translate(430, 130) scale(3)">
      </path>
     <g clip-path="url(#clipPath862)">
-    <text $make_fragment("0")$ x="300" y="-30" font-size="24" fill="#1c1c1c" transform="rotate(10)">
+    <text $make_fragment("1")$ x="300" y="5" font-size="24" fill="#1c1c1c" transform="rotate(10)">
       <tspan x="300" dy="1.2em">000010111111001001110111100010001010011011010001</tspan>
       <tspan x="300" dy="1.2em">101100101110111001010001100010010100011010001101</tspan>
       <tspan x="300" dy="1.2em">101100001001001101110101000001101011111111000001</tspan>
@@ -93,30 +122,30 @@ Emulators:
       <tspan x="300" dy="1.2em">111001010100000100001000011010000110000100111000</tspan>
     </text>
     </g>
-    <path $make_fragment("0")$
+    <path $make_fragment("1")$
        style="fill:none;stroke:#ffffff;stroke-width:2.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 13.129929,52.982921 c 14.088016,11.530028 5.172884,21.850894 23.709719,15.80634 l 26.343142,-8.59006 c 10.745346,-0.92119 14.441863,10.416282 22.869653,7.459753 7.51809,-2.6374 16.248977,-5.589914 25.068657,-6.836537 17.93266,-2.534703 21.39527,-2.66942 24.8414,-4.899529 14.99773,-9.70559 -24.47125,-8.258219 -8.82196,-19.510679 4.93397,-3.54772 8.42487,-24.538647 -11.18274,-28.0633042 C 104.41447,6.2738801 95.533553,1.5693172 88.073873,2.3640393 78.195193,3.4164709 79.624893,14.763377 63.133309,14.763377 c -9.573668,0 -6.890381,-9.6695182 -20.741188,-6.6817382 -11.310284,2.4397602 -9.241341,5.4606002 -17.841771,8.5526302 -9.028228,3.24582 9.771626,13.59215 -4.46044,18.70886 -12.7263865,4.57539 -19.37110753,9.990572 -6.959981,17.639792 z"
-       sodipodi:nodetypes="csccsssscsc" transform="translate(290, 70) scale(3)">
+       sodipodi:nodetypes="csccsssscsc" transform="translate(430, 130) scale(3)">
      </path>
   </svg>
   <div style="width:100%; position:absolute; top:0; left:0">
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
       <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>CPU</div>
       <div></div>
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>Graphics</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>GPU</div>
     </div>
     <br>
     <br>
     <br>
     <br>
     <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
-      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">User<br>Interface</div>
+      <!-- <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%"><User<br>Interface</div>--><div></div>
       <div></div>
       <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>OS</div>
     </div>
   </div>
 </div>
-<p style="position:absolute; left:410px; top:300px" $make_fragment("0")$>Untyped Sea<br>of raw data</p>
+<p style="position:absolute; left:550px; top:360px" $make_fragment("1")$>Untyped Sea<br>of raw data</p>
 </section>
 
 
@@ -126,10 +155,17 @@ Emulators:
     <li $make_fragment("0")$>System Calls: <span style="float: right;">CPU registers ⟶ C++ function</span></li>
     <li $make_fragment("1")$>IPC: <span style="float: right;">Memory ⟶ C++ function</span></li>
     <li $make_fragment("2")$>Emulated file IO: <span style="float: right;">Memory ⟶ C++ struct&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
-    <li $make_fragment("3")$>GPU command buffers &amp; driver command queues</li> <!-- TODO: uint32_t[] -> well-typed register struct -->
+    <li $make_fragment("3")$>GPU command buffers &amp; driver command queues</li> <!-- TODO: uint32_t[] -> well-typed register struct --> <!-- Good example: DSP firmware -->
   </ul>
 
-  <p  $make_fragment("4")$>How to do this reliably?</p>
+  <p $make_fragment("4")$>Problematic issues:</p>
+  <ul>
+    <li $make_fragment("5")$>Repetitive boilerplate</li>
+    <li $make_fragment("6")$>Input validation (more boilerplate)</li>
+    <li $make_fragment("7")$>Detection of invalid states in the emulated system</li> <!-- i.e. diagnose when an emulated task returns unexpected errors -->
+  </ul>
+  <p $make_fragment("8")$>How to do this reliably?</p>
+  <p $make_fragment("9")$>The answer is: Let the compiler do it!<br>Generative Programming</p>
 </section>
 
 <section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>

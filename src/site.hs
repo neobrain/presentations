@@ -71,6 +71,8 @@ main = hakyll $ do
                       constField "color_codegen" "#f6ba4a" `mappend`
                       constField "color_reflection" "#49f749" `mappend`
                       constField "color_tmp" "#f7f749" `mappend`
+                      constField "color_declint" "#008f8f" `mappend`
+                      constField "cpptype_writeablebuffer" "WriteableBuffer" `mappend`
                       defaultContext
 
         compile $ getResourceBody
