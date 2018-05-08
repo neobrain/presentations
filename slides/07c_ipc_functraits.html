@@ -1,0 +1,43 @@
+<section><h2 style="color:#49f749">Function Traits</h2>
+<ul>
+<!--  <li $make_fragment("0")$>Type traits: Get info about a type at compile-time</li> -->
+  <li $make_fragment("3")$>Function traits:
+  <ul>
+  <li>Type traits for functions</li>
+  <li $make_fragment("4")$>Get parameter list &amp; return type</li>
+  </ul>
+</ul>
+<span class="fragment">
+<pre><code class="cpp">template&lt;typename F&gt;
+struct FunctionTraits {
+  using Args   = std::tuple&lt; /* Parameter list of F */ &gt;;
+  using Result = /* Return type of F */;
+};
+</code></pre>
+</span>
+<span class="fragment">
+<p>Implementations available in</p>
+<ul>
+  <li>Boost.FunctionTypes (C++98?)</li>
+  <li>Boost.CallableTraits (C++11)<br><small class="footer">Standalone: https://github.com/badair/callable_traits</small></li>
+</ul>
+</span>
+</section>
+
+
+<section><h2 style="color:#49f749">Function Traits</h2>
+<p>Minimal implementation</p>
+<span $make_fragment("0")$>
+<pre><code class="cpp" data-noescape>template&lt;typename F&gt;
+struct FunctionTraits;
+
+// Specialize for free functions
+template&lt;typename FuncResult, typename... FuncArgs&gt;
+struct FunctionTraits&lt;Result(Args...)&gt; {
+  using Args   = std::tuple&lt;FuncArgs...&gt;;
+  using Result = FuncResult;<span $make_fragment("1")$> // NB: This will be some tuple&lt;&gt; for us</span>
+};
+</code></pre>
+Very limited, but good enough here
+</span>
+</section>

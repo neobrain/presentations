@@ -1,0 +1,112 @@
+<section><h2>&lt;/<span style="color:$color_reflection$">Reflective</span>_<span style="color:$color_codegen$">Generators</span>&gt;</h2>
+<h2 $make_fragment("0")$>&lt;<span style="color:$color_declint$">Declarative</span>_<span style="color:$color_codegen$">Generators</span>&gt;</h2>
+</section>
+
+<section><h2>Declarative Compile-time Programming</h2>
+<p>Building blocks:</p>
+<img $make_fragment("0")$ src="images/metaprogramming_declint.svg" style="background:#2a2a2a">
+</section>
+
+<section><h2>IPC Commands</h2>
+Need four different type lists:
+<ul>
+  <li class="fragment">Value-based "normal" parameters (simple copy)</li>
+  <li class="fragment">Special parameters (require preprocessing/translation)</li>
+  <li class="fragment">The same for the response</li>
+</ul>
+<br>&nbsp;<br>
+<span class="fragment">E.g. FS::OpenFile:
+<ul>
+  <li class="fragment">Request takes <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, and <pre style="display:inline">uint32_t</pre>, but also</li>
+  <li class="fragment">Request takes a <pre style="display:inline">StaticBuffer</pre></li>
+  <li class="fragment">Response gives a <pre style="display:inline">FileDescriptor</pre>, and</li>
+  <li class="fragment">Response gives no special parameters</li>
+</ul>
+</span>
+</section>
+
+<section><h2>Building <span style="color:$color_tmp$">Type Lists</span></h2>
+<pre style="width:100%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
+struct IPCCmd {
+  <span $make_fragment("5")$>template&lt;typename... NormalParams&gt;
+  struct normal {
+    <span $make_fragment("9")$>template&lt;typename... SpecialParams&gt;
+    struct special {
+    </span></span><span $make_fragment("1")$>  // Export template params in the interface
+      static constexpr uint32_t command_id = CommandId;
+      <span $make_fragment("6")$>using normal_params    = std::tuple&lt;NormalParams...&gt;;
+      <span $make_fragment("10")$>using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
+    <span $make_fragment("9")$>};</span>
+  <span $make_fragment("5")$>};</span>
+};
+
+<span $make_fragment("2")$>namespace FS { // FileSystem-related commands
+using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("7")$>
+                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span $make_fragment("11")$>
+                  ::special&lt;StaticBuffer&gt;</span>;
+<span $make_fragment("3")$>using GetFileSize = IPCCmd&lt;0x804&gt;<span $make_fragment("8")$>
+                  ::normal&lt;FileDescriptor&gt;</span><span $make_fragment("12")$>
+                  ::special&lt;&gt;</span>;</span>
+}</span>
+</code></pre>
+</section>
+
+<section><h2>Building <span style="color:$color_tmp$">Type Lists</span></h2>
+  Adding IPC response layout information is trivial:
+<pre style="width:110%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
+struct IPCCmd {
+  template&lt;typename... NormalParams&gt;
+  struct normal {
+    template&lt;typename... SpecialParams&gt;
+    struct special {
+      <span $make_fragment("0")$>template&lt;typename... ResponseNormalParams&gt;
+      struct response {</span>
+        // Export template params in the interface
+        static constexpr uint32_t command_id = CommandId;
+        using normal_params           = std::tuple&lt;NormalParams...&gt;;
+        using special_params          = std::tuple&lt;SpecialParams...&gt;;
+        <span $make_fragment("1")$>using response_normal_params  = std::tuple&lt;ResponseNormalParams...&gt;;</span>
+};};};<span $make_fragment("0")$>};</span>
+
+namespace FS {
+using GetFileSize = IPCCmd&lt;0x804&gt;
+                  ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                  <span $make_fragment("2")$>::response&lt;uint64_t&gt;</span>;
+// ...
+}
+</code></pre>
+</section>
+
+<section><h2>Building <span style="color:$color_tmp$">Type Lists</span></h2>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<p class="fragment">Builder pattern for type lists:</p>
+  <ul>
+    <li class="fragment">More expressive than plain type lists</li>
+    <li class="fragment">Enforcement of type ordering constraints</li>
+    <li class="fragment">Can handle multiple parameter packs</li>
+    <li class="fragment">Easy to extend interface to include more information</li> <!-- Referring to how easy it was to add response lists -->
+  </ul>
+  <p class="fragment"><span style="color:$color_declint$">Declarative</span> style of defining an interface!</p>
+</section>
+
+<section><h2 style="color:$color_codegen$">Generators</h2>
+<pre $make_fragment("0")$><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
+void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
+  <span $make_fragment("1")$>auto request_header = cmd_block.ReadU32(0);</span>
+  <span $make_fragment("2")$>if (request_header != IPCRequest::request_header)
+    throw std::runtime_error("Invalid request header");</span>
+
+  <span $make_fragment("3")$>auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler);</span>
+  <span $make_fragment("4")$>cmd_block.WriteU32(IPCRequest::response_header);</span>
+  <span $make_fragment("5")$>WriteFold&lt;ResponseList&gt;{cmd_block}.Run(results);</span>
+}
+</code></pre>
+</section>
+
+<section><h2 style="color:$color_declint$">Declarative Compile-time Programming</h2>
+ <!-- Stress how much this *lowers* the barrier for introducing new features (cf. e.g. hypervisor IPC database) -->
+<p>Building blocks:</p>
+<img src="images/metaprogramming_declint.svg" style="background:#2a2a2a">
+</section>
