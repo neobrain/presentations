@@ -22,7 +22,7 @@ main = hakyll $ do
 
     create ["images/stuff1.svg"] $ do
         route idRoute
-        compile $ makeItem $ T.unpack $ Svg.genSvg 4.5 -- 4.5 = number of entries + wait half a second
+        compile $ makeItem $ T.unpack $ Svg.genSvg 8.5 -- 8.5 = number of entries + wait half a second
 
     match "images/*" $ do
         route   idRoute
@@ -71,7 +71,7 @@ main = hakyll $ do
                       constField "color_codegen" "#f6ba4a" `mappend`
                       constField "color_reflection" "#49f749" `mappend`
                       constField "color_tmp" "#f7f749" `mappend`
-                      constField "color_declint" "#008f8f" `mappend`
+                      constField "color_declint" "#30cfcf" `mappend`
                       constField "color_runtime" "#f64a4a" `mappend`
                       constField "cpptype_writeablebuffer" "WriteableBuffer" `mappend`
                       defaultContext

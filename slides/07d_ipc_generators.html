@@ -20,8 +20,8 @@
   </table>
 <pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
 
-<span $make_fragment("0")$>template&lt;typename... T&gt;
-struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
+<span $make_fragment("0")$>template&lt;typename... Ts&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 <span $make_fragment("1")$>  uint32_t offset = 0x1; // offset into command block
 
   <span $make_fragment("2")$>// Read a single entry from the CmdBlock and advance "offset"
@@ -31,7 +31,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
   <span $make_fragment("3")$>// Iterate the entire CmdBlock, gather results and apply to "f"
   template&lt;typename Handler&gt;
   auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
-    return handler(DecodeEntry&lt;T&gt;(cmd_block)... );
+    return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
   }</span></span>
 };</span></code></pre>
 </section>
@@ -125,8 +125,8 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
   </table>
 <pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
 
-template&lt;typename... T&gt;
-struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
+template&lt;typename... Ts&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
   uint32_t offset = 0x1; // offset into command block
 
   // Read a single entry from the CmdBlock and advance "offset"
@@ -137,7 +137,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;T...&gt;&gt; {
   template&lt;typename Handler&gt;
   auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
     <span $make_fragment("0")$>// FIXME: Execution order undefined :(</span>
-    return handler(DecodeEntry&lt;T&gt;(cmd_block)... );
+    return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
   }
 };</code></pre>
 </section>

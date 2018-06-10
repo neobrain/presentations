@@ -14,7 +14,7 @@ spinKeyFrameName = "spin-gears"
 css = do
   let ipcCommandKernelBufferPopulationBegin = 0.0
 
-  let numEntries = 4 :: Int
+  let numEntries = 8 :: Int
   let cmdHighlightEntryAnimationName = "HighlightCmdBlockEntry"
   let cmdHighlightEntryAnimationNameKernel = "HighlightKernelCmdBlockEntry"
   let makeIpcBufferElements namePrefix keyframeName initialColor idx =
@@ -42,7 +42,7 @@ css = do
 
   -- Animation of filling in the kernel IPC command block elements one-by-one
   ".copied-ipc-cmd-block" ? do
-    animations [(fromString mystuffAnimationName1 :: AnimationName, sec (5 * ipcCommandBufferMoveToServiceDur), easeInOut, sec ipcCommandBufferMoveToServiceBegin, iterationCount 1, normal, forwards)]
+    animations [(fromString mystuffAnimationName1 :: AnimationName, sec (fromIntegral (numEntries + 1) * ipcCommandBufferMoveToServiceDur), easeInOut, sec ipcCommandBufferMoveToServiceBegin, iterationCount 1, normal, forwards)]
     overflow hidden
   let ipcFontSize = em 1
   let ipcRowHeight = 1.4 *@ ipcFontSize
@@ -52,9 +52,11 @@ css = do
   keyframes (T.pack mystuffAnimationName1) [(0.00, transform $ translateX $ em 0),
                                             (20.0, transform $ translateX distance),
                                             (80.0, transform $ translateX distance),
-                                            (100.0, transform $ translateX $ em 0)]
+                                            (100.0, transform $ translateX distance)
+                                            --(100.0, transform $ translateX $ em 0)
+                                            ]
 
-  let spinGearsAnimationBegin = ipcCommandBufferMoveToServiceBegin + ipcCommandBufferMoveToServiceDur
+  let spinGearsAnimationBegin = ipcCommandBufferMoveToServiceBegin + ipcCommandBufferMoveToServiceDur + 1.0
   let spinGearsAnimationDur = 3
   ".spin-gears" ? do
     textDecoration none
@@ -73,6 +75,12 @@ css = do
                                         (100.0, do
                                           transform $ rotate $ deg 360
                                           opacity 0.0)]
+
+  ".fadeoutArrow" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 1) linear (sec 7) (iterationCount 1) normal forwards
+  ".fadeoutArrow2" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 2) linear (sec 8.5) (iterationCount 1) normal forwards
+  keyframes (T.pack "fadeoutArrow")  [(0, opacity 1.0),
+                                        (83.3, opacity 1.0),
+                                        (100.0, opacity 0.0)]
 
   ".animated-slide" ? opacity 1.0
 

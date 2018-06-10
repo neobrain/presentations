@@ -27,7 +27,7 @@ template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f7f749">Combine</font> ↓
-<pre style="width:100%"><code class="cpp">GlueCommandHandler&lt;RequestList, ResponseList&gt;(CmdBlock&amp;, DoReadFile)
+<pre style="width:100%"><code class="cpp">GlueCommandHandler(cmd_block, DoReadFile)
 </code></pre>
 </span>
 </span>
