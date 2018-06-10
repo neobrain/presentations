@@ -162,7 +162,7 @@ struct EncodeAll&lt;std::tuple&lt;Ts...&gt;&gt; {
   uint32_t offset = 0x1;
 
   template&lt;typename T&gt;
-  auto EncodeEntry(CmdBlock&amp; block, T t) { ... }
+  void EncodeEntry(CmdBlock&amp; block, T t) { ... }
 
   void operator()(CmdBlock&amp; cmd_block, Ts... ts) {
     (EncodeEntry&lt;T&gt;(cmd_block, ts), ...);
