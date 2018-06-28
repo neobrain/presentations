@@ -7,7 +7,11 @@
         <link rel="stylesheet" href="/css/reveal.css">
         <link rel="stylesheet" href="/css/theme/black.css" id="theme">
         <link rel="stylesheet" href="/lib/css/zenburn.css">
+        $if(print)$
+        <link rel="stylesheet" type="text/css" href="/css/generated_print.css">
+        $else$
         <link rel="stylesheet" type="text/css" href="/css/generated.css">
+        $endif$
         <title>Generative Programming &amp; Declarative Interfaces: Emulating the Nintendo 3DS</title>
         <style>
           .comment { color: #bbb; font-size: 22pt !important; }
@@ -22,9 +26,16 @@
           $if(print)$
           .print-hack-slide-4 { top:-22px }
           .print-hack-slide-5 { margin-top:0.9em !important }
+          .fadeoutArrow::before { content: " ⟶ "; padding-left:15px; padding-right:15px }
+          .fadeoutArrow2::before { content: " ⟶ "; padding-left:15px; padding-right:15px }
+          .spin-gears { position:absolute; left:1130px; top:110px }
           $else$
           .print-hack-slide-4 { top:0px }
           .print-hack-slide-5 { margin-top:0.5em !important }
+          .fadeoutArrow::before { content:url(/images/stuff0.svg) }
+          .fadeoutArrow2::before { content:url(/images/stuff1.svg) }
+          .print-only { display:none }
+          .spin-gears { position:absolute; left:1150px; top:125px }
           $endif$
         </style>
 <script>

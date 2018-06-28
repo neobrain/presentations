@@ -14,7 +14,11 @@ main :: IO ()
 main = hakyll $ do
     create ["css/generated.css"] $ do
         route idRoute
-        compile $ makeItem $ TL.unpack $ Clay.render Css.genCss
+        compile $ makeItem $ TL.unpack $ Clay.render $ Css.genCss False
+
+    create ["css/generated_print.css"] $ do
+        route idRoute
+        compile $ makeItem $ TL.unpack $ Clay.render $ Css.genCss True
 
     create ["images/stuff0.svg"] $ do
         route idRoute

@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Css (genCss) where
 
-import Clay
+import Clay hiding (not)
 --import qualified Clay.Selector (selectorFromText)
 import Data.Monoid ((<>))
-import Control.Monad (forM_)
+import Control.Monad (forM_, when)
 import qualified Data.Text as T (pack)
 import qualified TextShow as T (showt)
 import Data.String (fromString)
 
 spinKeyFrameName = "spin-gears"
 
-css = do
+css print = do
   let ipcCommandKernelBufferPopulationBegin = 0.0
 
   let numEntries = 8 :: Int
@@ -31,7 +31,7 @@ css = do
           makeIpcBufferElements ".original-ipc-cmd-block-entry" cmdHighlightEntryAnimationName (rgb 0xff 0xff 0xff) idx
           makeIpcBufferElements ".kernel-ipc-cmd-block-entry" cmdHighlightEntryAnimationNameKernel (rgb 0x22 0x22 0x22) idx
 
-  forM_ [0..numEntries] genCmdBufEntryClass
+  when (Prelude.not print) $ forM_ [0..numEntries] genCmdBufEntryClass
 
 
   -- Animation that moves the IPC command block to the right
@@ -41,9 +41,11 @@ css = do
   let mystuffAnimationName2 = "cssAnimation2"
 
   -- Animation of filling in the kernel IPC command block elements one-by-one
-  ".copied-ipc-cmd-block" ? do
-    animations [(fromString mystuffAnimationName1 :: AnimationName, sec (fromIntegral (numEntries + 1) * ipcCommandBufferMoveToServiceDur), easeInOut, sec ipcCommandBufferMoveToServiceBegin, iterationCount 1, normal, forwards)]
-    overflow hidden
+  when (not print) $ do
+    ".copied-ipc-cmd-block" ? do
+      animations [(fromString mystuffAnimationName1 :: AnimationName, sec (fromIntegral (numEntries + 1) * ipcCommandBufferMoveToServiceDur), easeInOut, sec ipcCommandBufferMoveToServiceBegin, iterationCount 1, normal, forwards)]
+      overflow hidden
+
   let ipcFontSize = em 1
   let ipcRowHeight = 1.4 *@ ipcFontSize
   fontSize ipcFontSize
@@ -61,7 +63,8 @@ css = do
   ".spin-gears" ? do
     textDecoration none
     --fontSize $ px 36
-    animation (fromString spinKeyFrameName :: AnimationName) (sec spinGearsAnimationDur) linear (sec spinGearsAnimationBegin) (iterationCount 1) normal none
+    when (not print) $ do
+      animation (fromString spinKeyFrameName :: AnimationName) (sec spinGearsAnimationDur) linear (sec spinGearsAnimationBegin) (iterationCount 1) normal none
     display inlineBlock
     opacity 0.0 -- Will be blended in once the animation starts
   ".spin-gears" # before ? content (stringContent "⚙") -- Gear character
@@ -76,9 +79,10 @@ css = do
                                           transform $ rotate $ deg 360
                                           opacity 0.0)]
 
-  ".fadeoutArrow" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 1) linear (sec 7) (iterationCount 1) normal forwards
-  ".fadeoutArrow2" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 2) linear (sec 8.5) (iterationCount 1) normal forwards
-  keyframes (T.pack "fadeoutArrow")  [(0, opacity 1.0),
+  when (not print) $ do
+    ".fadeoutArrow" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 1) linear (sec 7) (iterationCount 1) normal forwards
+    ".fadeoutArrow2" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 2) linear (sec 8.5) (iterationCount 1) normal forwards
+    keyframes (T.pack "fadeoutArrow")  [(0, opacity 1.0),
                                         (83.3, opacity 1.0),
                                         (100.0, opacity 0.0)]
 
@@ -100,5 +104,5 @@ css = do
     animation (fromString "hideContent" :: AnimationName) (sec 1) linear (sec 20) (iterationCount 1) normal forwards
     keyframesFromTo "hideContent" (opacity 0.0) (opacity 1.0)
 
-genCss :: Css
-genCss = css
+genCss :: Bool -> Css
+genCss print = css print
