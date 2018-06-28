@@ -2,9 +2,30 @@
 <h2 $make_fragment("0")$>&lt;<span style="color:$color_declint$">Declarative</span>_<span style="color:$color_codegen$">Generators</span>&gt;</h2>
 </section>
 
-<section><h2>Declarative Compile-time Programming</h2>
+<section><h2><span style="color:$color_declint$">Declarative</span> Compile-time Programming</h2>
 <p>Building blocks:</p>
 <img $make_fragment("0")$ src="images/metaprogramming_declint.svg" style="background:#2a2a2a">
+</section>
+
+<section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
+An explicit approach:
+
+<pre><code class="cpp" data-noescape style="max-height:500em"><span $make_fragment("1")$>namespace FS { // FileSystem-related commands
+
+<span $make_fragment("2")$>using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("7")$>
+                    ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span $make_fragment("10")$>
+                    ::special&lt;StaticBuffer&gt;</span><span $make_fragment("11")$>
+                    ::response&lt;FileDescriptor&gt;;</span></span>
+
+<span $make_fragment("12")$>using GetFileSize = IPCCmd&lt;0x804&gt;<span $make_fragment("12")$>
+                    ::normal&lt;FileDescriptor&gt;</span><span $make_fragment("12")$>
+                    ::special&lt;&gt;
+                    ::response&lt;uint64_t&gt;;</span></span>
+
+}</span>
+</code></pre>
+
+<p class="fragment">=> Builder-like pattern</p>
 </section>
 
 <section><h2>IPC Commands</h2>
@@ -50,7 +71,7 @@ using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("7")$>
 </code></pre>
 </section>
 
-<section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
+<!-- <section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
   Adding IPC response layout information is trivial:
 <pre style="width:110%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
 struct IPCCmd {
@@ -74,21 +95,7 @@ using GetFileSize = IPCCmd&lt;0x804&gt;
 // ...
 }
 </code></pre>
-</section>
-
-<section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
-<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
-                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
-                      ::response&lt;uint64_t&gt;;</code></pre>
-<p class="fragment">Builder-like pattern:</p>
-  <ul>
-    <li class="fragment">More expressive than plain type lists</li>
-    <li class="fragment">Enforcement of type ordering constraints</li>
-    <li class="fragment">Can handle multiple parameter packs</li>
-    <li class="fragment">Easy to extend interface to include more information</li> <!-- Referring to how easy it was to add response lists -->
-  </ul>
-  <p class="fragment"><span style="color:$color_declint$">Declarative</span> anatomy of the full IPC command structure!</p>
-</section>
+</section> -->
 
 <section><h2><span style="color:$color_codegen$">Generators</span> with <span style="color:$color_declint$">declarative</span> interfaces</h2>
 <pre $make_fragment("0")$><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
@@ -104,10 +111,58 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
 </code></pre>
 </section>
 
-<section><h2><span style="color:$color_declint$">Declarative</span> Compile-time Programming</h2>
- <!-- Stress how much this *lowers* the barrier for introducing new features (cf. e.g. hypervisor IPC database) -->
-<p>Building blocks:</p>
-<img src="images/metaprogramming_declint.svg" style="background:#2a2a2a">
+<!-- <section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<p class="fragment">Builder-like pattern:</p>
+  <ul>
+    <li class="fragment">More expressive ("named" lists of types)</li>
+    <li class="fragment">Enforces of ordering rules</li>
+    <li class="fragment">Can handle multiple parameter packs</li>
+    <li class="fragment">Extendible: Easy to add more information later</li> <!-- Referring to how easy it was to add response lists -->
+  <!--</ul>
+  <p class="fragment"><span style="color:$color_declint$">Declarative</span> anatomy of the full IPC command structure!</p>
+</section>-->
+
+<section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<table style="width:104%; margin-left:-2%; border: 0px solid !important">
+<tr style="padding:0px">
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("0")$>↓<br><span style="color:$color_codegen$">Handlers</span><br><small>GlueHandler&lt;FS::GetFileSize&gt;(cmdblk)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("1")$>↓<br><span style="color:$color_codegen$">Synthesis</span><br><small>CmdBlock blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("2")$>↓<br><span style="color:$color_codegen$">Logging</span><br><small>std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</small></td>
+</tr>
+</table>
+
+</section>
+
+<section><h3><span style="color:$color_declint$">Declarative </span> vs <span style="color:$color_reflection$">Reflective</span></h3>
+<hr>
+<table style="border: none !important">
+<tr>
+<td style="border: none !important; color:$color_declint$"><b>Pros</b></td>
+<td style="border: none !important; color:$color_declint$"><b>Cons</b></td>
+</tr>
+<tr>
+<td style="border: none !important">Flexibility</td>
+<td style="border: none !important">Redundancy</td>
+</tr>
+<tr>
+<td style="border: none !important">Consistency <i>by design</i></td>
+<td style="border: none !important">Implementation complexity</td>
+</tr>
+<tr>
+<td style="border: none !important">Separation: Logic ↔ Structure</td>
+<td style="border: none !important"></td>
+</tr>
+</table>
+<hr>
+<p><b>Common:</b><br>
+No boilerplate<br>
+Type safe &amp; correct by design</p>
 </section>
 
 <section><h2><span style="color:$color_declint$">Declarative</span> Compile-time Programming</h2>

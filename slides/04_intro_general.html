@@ -90,11 +90,11 @@ Emulated Games:
       <line x1="390" y1="120" x2="455" y2="165" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/> <!-- Serialization -->
       <text x="200" y="180" font-size="24" fill="#fff">Game writing raw data</text>
     </g>
-    <g $make_fragment("3")$>
+    <g $make_fragment("4")$>
       <line x1="850" y1="200" x2="950" y2="140" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/> <!-- Deserialize -->
       <text x="910" y="190" font-size="24" fill="#fff">Deserialization</text>
     </g>
-    <g $make_fragment("4")$>
+    <g $make_fragment("5")$>
       <line x1="860" y1="310" x2="950" y2="380" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/> <!-- Deserialize -->
       <text x="910" y="340" font-size="24" fill="#fff">Deserialization</text>
     </g>
@@ -138,16 +138,16 @@ Emulated Games:
     </div>
   </div>
 </div>
-<p style="position:absolute; left:550px; top:360px" $make_fragment("1")$>Untyped Sea<br>of raw data</p>
+<p style="position:absolute; left:550px; top:360px" $make_fragment("3")$>Untyped Sea<br>of raw data</p>
 </section>
 
 
 <section><h2>Serialization &nbsp; &amp; &nbsp; Emulation</h2>
-  <p>Examples:</p>
+  <p>A ubiquitous problem:</p>
   <ul>
     <li $make_fragment("0")$>System Calls: <span style="float: right;">CPU registers ⟶ C++ function</span></li>
     <li $make_fragment("1")$>IPC: <span style="float: right;">Memory ⟶ C++ function</span></li>
-    <li $make_fragment("2")$>Emulated file IO: <span style="float: right;">Memory ⟶ C++ struct&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+    <li $make_fragment("2")$>Emulated file IO: <span style="float: right;">Disk ⟶ C++ struct&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
     <li $make_fragment("3")$>GPU command buffers &amp; driver command queues</li> <!-- TODO: uint32_t[] -> well-typed register struct --> <!-- Good example: DSP firmware -->
   </ul>
 
@@ -195,7 +195,7 @@ Example: System Call Emulation on ARM32
    </tr>
    <tr>
      <td>…</td>
-     <td></td>
+     <td>…</td>
    </tr>
   </table>
 </span>
@@ -208,8 +208,9 @@ Example: System Call Emulation on ARM32
                                 LookupHandle(12),
                                 0x1800600,
                                 0x200)</code></pre>
+<p><small  $make_fragment("2")$>NB: [a, b] is a <i>structured binding declaration</i></small></p>
 </span>
 <span></span>
 </div>
-<p><small $make_fragment("2")$>Presented at C++::London:<br><a href="https://skillsmatter.com/skillscasts/11505-generative-programming-in-action-emulating-the-3ds" target="_blank">Generative Programming in Action: Emulating the 3DS</a></small></p>
+<p><small $make_fragment("3")$>Presented at C++::London:<br><a href="https://skillsmatter.com/skillscasts/11505-generative-programming-in-action-emulating-the-3ds" target="_blank">Generative Programming in Action: Emulating the 3DS</a></small></p>
 </section>

@@ -1,4 +1,4 @@
-<section><h2>Generative Programming</h2>
+<section><h2 style="color:$color_codegen$">Generative Programming</h2>
 <h3>Building Blocks</h3>
 <!-- <ul>
 <li $make_fragment("1")$><font color="$color_codegen$">Code generation</font>: <font color="#f7f749">Type lists</font> ⟶ <font color="#f64a4a">Runtime logic</font></li>
@@ -32,4 +32,13 @@ template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data
 </span>
 </span>
 </span>
+</section>
+
+<section><h2>Our Vision</h2>
+Advantages:
+<ul>
+  <li class="fragment">Automated command encoding/decoding</li>
+  <li class="fragment">Type safe: Decoded data matches C++ function signature <i>by design</i></li>
+  <li class="fragment">Bonus: It's easier to read <small class="fragment" style="vertical-align:baseline">(since there's nothing to read anymore)</small></li>
+</ul>
 </section>

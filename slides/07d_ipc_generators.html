@@ -11,7 +11,29 @@
 <p class="fragment">How do we <span style="color:$color_codegen$">generate</span> a command block decoder?</p>
 </section>
 
-<section><h2 style="color:$color_codegen$">Generators</h2>
+<section><h2>A <span style="color:$color_codegen$">Generative</span> decoder</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape><span $make_fragment("0")$>// Read a single entry from the CmdBlock and advance "offset"
+template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }</span>
+<span $make_fragment("1")$>
+// Iterate over entire CmdBlock &amp; gather results <span $make_fragment("4")$>&amp; apply to "handler"</span>
+template&lt;<span $make_fragment("4")$>typename Handler, </span>typename... T&gt;
+auto DecodeAll<span $make_fragment("4")$>AndApply</span>(CmdBlock&amp; cmd_block<span $make_fragment("4")$>, Handler&amp;&amp; handler</span>) {
+  <span $make_fragment("2")$>int offset = 0x1; // into command block
+  <span $make_fragment("3")$>return <span $make_fragment("4")$>handler(</span>DecodeEntry&lt;Ts&gt;(offset, cmd_block)...<span $make_fragment("4")$>)</span>;
+</span></span>}
+</span></code></pre>
+<p $make_fragment("5")$><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p>
+</section>
+
+<!-- <section><h2 style="color:$color_codegen$">Generators</h2>
+NOTE: Obsolete.
   <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
@@ -28,13 +50,13 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
   template&lt;typename T&gt;
   auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
 
-  <span $make_fragment("3")$>// Iterate the entire CmdBlock, gather results and apply to "f"
+  <span $make_fragment("3")$>// Iterate the entire CmdBlock, gather results and apply to "handler"
   template&lt;typename Handler&gt;
   auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
     return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
   }</span></span>
 };</span></code></pre>
-</section>
+</section> -->
 
 <section data-transition="slide-in fade-out"><h2 style="color:$color_codegen$">Generators</h2>
   <pre style="width:71.1%">std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
@@ -44,22 +66,21 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
     </tr>
   </table>
 Decoding 32-bit values:
-<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename... Ts&gt;
-struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
-  uint32_t offset = 0x1; // offset into command block
-
-  template&lt;typename T&gt;
-  auto DecodeEntry(CmdBlock&amp; block) {
-    <span $make_fragment("0")$>if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
-      <span $make_fragment("1")$>return block.ReadU32(offset<span $make_fragment("2")$>++</span>);</span>
-    }</span><span $make_fragment("3")$> else {
-      ...
-    }</span>
-  }
-};
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) {
+  <span $make_fragment("0")$>if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    <span $make_fragment("1")$>return block.ReadU32(offset<span $make_fragment("2")$>++</span>);</span>
 
 
 
+
+
+
+
+  }</span><span $make_fragment("3")$> else {
+    ...
+  }</span>
+}
 </code></pre>
 </section>
 
@@ -71,22 +92,21 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
     </tr>
   </table>
 Decoding 64-bit values:
-<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename... T&gt;
-struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
-  uint32_t offset = 0x1; // offset into command block
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) {
+  if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    return block.ReadU32(offset++);</span>
+  <span $make_fragment("0")$>} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
+    <span $make_fragment("1")$>uint32_t val_low  = block.ReadU32(offset++);
+    uint32_t val_high = block.ReadU32(offset++);</span>
+    <span $make_fragment("2")$>return (val_high << 32) | val_low;</span>
 
-  template&lt;typename T&gt;
-  auto DecodeEntry(CmdBlock&amp; block) {
-    // ...
-    <span $make_fragment("0")$>} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
-      <span $make_fragment("1")$>uint32_t val_low  = block.ReadU32(offset++);
-      uint32_t val_high = block.ReadU32(offset++);</span>
-      <span $make_fragment("2")$>return (val_high << 32) | val_low;</span>
-    }</span><span $make_fragment("0")$> else {
-      ...
-    }</span>
+
+
+  </span>} else {
+    ...
   }
-};</code></pre>
+}</code></pre>
 </section>
 
 <section data-transition="fade-in slide-out"><h2 style="color:$color_codegen$">Generators</h2>
@@ -97,23 +117,43 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
     </tr>
   </table>
 Decoding buffer descriptors:
-<pre><code class="cpp hljs" style="max-height:100em" data-noescape>template&lt;typename... T&gt;
-struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
-  uint32_t offset = 0x1; // offset into command block
-
-  template&lt;typename T&gt;
-  auto DecodeEntry(CmdBlock&amp; block) {
-    // ...
-    <span $make_fragment("0")$>} else if constexpr (std::is_same_v&lt;T, $cpptype_writeablebuffer$&gt;) {
-      <span $make_fragment("1")$>uint32_t descriptor = block.ReadU32(offset++);
-      auto [size, flags] = DecodeBufferDescriptor(descriptor);</span>
-      <span $make_fragment("2")$>uint32_t address = block.ReadU32(offset++);</span>
-      <span $make_fragment("3")$>return WriteableBuffer { address, size };</span>
-    }</span><span $make_fragment("4")$> else {
-      ...
-    }</span>
+<pre><code class="cpp hljs" style="max-height:100em" data-noescape>template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) {
+  if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    return block.ReadU32(offset++);</span>
+  } else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
+    ...
+  <span $make_fragment("0")$>} else if constexpr (std::is_same_v&lt;T, $cpptype_writeablebuffer$&gt;) {
+    <span $make_fragment("1")$>uint32_t descriptor = block.ReadU32(offset++);
+    auto [size, flags] = DecodeBufferDescriptor(descriptor);</span>
+    <span $make_fragment("2")$>uint32_t address = block.ReadU32(offset++);</span>
+    <span $make_fragment("3")$>return WriteableBuffer { address, size };</span>
+  </span>} else {
+    ...
   }
-};</code></pre>
+}</code></pre>
+</section>
+
+<section><h2>A <span style="color:$color_codegen$">Generative</span> decoder</h2>
+  <pre style="width:71.1%">std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">$cpptype_writeablebuffer$</span> &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape>// Read a single entry from the CmdBlock and advance "offset"
+template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }
+
+// Iterate over entire CmdBlock &amp; gather results &amp; apply to "handler"
+template&lt;typename Handler, typename... T&gt;
+auto DecodeAllAndApply(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+  int offset = 0x1; // into command block
+  return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
+}
+</span></code></pre>
+<p $make_fragment("0")$>No boilerplate!</p>
+<p $make_fragment("1")$>Caveat 1: We actually need a std::tuple&lt;T...&gt; &nbsp;😔</p>
 </section>
 
 <section><h2 style="color:$color_codegen$">Generators:</h2>
@@ -123,21 +163,21 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
     </tr>
   </table>
-<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
+<pre><code class="cpp" style="max-height:100em" data-noescape>// Read a single entry from the CmdBlock and advance "offset"
+template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }
+
+template&lt;typename TypeList&gt; struct DecodeAllAndApply;
 
 template&lt;typename... Ts&gt;
 struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
-  uint32_t offset = 0x1; // offset into command block
+  int offset = 1; // offset into command block
 
-  // Read a single entry from the CmdBlock and advance "offset"
-  template&lt;typename T&gt;
-  auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
-
-  // Iterate the entire CmdBlock, gather results and apply to "f"
+  // Iterate over entire CmdBlock &amp; gather results &amp; apply to "handler"
   template&lt;typename Handler&gt;
   auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
-    <span $make_fragment("0")$>// FIXME: Execution order undefined :(</span>
-    return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
+    <span $make_fragment("0")$>// Caveat 2: Execution order undefined :(</span>
+    return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
   }
 };</code></pre>
 </section>
@@ -155,23 +195,21 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 
 <p>Trivial with fold expressions!</p>
 
-<pre $make_fragment("0")$><code class="cpp">template&lt;typename TypeList&gt; struct EncodeAll;
+<pre $make_fragment("0")$><code class="cpp" data-noescape>template&lt;typename T&gt;
+void EncodeEntry(int& offset, CmdBlock&amp; block, T t) { ... }
 
-template&lt;typename... Ts&gt;
-struct EncodeAll&lt;std::tuple&lt;Ts...&gt;&gt; {
-  uint32_t offset = 0x1;
+<span class="fragment">template&lt;typename... Ts&gt;
+void EncodeAll(CmdBlock&amp; cmd_block, Ts... ts) {
+  int offset = 1;
 
-  template&lt;typename T&gt;
-  void EncodeEntry(CmdBlock&amp; block, T t) { ... }
-
-  void operator()(CmdBlock&amp; cmd_block, Ts... ts) {
-    (EncodeEntry&lt;T&gt;(cmd_block, ts), ...);
-  }
-};</code></pre>
+  <span class="fragment">(EncodeEntry&lt;T&gt;(offset, cmd_block, ts), ...);</span>
+}</span></code></pre>
 </section>
 
 <section><h2>Putting Things Together</h2>
-<pre><code class="cpp">GlueCommandHandler(DoReadFile, cmd_block);</code></pre>
+<pre><code class="cpp" data-noescape><span $make_fragment("8")$>GlueCommandHandler(DoOpenFile, cmd_block);</span>
+GlueCommandHandler(DoReadFile, cmd_block);
+<span $make_fragment("8")$>GlueCommandHandler(DoCloseFile, cmd_block);</span></code></pre>
 
 <pre $make_fragment("0")$><code class="cpp" data-noescape>template&lt;typename Handler&gt;
 void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {

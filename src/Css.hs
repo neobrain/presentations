@@ -20,12 +20,12 @@ css = do
   let makeIpcBufferElements namePrefix keyframeName initialColor idx =
         do
           let name = namePrefix <> T.showt idx
-          let anims = animations [(fromString keyframeName :: AnimationName, sec 0.5, easeOut,
+          let anims = animations [(fromString keyframeName :: AnimationName, sec 4, easeOut,
                                   sec $ ipcCommandKernelBufferPopulationBegin + fromIntegral idx, iterationCount 1, normal, forwards)]
           element name ? do
             color initialColor
             anims
-          keyframes (T.pack keyframeName) [(0.0, color initialColor), (50.0, color blue), (100.0, color $ rgb 0xff 0xff 0xff)]
+          keyframes (T.pack keyframeName) [(0.0, color initialColor), (25.0, color blue), (50.0, color $ rgb 0xff 0xff 0xff), (100.0, color $ rgb 0xff 0xff 0xff)]
   let genCmdBufEntryClass idx =
         do
           makeIpcBufferElements ".original-ipc-cmd-block-entry" cmdHighlightEntryAnimationName (rgb 0xff 0xff 0xff) idx
@@ -57,7 +57,7 @@ css = do
                                             ]
 
   let spinGearsAnimationBegin = ipcCommandBufferMoveToServiceBegin + ipcCommandBufferMoveToServiceDur + 1.0
-  let spinGearsAnimationDur = 3
+  let spinGearsAnimationDur = 6
   ".spin-gears" ? do
     textDecoration none
     --fontSize $ px 36

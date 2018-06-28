@@ -31,7 +31,7 @@ struct FunctionTraits {
 <pre><code class="cpp" data-noescape>template&lt;typename F&gt;
 struct FunctionTraits;
 
-// Specialize for free functions
+// (Partial) specialization for free functions
 template&lt;typename FuncResult, typename... FuncArgs&gt;
 struct FunctionTraits&lt;Result(Args...)&gt; {
   using Args   = std::tuple&lt;FuncArgs...&gt;;
@@ -40,4 +40,5 @@ struct FunctionTraits&lt;Result(Args...)&gt; {
 </code></pre>
 Very limited, but good enough here
 </span>
+<p class="fragment"><small>NB: "using" is C++11-syntax for type aliases ("typedef")</small></p>
 </section>
