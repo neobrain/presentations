@@ -19,6 +19,13 @@
           .chip td { border-width: 0 !important; }
           .chip tr { border-width: 0 !important; }
           .ipc-img { border:none !important; box-shadow:none !important; background-color:#0000 !important }
+          $if(print)$
+          .print-hack-slide-4 { top:-22px }
+          .print-hack-slide-5 { margin-top:0.9em !important }
+          $else$
+          .print-hack-slide-4 { top:0px }
+          .print-hack-slide-5 { margin-top:0.5em !important }
+          $endif$
         </style>
 <script>
     var link = document.createElement( 'link' );
