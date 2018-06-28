@@ -45,12 +45,10 @@ $endif$
         Reveal.initialize({
           width: 1366,
           height: 768,
-          //width: 960,
-          //height: 700,
           controls: false,
           transition: 'slide',
           transitionSpeed: 'fast',
-          fragments: 'true', // TODO: Disable in the final presentation!
+          fragments: 'true',
           dependencies: [
             // Highlighting for code blocks
            { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
@@ -63,7 +61,7 @@ $endif$
           ]
         });
 
-  // Make left/right mouseclicks move to the next/previous slide. Disabled in the published version to make clicking on links possible.
+  // Make left/right mouseclicks move to the next/previous slide. Disabled in the public version to make clicking on links possible.
   // window.addEventListener("mousedown", handleClick, false);
   // window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
   //
