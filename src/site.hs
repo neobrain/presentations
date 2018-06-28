@@ -32,6 +32,13 @@ main = hakyll $ do
         route   idRoute
         compile copyFileCompiler
 
+    match "css/pdf.css" $ do
+        route   idRoute
+        -- Line height defaults to 1 in print mode, which looks rather ugly
+        let cssPrefix = "body { line-height : 1.3 }\n"
+        compile $ getResourceBody
+           >>= (withItemBody (return . compressCss . (cssPrefix ++ )))
+
     match "css/*" $ do
         route   idRoute
         compile compressCssCompiler
