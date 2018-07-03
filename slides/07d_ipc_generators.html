@@ -1,0 +1,194 @@
+<section><h2 style="color:#f6ba4a">Generators</h2>
+<p>Core idea: Generate <span style="color:#f64a4a">runtime code</span> based on a <span style="color:#f7f749">type list</span> via</p> <!-- NB: Mention this is done via a function or function object -->
+<ul>
+  <li class="fragment">Recursion</li>
+  <li class="fragment"><pre style="display:inline; font-size:85%">for_each(tuple, f)</pre></li> <!-- NB: e.g. via boost mpl -->
+  <li class="fragment">parameter pack expansions (C++11)</li>
+  <li class="fragment">fold expressions (C++17)</li>
+</ul>
+
+<p class="fragment">We got our <span style="color:#f7f749">type list</span> from <span style="color:#49f749">FunctionTraits</span></p>
+<p class="fragment">How do we <span style="color:#f6ba4a">generate</span> a command block decoder?</p>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, WriteableBuffer &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
+
+<span class="fragment" data-fragment-index=0>template&lt;typename... Ts&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
+<span class="fragment" data-fragment-index=1>  uint32_t offset = 0x1; // offset into command block
+
+  <span class="fragment" data-fragment-index=2>// Read a single entry from the CmdBlock and advance "offset"
+  template&lt;typename T&gt;
+  auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
+
+  <span class="fragment" data-fragment-index=3>// Iterate the entire CmdBlock, gather results and apply to "f"
+  template&lt;typename Handler&gt;
+  auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+    return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
+  }</span></span>
+};</span></code></pre>
+</section>
+
+<section data-transition="slide-in fade-out"><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, WriteableBuffer &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#3f0000">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+Decoding 32-bit values:
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename... Ts&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
+  uint32_t offset = 0x1; // offset into command block
+
+  template&lt;typename T&gt;
+  auto DecodeEntry(CmdBlock&amp; block) {
+    <span class="fragment" data-fragment-index=0>if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+      <span class="fragment" data-fragment-index=1>return block.ReadU32(offset<span class="fragment" data-fragment-index=2>++</span>);</span>
+    }</span><span class="fragment" data-fragment-index=3> else {
+      ...
+    }</span>
+  }
+};
+
+
+
+</code></pre>
+</section>
+
+<section data-transition="fade-in fade-out"><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, WriteableBuffer &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+Decoding 64-bit values:
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename... T&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
+  uint32_t offset = 0x1; // offset into command block
+
+  template&lt;typename T&gt;
+  auto DecodeEntry(CmdBlock&amp; block) {
+    // ...
+    <span class="fragment" data-fragment-index=0>} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
+      <span class="fragment" data-fragment-index=1>uint32_t val_low  = block.ReadU32(offset++);
+      uint32_t val_high = block.ReadU32(offset++);</span>
+      <span class="fragment" data-fragment-index=2>return (val_high << 32) | val_low;</span>
+    }</span><span class="fragment" data-fragment-index=0> else {
+      ...
+    }</span>
+  }
+};</code></pre>
+</section>
+
+<section data-transition="fade-in slide-out"><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, <span style="color:#f03040">WriteableBuffer</span> &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center; background:#3f0000">buffer descriptor<br>…</td><td style="text-align:center; background:#3f0000">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+Decoding buffer descriptors:
+<pre><code class="cpp hljs" style="max-height:100em" data-noescape>template&lt;typename... T&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
+  uint32_t offset = 0x1; // offset into command block
+
+  template&lt;typename T&gt;
+  auto DecodeEntry(CmdBlock&amp; block) {
+    // ...
+    <span class="fragment" data-fragment-index=0>} else if constexpr (std::is_same_v&lt;T, WriteableBuffer&gt;) {
+      <span class="fragment" data-fragment-index=1>uint32_t descriptor = block.ReadU32(offset++);
+      auto [size, flags] = DecodeBufferDescriptor(descriptor);</span>
+      <span class="fragment" data-fragment-index=2>uint32_t address = block.ReadU32(offset++);</span>
+      <span class="fragment" data-fragment-index=3>return WriteableBuffer { address, size };</span>
+    }</span><span class="fragment" data-fragment-index=4> else {
+      ...
+    }</span>
+  }
+};</code></pre>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators:</h2>
+  <pre style="width:71.1%">std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">WriteableBuffer</span> &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
+
+template&lt;typename... Ts&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
+  uint32_t offset = 0x1; // offset into command block
+
+  // Read a single entry from the CmdBlock and advance "offset"
+  template&lt;typename T&gt;
+  auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
+
+  // Iterate the entire CmdBlock, gather results and apply to "f"
+  template&lt;typename Handler&gt;
+  auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+    <span class="fragment" data-fragment-index=0>// FIXME: Execution order undefined :(</span>
+    return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
+  }
+};</code></pre>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators:</h2>
+<h2>Demo time!</h2>
+<p><a href=/live/generators.cpp>generators.cpp</a><br><a href=/live/magic.hpp>magic.hpp</a></p>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators: Result encoder</h2>
+  <table style="font-size:60%">
+    <tr>
+      <td style="text-align:center">header<br>0x8020002</td><td style="text-align:center">Result<br>0x0</td><td style="text-align:center">uint32_t<br>0xd00f</td>
+    </tr>
+  </table>
+
+<p>Trivial with fold expressions!</p>
+
+<pre class="fragment" data-fragment-index=0><code class="cpp">template&lt;typename TypeList&gt; struct EncodeAll;
+
+template&lt;typename... Ts&gt;
+struct EncodeAll&lt;std::tuple&lt;Ts...&gt;&gt; {
+  uint32_t offset = 0x1;
+
+  template&lt;typename T&gt;
+  void EncodeEntry(CmdBlock&amp; block, T t) { ... }
+
+  void operator()(CmdBlock&amp; cmd_block, Ts... ts) {
+    (EncodeEntry&lt;T&gt;(cmd_block, ts), ...);
+  }
+};</code></pre>
+</section>
+
+<section><h2>Putting Things Together</h2>
+<pre><code class="cpp">GlueCommandHandler(DoReadFile, cmd_block);</code></pre>
+
+<pre class="fragment" data-fragment-index=0><code class="cpp" data-noescape>template&lt;typename Handler&gt;
+void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
+  <span class="fragment" data-fragment-index=1>auto request_header = cmd_block.ReadU32(0);</span></span>
+  <span class="fragment" data-fragment-index=2>using RequestList = typename FunctionTraits&lt;Handler&gt;::Args;</span>
+  <span class="fragment" data-fragment-index=2>using ResponseList = typename FunctionTraits&lt;Handler&gt;::Result;</span>
+  <span class="fragment" data-fragment-index=3>auto results = DecodeAllAndApply&lt;RequestList&gt;{}(cmd_block, handler);</span>
+  <span class="fragment" data-fragment-index=4>cmd_block.WriteU32(BuildResponseHeader(results));</span>
+  <span class="fragment" data-fragment-index=5>EncodeAll&lt;ResponseList&gt;{}(cmd_block, results);</span>
+}</code></pre>
+
+<p class="fragment" data-fragment-index=6>Omitted for now:</p>
+<ul class="fragment" data-fragment-index=6>
+  <li>Command header verification</li>
+  <li>BuildResponseHeader</li>
+</ul>
+<p class="fragment" data-fragment-index=7>But: This can be used for all IPC commands!</p>
+</section>
+
