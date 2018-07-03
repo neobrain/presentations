@@ -2,3 +2,11 @@
 	path = cpplondon_feb2018
 	url = https://github.com/neobrain/presentations
 	branch = cpplondon_feb2018
+[submodule "cppnow_may2018"]
+	path = cppnow_may2018
+	url = https://github.com/neobrain/presentations
+	branch = cppnow_may2018
+[submodule "ndcoslo_jun2018"]
+	path = ndcoslo_jun2018
+	url = https://github.com/neobrain/presentations
+	branch = ndcoslo_jun2018
