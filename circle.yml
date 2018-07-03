@@ -1,0 +1,35 @@
+machine:
+  timezone:
+    Europe/London
+
+dependencies:
+  cache_directories:
+    - "~/.stack"
+  override:
+    - stack setup
+    - stack install hakyll
+    - stack install clay lucid-svg
+
+test:
+  override:
+    - stack build
+  post:
+    - rm -rf _site
+    - rsync -Rr ./.git ./_site/
+    - cd _site && git checkout cppnow_may2018
+    - stack exec site build
+
+deployment:
+  production:
+    branch: cppnow_may2018_dev
+    commands:
+      - git config --global user.email circleci@circleci && git config --global user.name CircleCI
+      - cd _site && git status && git add --all && git commit --allow-empty -m "Update (`date '+%F %T TZ'`) [ci skip]." && git push origin cppnow_may2018
+
+      - git fetch origin && git checkout dev && git reset --hard origin/dev && git status
+      - git submodule update --init && cd cppnow_may2018 && git checkout cppnow_may2018_dev && git pull
+      - git commit cppnow_may2018 -m "Update cppnow_may2018 (`date '+%F %T TZ'`) [ci skip]" && git push origin dev
+
+      - git checkout master && git reset --hard origin/master && git status
+      - git submodule update --init && cd cppnow_may2018 && git checkout cppnow_may2018 && git pull
+      - git commit cppnow_may2018 -m "Deploy cppnow_may2018 (`date '+%F %T TZ'`) [ci skip]" && git push origin master
