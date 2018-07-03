@@ -35,7 +35,10 @@ main = hakyll $ do
     match "css/pdf.css" $ do
         route   idRoute
         -- Line height defaults to 1 in print mode, which looks rather ugly
-        let cssPrefix = "body { line-height : 1.3 }\n"
+        let lineHeightFix = "body { line-height : 1.3 }\n"
+        -- reveal.js disables pointer-events by default and never re-enables them for print mode, so let's override that
+        let linksFix = ".reveal .slides { pointer-events:auto }\n"
+        let cssPrefix = lineHeightFix ++ linksFix
         compile $ getResourceBody
            >>= (withItemBody (return . compressCss . (cssPrefix ++ )))
 
