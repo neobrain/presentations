@@ -98,3 +98,11 @@ main = hakyll $ do
             >>= relativizeUrls
 
     match "templates/*" $ compile templateBodyCompiler
+
+    -- Raw code snippets
+    match "live/*.cpp" $ do
+        route idRoute
+        compile getResourceBody
+    match "live/*.hpp" $ do
+        route idRoute
+        compile getResourceBody

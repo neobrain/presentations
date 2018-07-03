@@ -1,7 +1,8 @@
+// g++ generators.cpp -std=c++11
 #include <cstdint>
 #include <iostream>
 #include <tuple>
-#include "magic.hpp"
+#include "magic.hpp" // provides CallWithSequentialEvaluation
 
 /*********************
  * DUMMY ENVIRONMENT *
@@ -18,6 +19,7 @@ struct WriteableBuffer {
 };
 std::ostream& operator<<(std::ostream& os, WriteableBuffer& buf) {
     os << "WriteableBuffer { " << buf.address << ", " << buf.size << " }";
+    return os;
 }
 
 bool IsValidBufferDescriptor(uint32_t descriptor) {
@@ -69,6 +71,7 @@ int DoStuff(uint32_t a, uint64_t b, WriteableBuffer c) {
     std::cout << std::hex << a << std::endl;
     std::cout << b << std::endl;
     std::cout << c << std::endl;
+    return 0;
 }
 
 int main() {
