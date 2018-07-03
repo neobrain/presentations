@@ -18,18 +18,18 @@
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
     </tr>
   </table>
-<pre><code class="cpp" style="max-height:100em" data-noescape><span class="fragment" data-fragment-index="0">// Read a single entry from the CmdBlock and advance "offset"
+<pre><code class="cpp" style="max-height:100em" data-noescape><span class="fragment" data-fragment-index=0>// Read a single entry from the CmdBlock and advance "offset"
 template&lt;typename T&gt;
 auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }</span>
-<span class="fragment" data-fragment-index="1">
-// Iterate over entire CmdBlock &amp; gather results <span class="fragment" data-fragment-index="4">&amp; apply to "handler"</span>
-template&lt;<span class="fragment" data-fragment-index="4">typename Handler, </span>typename... T&gt;
-auto DecodeAll<span class="fragment" data-fragment-index="4">AndApply</span>(CmdBlock&amp; cmd_block<span class="fragment" data-fragment-index="4">, Handler&amp;&amp; handler</span>) {
-  <span class="fragment" data-fragment-index="2">int offset = 0x1; // into command block
-  <span class="fragment" data-fragment-index="3">return <span class="fragment" data-fragment-index="4">handler(</span>DecodeEntry&lt;Ts&gt;(offset, cmd_block)...<span class="fragment" data-fragment-index="4">)</span>;
+<span class="fragment" data-fragment-index=1>
+// Iterate over entire CmdBlock &amp; gather results <span class="fragment" data-fragment-index=4>&amp; apply to "handler"</span>
+template&lt;<span class="fragment" data-fragment-index=4>typename Handler, </span>typename... T&gt;
+auto DecodeAll<span class="fragment" data-fragment-index=4>AndApply</span>(CmdBlock&amp; cmd_block<span class="fragment" data-fragment-index=4>, Handler&amp;&amp; handler</span>) {
+  <span class="fragment" data-fragment-index=2>int offset = 0x1; // into command block
+  <span class="fragment" data-fragment-index=3>return <span class="fragment" data-fragment-index=4>handler(</span>DecodeEntry&lt;Ts&gt;(offset, cmd_block)...<span class="fragment" data-fragment-index=4>)</span>;
 </span></span>}
 </span></code></pre>
-<p class="fragment" data-fragment-index="5"><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p>
+<p class="fragment" data-fragment-index=5><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p>
 </section>
 
 <!-- <section><h2 style="color:#f6ba4a">Generators</h2>
@@ -68,8 +68,8 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 Decoding 32-bit values:
 <pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename T&gt;
 auto DecodeEntry(int& offset, CmdBlock&amp; block) {
-  <span class="fragment" data-fragment-index="0">if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
-    <span class="fragment" data-fragment-index="1">return block.ReadU32(offset<span class="fragment" data-fragment-index="2">++</span>);</span>
+  <span class="fragment" data-fragment-index=0>if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    <span class="fragment" data-fragment-index=1>return block.ReadU32(offset<span class="fragment" data-fragment-index=2>++</span>);</span>
 
 
 
@@ -77,7 +77,7 @@ auto DecodeEntry(int& offset, CmdBlock&amp; block) {
 
 
 
-  }</span><span class="fragment" data-fragment-index="3"> else {
+  }</span><span class="fragment" data-fragment-index=3> else {
     ...
   }</span>
 }
@@ -96,10 +96,10 @@ Decoding 64-bit values:
 auto DecodeEntry(int& offset, CmdBlock&amp; block) {
   if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
     return block.ReadU32(offset++);</span>
-  <span class="fragment" data-fragment-index="0">} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
-    <span class="fragment" data-fragment-index="1">uint32_t val_low  = block.ReadU32(offset++);
+  <span class="fragment" data-fragment-index=0>} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
+    <span class="fragment" data-fragment-index=1>uint32_t val_low  = block.ReadU32(offset++);
     uint32_t val_high = block.ReadU32(offset++);</span>
-    <span class="fragment" data-fragment-index="2">return (val_high << 32) | val_low;</span>
+    <span class="fragment" data-fragment-index=2>return (val_high << 32) | val_low;</span>
 
 
 
@@ -123,11 +123,11 @@ auto DecodeEntry(int& offset, CmdBlock&amp; block) {
     return block.ReadU32(offset++);</span>
   } else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
     ...
-  <span class="fragment" data-fragment-index="0">} else if constexpr (std::is_same_v&lt;T, WriteableBuffer&gt;) {
-    <span class="fragment" data-fragment-index="1">uint32_t descriptor = block.ReadU32(offset++);
+  <span class="fragment" data-fragment-index=0>} else if constexpr (std::is_same_v&lt;T, WriteableBuffer&gt;) {
+    <span class="fragment" data-fragment-index=1>uint32_t descriptor = block.ReadU32(offset++);
     auto [size, flags] = DecodeBufferDescriptor(descriptor);</span>
-    <span class="fragment" data-fragment-index="2">uint32_t address = block.ReadU32(offset++);</span>
-    <span class="fragment" data-fragment-index="3">return WriteableBuffer { address, size };</span>
+    <span class="fragment" data-fragment-index=2>uint32_t address = block.ReadU32(offset++);</span>
+    <span class="fragment" data-fragment-index=3>return WriteableBuffer { address, size };</span>
   </span>} else {
     ...
   }
@@ -152,8 +152,8 @@ auto DecodeAllAndApply(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
   return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
 }
 </span></code></pre>
-<p class="fragment" data-fragment-index="0">No boilerplate!</p>
-<p class="fragment" data-fragment-index="1">Caveat 1: We actually need a std::tuple&lt;T...&gt; &nbsp;😔</p>
+<p class="fragment" data-fragment-index=0>No boilerplate!</p>
+<p class="fragment" data-fragment-index=1>Caveat 1: We actually need a std::tuple&lt;T...&gt; &nbsp;😔</p>
 </section>
 
 <section><h2 style="color:#f6ba4a">Generators:</h2>
@@ -176,7 +176,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
   // Iterate over entire CmdBlock &amp; gather results &amp; apply to "handler"
   template&lt;typename Handler&gt;
   auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
-    <span class="fragment" data-fragment-index="0">// Caveat 2: Execution order undefined :(</span>
+    <span class="fragment" data-fragment-index=0>// Caveat 2: Execution order undefined :(</span>
     return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
   }
 };</code></pre>
@@ -184,7 +184,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 
 <section><h2 style="color:#f6ba4a">Generators:</h2>
 <h2>Demo time!</h2>
-<p><a href="../live/generators.cpp">generators.cpp</a><br><a href="../live/magic.hpp">magic.hpp</a></p>
+<p><a href=/live/generators.cpp>generators.cpp</a><br><a href=/live/magic.hpp>magic.hpp</a></p>
 </section>
 
 <section><h2 style="color:#f6ba4a">Generators: Result encoder</h2>
@@ -196,7 +196,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 
 <p>Trivial with fold expressions!</p>
 
-<pre class="fragment" data-fragment-index="0"><code class="cpp" data-noescape>template&lt;typename T&gt;
+<pre class="fragment" data-fragment-index=0><code class="cpp" data-noescape>template&lt;typename T&gt;
 void EncodeEntry(int& offset, CmdBlock&amp; block, T t) { ... }
 
 <span class="fragment">template&lt;typename... Ts&gt;
@@ -208,25 +208,25 @@ void EncodeAll(CmdBlock&amp; cmd_block, Ts... ts) {
 </section>
 
 <section><h2>Putting Things Together</h2>
-<pre><code class="cpp" data-noescape><span class="fragment" data-fragment-index="8">GlueCommandHandler(DoOpenFile, cmd_block);</span>
+<pre><code class="cpp" data-noescape><span class="fragment" data-fragment-index=8>GlueCommandHandler(DoOpenFile, cmd_block);</span>
 GlueCommandHandler(DoReadFile, cmd_block);
-<span class="fragment" data-fragment-index="8">GlueCommandHandler(DoCloseFile, cmd_block);</span></code></pre>
+<span class="fragment" data-fragment-index=8>GlueCommandHandler(DoCloseFile, cmd_block);</span></code></pre>
 
-<pre class="fragment" data-fragment-index="0"><code class="cpp" data-noescape>template&lt;typename Handler&gt;
+<pre class="fragment" data-fragment-index=0><code class="cpp" data-noescape>template&lt;typename Handler&gt;
 void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
-  <span class="fragment" data-fragment-index="1">auto request_header = cmd_block.ReadU32(0);</span></span>
-  <span class="fragment" data-fragment-index="2">using RequestList = typename FunctionTraits&lt;Handler&gt;::Args;</span>
-  <span class="fragment" data-fragment-index="2">using ResponseList = typename FunctionTraits&lt;Handler&gt;::Result;</span>
-  <span class="fragment" data-fragment-index="3">auto results = DecodeAllAndApply&lt;RequestList&gt;{}(cmd_block, handler);</span>
-  <span class="fragment" data-fragment-index="4">cmd_block.WriteU32(BuildResponseHeader(results));</span>
-  <span class="fragment" data-fragment-index="5">EncodeAll&lt;ResponseList&gt;{}(cmd_block, results);</span>
+  <span class="fragment" data-fragment-index=1>auto request_header = cmd_block.ReadU32(0);</span></span>
+  <span class="fragment" data-fragment-index=2>using RequestList = typename FunctionTraits&lt;Handler&gt;::Args;</span>
+  <span class="fragment" data-fragment-index=2>using ResponseList = typename FunctionTraits&lt;Handler&gt;::Result;</span>
+  <span class="fragment" data-fragment-index=3>auto results = DecodeAllAndApply&lt;RequestList&gt;{}(cmd_block, handler);</span>
+  <span class="fragment" data-fragment-index=4>cmd_block.WriteU32(BuildResponseHeader(results));</span>
+  <span class="fragment" data-fragment-index=5>EncodeAll&lt;ResponseList&gt;{}(cmd_block, results);</span>
 }</code></pre>
 
-<p class="fragment" data-fragment-index="6">Omitted for now:</p>
-<ul class="fragment" data-fragment-index="6">
+<p class="fragment" data-fragment-index=6>Omitted for now:</p>
+<ul class="fragment" data-fragment-index=6>
   <li>Command header verification</li>
   <li>BuildResponseHeader</li>
 </ul>
-<p class="fragment" data-fragment-index="7">But: This can be used for all IPC commands!</p>
+<p class="fragment" data-fragment-index=7>But: This can be used for all IPC commands!</p>
 </section>
 

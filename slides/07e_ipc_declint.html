@@ -1,24 +1,24 @@
 <section><h2>&lt;/<span style="color:#49f749">Reflective</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
-<h2 class="fragment" data-fragment-index="0">&lt;<span style="color:#30cfcf">Declarative</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
+<h2 class="fragment" data-fragment-index=0>&lt;<span style="color:#30cfcf">Declarative</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
 </section>
 
 <section><h2><span style="color:#30cfcf">Declarative</span> Compile-time Programming</h2>
 <p>Building blocks:</p>
-<img class="fragment" data-fragment-index="0" src="images/metaprogramming_declint.svg" style="background:#2a2a2a">
+<img class="fragment" data-fragment-index=0 src="/images/metaprogramming_declint.svg" style="background:#2a2a2a">
 </section>
 
 <section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
 An explicit approach:
 
-<pre><code class="cpp" data-noescape style="max-height:500em"><span class="fragment" data-fragment-index="1">namespace FS { // FileSystem-related commands
+<pre><code class="cpp" data-noescape style="max-height:500em"><span class="fragment" data-fragment-index=1>namespace FS { // FileSystem-related commands
 
-<span class="fragment" data-fragment-index="2">using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index="7">
-                    ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index="10">
-                    ::special&lt;StaticBuffer&gt;</span><span class="fragment" data-fragment-index="11">
+<span class="fragment" data-fragment-index=2>using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index=7>
+                    ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index=10>
+                    ::special&lt;StaticBuffer&gt;</span><span class="fragment" data-fragment-index=11>
                     ::response&lt;FileDescriptor&gt;;</span></span>
 
-<span class="fragment" data-fragment-index="12">using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index="12">
-                    ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index="12">
+<span class="fragment" data-fragment-index=12>using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index=12>
+                    ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index=12>
                     ::special&lt;&gt;
                     ::response&lt;uint64_t&gt;;</span></span>
 
@@ -48,24 +48,24 @@ Need command id + four different type lists:
 <section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
 <pre style="width:100%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
 struct IPCCmd {
-  <span class="fragment" data-fragment-index="5">template&lt;typename... NormalParams&gt;
+  <span class="fragment" data-fragment-index=5>template&lt;typename... NormalParams&gt;
   struct normal {
-    <span class="fragment" data-fragment-index="9">template&lt;typename... SpecialParams&gt;
+    <span class="fragment" data-fragment-index=9>template&lt;typename... SpecialParams&gt;
     struct special {
-    </span></span><span class="fragment" data-fragment-index="1">  // Export template params in the interface
+    </span></span><span class="fragment" data-fragment-index=1>  // Export template params in the interface
       static constexpr uint32_t command_id = CommandId;
-      <span class="fragment" data-fragment-index="6">using normal_params    = std::tuple&lt;NormalParams...&gt;;
-      <span class="fragment" data-fragment-index="10">using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
-    <span class="fragment" data-fragment-index="9">};</span>
-  <span class="fragment" data-fragment-index="5">};</span>
+      <span class="fragment" data-fragment-index=6>using normal_params    = std::tuple&lt;NormalParams...&gt;;
+      <span class="fragment" data-fragment-index=10>using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
+    <span class="fragment" data-fragment-index=9>};</span>
+  <span class="fragment" data-fragment-index=5>};</span>
 };
 
-<span class="fragment" data-fragment-index="2">namespace FS { // FileSystem-related commands
-using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index="7">
-                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index="11">
+<span class="fragment" data-fragment-index=2>namespace FS { // FileSystem-related commands
+using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index=7>
+                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index=11>
                   ::special&lt;StaticBuffer&gt;</span>;
-<span class="fragment" data-fragment-index="3">using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index="8">
-                  ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index="12">
+<span class="fragment" data-fragment-index=3>using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index=8>
+                  ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index=12>
                   ::special&lt;&gt;</span>;</span>
 }</span>
 </code></pre>
@@ -98,15 +98,15 @@ using GetFileSize = IPCCmd&lt;0x804&gt;
 </section> -->
 
 <section><h2><span style="color:#f6ba4a">Generators</span> with <span style="color:#30cfcf">declarative</span> interfaces</h2>
-<pre class="fragment" data-fragment-index="0"><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
+<pre class="fragment" data-fragment-index=0><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
 void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
-  <span class="fragment" data-fragment-index="1">auto request_header = cmd_block.ReadU32(0);</span>
-  <span class="fragment" data-fragment-index="2">if (request_header != IPCRequest::request_header)
+  <span class="fragment" data-fragment-index=1>auto request_header = cmd_block.ReadU32(0);</span>
+  <span class="fragment" data-fragment-index=2>if (request_header != IPCRequest::request_header)
     throw std::runtime_error("Invalid request header");</span>
 
-  <span class="fragment" data-fragment-index="3">auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler);</span>
-  <span class="fragment" data-fragment-index="4">cmd_block.WriteU32(IPCRequest::response_header);</span>
-  <span class="fragment" data-fragment-index="5">WriteFold&lt;ResponseList&gt;{cmd_block}.Run(results);</span>
+  <span class="fragment" data-fragment-index=3>auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler);</span>
+  <span class="fragment" data-fragment-index=4>cmd_block.WriteU32(IPCRequest::response_header);</span>
+  <span class="fragment" data-fragment-index=5>WriteFold&lt;ResponseList&gt;{cmd_block}.Run(results);</span>
 }
 </code></pre>
 </section>
@@ -131,9 +131,9 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
                       ::response&lt;uint64_t&gt;;</code></pre>
 <table style="width:104%; margin-left:-2%; border: 0px solid !important">
 <tr style="padding:0px">
-<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index="0">↓<br><span style="color:#f6ba4a">Handlers</span><br><small>GlueHandler&lt;FS::GetFileSize&gt;(cmdblk)</small></td>
-<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index="1">↓<br><span style="color:#f6ba4a">Synthesis</span><br><small>CmdBlock blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</small></td>
-<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index="2">↓<br><span style="color:#f6ba4a">Logging</span><br><small>std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=0>↓<br><span style="color:#f6ba4a">Handlers</span><br><small>GlueHandler&lt;FS::GetFileSize&gt;(cmdblk)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=1>↓<br><span style="color:#f6ba4a">Synthesis</span><br><small>CmdBlock blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=2>↓<br><span style="color:#f6ba4a">Logging</span><br><small>std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</small></td>
 </tr>
 </table>
 

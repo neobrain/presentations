@@ -1,10 +1,10 @@
 <section><h2 style="color:#49f749">Function Traits</h2>
 <ul>
 <!--  <li class="fragment" data-fragment-index=0>Type traits: Get info about a type at compile-time</li> -->
-  <li class="fragment" data-fragment-index="3">Function traits:
+  <li class="fragment" data-fragment-index=3>Function traits:
   <ul>
   <li>Type traits for functions</li>
-  <li class="fragment" data-fragment-index="4">Get parameter list &amp; return type</li>
+  <li class="fragment" data-fragment-index=4>Get parameter list &amp; return type</li>
   </ul>
 </ul>
 <span class="fragment">
@@ -27,7 +27,7 @@ struct FunctionTraits {
 
 <section><h2 style="color:#49f749">Function Traits</h2>
 <p>Minimal implementation</p>
-<span class="fragment" data-fragment-index="0">
+<span class="fragment" data-fragment-index=0>
 <pre><code class="cpp" data-noescape>template&lt;typename F&gt;
 struct FunctionTraits;
 
@@ -35,7 +35,7 @@ struct FunctionTraits;
 template&lt;typename FuncResult, typename... FuncArgs&gt;
 struct FunctionTraits&lt;Result(Args...)&gt; {
   using Args   = std::tuple&lt;FuncArgs...&gt;;
-  using Result = FuncResult;<span class="fragment" data-fragment-index="1"> // NB: This will be some tuple&lt;&gt; for us</span>
+  using Result = FuncResult;<span class="fragment" data-fragment-index=1> // NB: This will be some tuple&lt;&gt; for us</span>
 };
 </code></pre>
 Very limited, but good enough here
