@@ -1,0 +1,204 @@
+<section><h1>InterProcess Communication</h1>
+  <img src="images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+</section>
+
+<section><h2>InterProcess Communication</h2>
+<p>IPC is crucial to everything:</p> <!-- NB: Crucial for games -->
+<ul>
+  <li>Rendering graphics <span class="fragment" data-fragment-index="0" style="color:#40c030">(gsp)</span> &amp; playing audio <span class="fragment" data-fragment-index="1" style="color:#40c030">(dsp)</span></li>
+  <li>Accessing WiFi <span class="fragment" data-fragment-index="2" style="color:#40c030">(soc)</span> &amp; connecting to friends <span class="fragment" data-fragment-index="3" style="color:#40c030">(frd)</span></li>
+  <li>Loading assets &amp; saving progress <span class="fragment" data-fragment-index="4" style="color:#40c030">(fs)</span></li>
+  <li>…</li>
+</ul>
+
+<p class="fragment" data-fragment-index="5"><span style="color:#40c030">~40 processes ("services")</span> in total,<br>each serving different functionality</p>
+</section>
+
+<section><h2>IPC Protocol</h2>
+<ul>
+<li class="fragment" data-fragment-index="14"><span style="color:#f0b0b0">Client-Server</span> based: Games ⇄ Services</li> <!-- NB: Services ⇄ Services also works -->
+<li class="fragment" data-fragment-index="15"><span style="color:#f0b0b0">Request-response</span> exchange via command blocks</li>
+<li class="fragment" data-fragment-index="16"><span style="color:#f0b0b0">Marshalling</span> of sensitive data by the OS kernel<!-- NB: <br>
+  (e.g. shared buffers or kernel object handles)--></li>
+<li class="fragment" data-fragment-index="17"><span style="color:#f0b0b0">Hierarchy</span> of abstraction for exploit mitigation</li>
+</ul>
+</section>
+
+<section class="animated-slide"><h2>IPC Visualized</h2>
+<!--<div class="link-for-reload"><a class="link-for-reload">TODOSTUFF</a></div>-->
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App: ReadFile</p>
+<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:12em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
+<span>1: 0x5</span><br> <!-- file descriptor -->
+<span>2: 0x200</span><br> <!-- low word of offset-->
+<span>3: 0x0</span><br>
+<span>4: 0x100</span><br> <!-- low word of size-->
+<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+<span>6: 0x200c</span><br>
+<span>7: 0x1ff00200</span><br>
+</div>
+</span>
+<span class="ipc-img fadeoutArrow" style="visibility:hidden"></span>
+<span>
+<p>Kernel</p>
+<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+</div>
+</span>
+<span class="ipc-img fadeoutArrow2" style="visibility:hidden"></span>
+<span>
+<p>Service</p>
+<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+</div>
+</span>
+</div>
+</section>
+
+<section class="animated-slide"><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App: ReadFile</p>
+<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:12em">
+<span class="original-ipc-cmd-block-entry0" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
+<span class="original-ipc-cmd-block-entry1">1: 0x5</span><br> <!-- file descriptor -->
+<span class="original-ipc-cmd-block-entry2">2: 0x200</span><br> <!-- low word of offset-->
+<span class="original-ipc-cmd-block-entry3">3: 0x0</span><br>
+<span class="original-ipc-cmd-block-entry4">4: 0x100</span><br> <!-- low word of size-->
+<span class="original-ipc-cmd-block-entry5" style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+<span class="original-ipc-cmd-block-entry6">6: 0x200c</span><br>
+<span class="original-ipc-cmd-block-entry7">7: 0x1ff00200</span><br>
+</div>
+</span>
+<span class="ipc-img fadeoutArrow"></span>
+<span>
+<p>Kernel</p>
+<div class="copied-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span class="kernel-ipc-cmd-block-entry0">0: 0x802'02'05<br></span>
+<span class="kernel-ipc-cmd-block-entry1">1: 0x5<br></span>
+<span class="kernel-ipc-cmd-block-entry2">2: 0x200<br></span>
+<span class="kernel-ipc-cmd-block-entry3">3: 0x0<br></span>
+<span class="kernel-ipc-cmd-block-entry4">4: 0x100<br></span>
+<span class="kernel-ipc-cmd-block-entry5">5: 0x0<br></span>
+<span class="kernel-ipc-cmd-block-entry6">6: 0x200c<br></span>
+<span class="kernel-ipc-cmd-block-entry7">7: 0x2a700200<br></span>
+</div>
+</span>
+<span class="ipc-img fadeoutArrow2"></span>
+<span>
+<p>Service</p>
+<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+</div>
+</span>
+<h2 class="spin-gears"></h2>
+</div>
+<p class="print-only">Translate command block …</p>
+</section>
+
+<section class="animated-slide"><span class="print-onl"><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App: ReadFile</p>
+<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:12em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
+<span>1: 0x5</span><br> <!-- file descriptor -->
+<span>2: 0x200</span><br> <!-- low word of offset-->
+<span>3: 0x0</span><br>
+<span>4: 0x100</span><br> <!-- low word of size-->
+<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+<span>6: 0x200c</span><br>
+<span>7: 0x1ff00200</span><br>
+</div>
+</span>
+<span class="ipc-img fadeoutArrow" style="visibility:hidden"></span>
+<span>
+<p>Kernel</p>
+<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
+  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
+</div>
+</span>
+<span class="ipc-img fadeoutArrow2" style="visibility:hidden"></span>
+<span>
+<p>Service</p>
+<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span>0: 0x802'02'05<br></span>
+<span>1: 0x5<br></span>
+<span>2: 0x200<br></span>
+<span>3: 0x0<br></span>
+<span>4: 0x100<br></span>
+<span>5: 0x0<br></span>
+<span>6: 0x200c<br></span>
+<span>7: 0x2a700200<br></span>
+</div>
+</span>
+</div>
+<p class="print-only">… and send it to the service</p>
+</span></section>
+
+<section><h3>Emulating IPC command handlers</h3>
+<p style="margin-top:-15px; margin-bottom:0px">Common dispatch flow:</p>
+<ul>
+  <li class="fragment" data-fragment-index="0">Select C++ handler function based on command index<br>
+  <pre style="width:100%"><code class="cpp" style="font-size:90%">std::tuple&lt;Result,uint32_t&gt; DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
+  <li class="fragment" data-fragment-index="1">Verify command header (number of parameters)<br>
+  <pre style="width:100%"><code class="cpp">(cmd_header &amp; 0xFF == 5) &nbsp;&amp;&amp;&nbsp; ((cmd_header &gt;&gt; 8) &amp; 0xff == 2)</code></pre></li>
+  <li class="fragment" data-fragment-index="2">Parse parameters from command block
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table></li>
+  <li class="fragment" data-fragment-index="3">Invoke C++ handler function<br>
+  <pre style="width:100%"><code class="cpp">DoReadFile(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
+  <li class="fragment" data-fragment-index="4">Write response back to command block
+  <table style="font-size:60%">
+    <tr>
+      <td>header: 0x8020002</td><td>Result: 0x0</td><td>Result 2: 0xd00f</td>
+    </tr>
+  </table></li>
+</ul>
+</section>
+
+<section><h3>Emulating IPC command handlers</h3>
+  <!-- Screenshot/Browse 3dbrew instead here -->
+  How often do we need to write this logic?
+  <ul>
+    <li class="fragment" data-fragment-index="0">~40 active processes</li>
+    <li class="fragment" data-fragment-index="1">Each with ~30 IPC commands on average</li>
+    <li class="fragment" data-fragment-index="2">Manual glue to invoke the C++ handler required for each</li>
+  </ul>
+  <p class="fragment" data-fragment-index="3">That is a lot of work. <!-- TODO: Consider reusing the "Repetitive logic" slide here instead --> <span class="fragment" data-fragment-index="4">Or is it?</span></p>
+  <p class="fragment" data-fragment-index="5"><b>Enter <span style="color:#f6ba4a">Generative Programming</span></b></p>
+</section>
+

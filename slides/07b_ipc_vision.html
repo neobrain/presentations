@@ -1,0 +1,45 @@
+<section><h2 style="color:#f6ba4a">Generative Programming</h2>
+<h3>Building Blocks</h3>
+<!-- <ul>
+<li class="fragment" data-fragment-index=1><font color="#f6ba4a">Code generation</font>: <font color="#f7f749">Type lists</font> ⟶ <font color="#f64a4a">Runtime logic</font></li>
+<li class="fragment" data-fragment-index=2><font color="#49f749">Reflection</font>: Capture <font color="#0049f7">code properties</font> in <font color="#f7f749">type lists</font></li>
+<li class="fragment" data-fragment-index=3><font color="#f7f749">TMP</font>: Transform <font color="#f7f749">type list</font> into <font color="#f7f749">type lists</font></li>
+</ul>-->
+
+<!-- TODO: Tune background color -->
+<img class="fragment" data-fragment-index="0" src="images/metaprogramming.svg" style="background:#2a2a2a">
+</section>
+
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
+DoReadFile(uint32_t file_descriptor, uint64_t offset,
+           uint64_t num_bytes, WriteableBuffer&amp; output)
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<pre style="width:100%"><code class="cpp">using RequestList  = std::tuple&lt;uint32_t, uint64_t, uint64_t, WriteableBuffer>
+using ResponseList = std::tuple&lt;Result, uint32_t>
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">GlueCommandHandler(cmd_block, DoReadFile)
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+
+<section><h2>Our Vision</h2>
+Advantages:
+<ul>
+  <li class="fragment">Automated command encoding/decoding</li>
+  <li class="fragment">Type safe: Decoded data matches C++ function signature <i>by design</i></li>
+  <li class="fragment">Bonus: It's easier to read <small class="fragment" style="vertical-align:baseline">(since there's nothing to read anymore)</small></li>
+</ul>
+</section>
+
