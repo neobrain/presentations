@@ -102,7 +102,6 @@ main = hakyll $ do
         compile $ getResourceBody
             >>= applyAsTemplate context
             >>= loadAndApplyTemplate "templates/slide.html" defaultContext
-            >>= relativizeUrls
 
     match "templates/*" $ compile templateBodyCompiler
 
