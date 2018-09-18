@@ -167,22 +167,22 @@
 <p class="print-only">… and send it to the service</p>
 </span></section>
 
-<section><h3>Emulating IPC command handlers</h3>
-<p style="margin-top:-15px; margin-bottom:0px">Common dispatch flow:</p>
+<section><h3>Emulating IPC command handlers</h3> <!-- TODO: Make the SVPIW highlight show up after transition -->
+<p style="margin-top:-15px; margin-bottom:0px"><span class="svpiw">SVPIW</span>: Common dispatch flow:</p>
 <ul>
-  <li $make_fragment("0")$>Select C++ handler function based on command index<br>
+  <li $make_fragment("0")$><span class="svpiw">S</span>elect C++ handler function based on command index<br>
   <pre style="width:100%"><code class="cpp" style="font-size:90%">std::tuple&lt;Result,uint32_t&gt; DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
-  <li $make_fragment("1")$>Verify command header (number of parameters)<br>
+  <li $make_fragment("1")$><span class="svpiw">V</span>erify command header (number of parameters)<br>
   <pre style="width:100%"><code class="cpp">(cmd_header &amp; 0xFF == 5) &nbsp;&amp;&amp;&nbsp; ((cmd_header &gt;&gt; 8) &amp; 0xff == 2)</code></pre></li>
-  <li $make_fragment("2")$>Parse parameters from command block
+  <li $make_fragment("2")$><span class="svpiw">P</span>arse parameters from command block
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
     </tr>
   </table></li>
-  <li $make_fragment("3")$>Invoke C++ handler function<br>
+  <li $make_fragment("3")$><span class="svpiw">I</span>nvoke C++ handler function<br>
   <pre style="width:100%"><code class="cpp">DoReadFile(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
-  <li $make_fragment("4")$>Write response back to command block
+  <li $make_fragment("4")$><span class="svpiw">W</span>rite response back to command block
   <table style="font-size:60%">
     <tr>
       <td>header: 0x8020002</td><td>Result: 0x0</td><td>Result 2: 0xd00f</td>
@@ -199,6 +199,7 @@
     <li $make_fragment("1")$>Each with ~30 IPC commands on average</li>
     <li $make_fragment("2")$>Manual glue to invoke the C++ handler required for each</li>
   </ul>
-  <p $make_fragment("3")$>That is a lot of work. <!-- TODO: Consider reusing the "Repetitive logic" slide here instead --> <span $make_fragment("4")$>Or is it?</span></p>
-  <p $make_fragment("5")$><b>Enter <span style="color:$color_codegen$">Generative Programming</span></b></p>
+  <p $make_fragment("3")$>That is a lot of work.</p>
+  <p $make_fragment("4")$>How can we get it right and consistent?</p>
+  <p $make_fragment("5")$><b>Enter <span style="color:$color_declint$">declarative</span> &amp; <span style="color:$color_codegen$">generative</span> programming</b></p>
 </section>

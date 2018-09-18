@@ -7,7 +7,7 @@
   <li class="fragment">fold expressions (C++17)</li>
 </ul>
 
-<p class="fragment">We got our <span style="color:$color_tmp$">type list</span> from <span style="color:$color_reflection$">FunctionTraits</span></p>
+<p class="fragment">We got our <span style="color:$color_tmp$">type list</span> from the <span style="color:$color_declint$">declarative interface</span></p>
 <p class="fragment">How do we <span style="color:$color_codegen$">generate</span> a command block decoder?</p>
 </section>
 
@@ -207,7 +207,7 @@ void EncodeAll(CmdBlock&amp; cmd_block, Ts... ts) {
 }</span></code></pre>
 </section>
 
-<section><h2>Putting Things Together</h2>
+<!-- <section><h2>Putting Things Together</h2>
 <pre><code class="cpp" data-noescape><span $make_fragment("8")$>GlueCommandHandler(DoOpenFile, cmd_block);</span>
 GlueCommandHandler(DoReadFile, cmd_block);
 <span $make_fragment("8")$>GlueCommandHandler(DoCloseFile, cmd_block);</span></code></pre>
@@ -229,3 +229,4 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
 </ul>
 <p $make_fragment("7")$>But: This can be used for all IPC commands!</p>
 </section>
+-->
