@@ -26,8 +26,26 @@ Highlight that all of these are at the type-system level (mention constexpr, tho
 Key characteristic of declarative interfaces: The only thing they provide is a translation to type lists!
 -->
 
+<section><h2>IPC Commands</h2>
+Need command id + four different type lists:
+<ul>
+  <li class="fragment">Value-based "normal" parameters (simple copy)</li>
+  <li class="fragment">Special parameters (require preprocessing/translation)</li>
+  <li class="fragment">Normal and Special parameters for the response</li>
+</ul>
+<br>&nbsp;<br>
+<p class="fragment">E.g. FS::OpenFile:</p>
+<ul>
+  <li class="fragment">Request takes <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, and <pre style="display:inline">uint32_t</pre>, but also</li>
+  <li class="fragment">Request takes a <pre style="display:inline">StaticBuffer</pre></li>
+  <li class="fragment">Response gives a <pre style="display:inline">FileDescriptor</pre>, and</li>
+  <li class="fragment">Response gives no special parameters</li>
+</ul>
+</section>
+
+
 <section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
-An explicit approach:
+One approach:
 
 <pre><code class="cpp" data-noescape style="max-height:500em"><span $make_fragment("1")$>namespace FS { // FileSystem-related commands
 
@@ -47,44 +65,28 @@ An explicit approach:
 <p class="fragment">=> Builder-like pattern</p>
 </section>
 
-<section><h2>IPC Commands</h2>
-Need command id + four different type lists:
-<ul>
-  <li class="fragment">Value-based "normal" parameters (simple copy)</li>
-  <li class="fragment">Special parameters (require preprocessing/translation)</li>
-  <li class="fragment">Normal and Special parameters for the response</li>
-</ul>
-<br>&nbsp;<br>
-<p class="fragment">E.g. FS::OpenFile:</p>
-<ul>
-  <li class="fragment">Request takes <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, and <pre style="display:inline">uint32_t</pre>, but also</li>
-  <li class="fragment">Request takes a <pre style="display:inline">StaticBuffer</pre></li>
-  <li class="fragment">Response gives a <pre style="display:inline">FileDescriptor</pre>, and</li>
-  <li class="fragment">Response gives no special parameters</li>
-</ul>
-</section>
 
 <section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
 <pre style="width:100%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
 struct IPCCmd {
   <span $make_fragment("5")$>template&lt;typename... NormalParams&gt;
   struct normal {
-    <span $make_fragment("9")$>template&lt;typename... SpecialParams&gt;
+    <span $make_fragment("8")$>template&lt;typename... SpecialParams&gt;
     struct special {
-    </span></span><span $make_fragment("1")$>  // Export template params in the interface
+    </span></span><span $make_fragment("2")$>  // Export template params in the interface
       static constexpr uint32_t command_id = CommandId;
-      <span $make_fragment("6")$>using normal_params    = std::tuple&lt;NormalParams...&gt;;
-      <span $make_fragment("10")$>using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
-    <span $make_fragment("9")$>};</span>
+      <span $make_fragment("5")$>using normal_params    = std::tuple&lt;NormalParams...&gt;;
+      <span $make_fragment("9")$>using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
+    <span $make_fragment("8")$>};</span>
   <span $make_fragment("5")$>};</span>
 };
 
-<span $make_fragment("2")$>namespace FS { // FileSystem-related commands
-using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("7")$>
-                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span $make_fragment("11")$>
+<span $make_fragment("1")$>namespace FS { // FileSystem-related commands
+using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("8")$>
+                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span $make_fragment("12")$>
                   ::special&lt;StaticBuffer&gt;</span>;
-<span $make_fragment("3")$>using GetFileSize = IPCCmd&lt;0x804&gt;<span $make_fragment("8")$>
-                  ::normal&lt;FileDescriptor&gt;</span><span $make_fragment("12")$>
+<span $make_fragment("3")$>using GetFileSize = IPCCmd&lt;0x804&gt;<span $make_fragment("9")$>
+                  ::normal&lt;FileDescriptor&gt;</span><span $make_fragment("13")$>
                   ::special&lt;&gt;</span>;</span>
 }</span>
 </code></pre>
