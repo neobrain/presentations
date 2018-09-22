@@ -1,3 +1,16 @@
+<section><h2>Why <span style="color:$color_declint$">Declarative</span>?</h2>
+<ul>
+ <li class="fragment">Separates concerns (what vs how)
+  <ul><li class="fragment">Business structure and logic rarely <i>both</i> change</li></ul></li>
+ <li class="fragment">Speeds up feature bringup due to reusable components</li> <!-- Time to market Flexibility -->
+ <li class="fragment">Expresses programmer intent naturally</li>
+ <li class="fragment">Encourages automation of boilerplate <span style="color:$color_codegen$">generation</span></li>
+ <li class="fragment">Helps detect errors at compile-time</li>
+</ul>
+
+<p class="fragment">Improved flexibility, time to market, and maintainability!</p>
+</section>
+
 <section><h2>Conclusion</h2>
   <ul>
     <li $make_fragment("0")$>Untyped data makes serialization centric to emulation</li>
@@ -5,8 +18,8 @@
     <small $make_fragment("2")$>Fold expressions are big for simplicity!</small></li>
     <!-- <li $make_fragment("3")$><span style="color:$color_reflection$">Reflection</span> to synthesize code from data structures<br>
     <small $make_fragment("4")$>We have function traits now; full reflection in C++2n?</small></li> -->
-    <li $make_fragment("5")$><span style="color:$color_declint$">Declarative interface</span> for maximizing reuse
-    <p $make_fragment("5")$ style="text-align:center"><img $make_fragment("0")$ src="/images/metaprogramming_declint.svg" style="background:#2a2a2a; width:50%"></p></li>
+    <li $make_fragment("5")$><span style="color:$color_declint$">Declarative interfaces:</span> Novel but powerful
+    <p $make_fragment("5")$ style="text-align:center"><img $make_fragment("0")$ src="/images/metaprogramming_declint_pure.svg" style="background:#2a2a2a; width:50%"></p></li>
     <li $make_fragment("6")$>Vastly more maintainable and expressive at zero overhead</li>
   </ul>
 </section>

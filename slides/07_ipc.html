@@ -27,151 +27,109 @@
 <p $make_fragment("19")$>Hierarchical: Game ⇄ <span style="color:#40c030">cfg</span> ⇄ <span style="color:#40c030">fs</span> ⇄ <span style="color:#40c030">fspxi</span></p>
 </section>
 
-<section class="animated-slide"><h2>IPC Visualized</h2>
-<!--<div class="link-for-reload"><a class="link-for-reload">TODOSTUFF</a></div>-->
-<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
-<span>
-<p>App: ReadFile</p>
-<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:12em">
-<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
-<span>1: 0x5</span><br> <!-- file descriptor -->
-<span>2: 0x200</span><br> <!-- low word of offset-->
-<span>3: 0x0</span><br>
-<span>4: 0x100</span><br> <!-- low word of size-->
-<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
-<span>6: 0x200c</span><br>
-<span>7: 0x1ff00200</span><br>
-</div>
-</span>
-<span class="ipc-img fadeoutArrow" style="visibility:hidden"></span>
-<span>
-<p>Kernel</p>
-<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-</div>
-</span>
-<span class="ipc-img fadeoutArrow2" style="visibility:hidden"></span>
-<span>
-<p>Service</p>
-<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-</div>
-</span>
-</div>
-<p class="print-only" style="visibility:hidden">Translate command block …</p> <!-- For padding, only -->
-</section>
 
-<section class="animated-slide"><h2>IPC Visualized</h2>
+<section><h2>IPC Visualized</h2>
 <div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
 <span>
 <p>App: ReadFile</p>
-<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:12em">
-<span class="original-ipc-cmd-block-entry0" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
-<span class="original-ipc-cmd-block-entry1">1: 0x5</span><br> <!-- file descriptor -->
-<span class="original-ipc-cmd-block-entry2">2: 0x200</span><br> <!-- low word of offset-->
-<span class="original-ipc-cmd-block-entry3">3: 0x0</span><br>
-<span class="original-ipc-cmd-block-entry4">4: 0x100</span><br> <!-- low word of size-->
-<span class="original-ipc-cmd-block-entry5" style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
-<span class="original-ipc-cmd-block-entry6">6: 0x200c</span><br>
-<span class="original-ipc-cmd-block-entry7">7: 0x1ff00200</span><br>
-</div>
-</span>
-<span class="ipc-img fadeoutArrow"></span>
-<span>
-<p>Kernel</p>
-<div class="copied-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
-<span class="kernel-ipc-cmd-block-entry0">0: 0x802'02'05<br></span>
-<span class="kernel-ipc-cmd-block-entry1">1: 0x5<br></span>
-<span class="kernel-ipc-cmd-block-entry2">2: 0x200<br></span>
-<span class="kernel-ipc-cmd-block-entry3">3: 0x0<br></span>
-<span class="kernel-ipc-cmd-block-entry4">4: 0x100<br></span>
-<span class="kernel-ipc-cmd-block-entry5">5: 0x0<br></span>
-<span class="kernel-ipc-cmd-block-entry6">6: 0x200c<br></span>
-<span class="kernel-ipc-cmd-block-entry7">7: 0x2a700200<br></span>
-</div>
-</span>
-<span class="ipc-img fadeoutArrow2"></span>
-<span>
-<p>Service</p>
-<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-</div>
-</span>
-<h2 class="spin-gears"></h2>
-</div>
-<p class="print-only">Translate command block …</p>
-</section>
-
-<section class="animated-slide"><span class="print-onl"><h2>IPC Visualized</h2>
-<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
-<span>
-<p>App: ReadFile</p>
-<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:12em">
-<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
-<span>1: 0x5</span><br> <!-- file descriptor -->
-<span>2: 0x200</span><br> <!-- low word of offset-->
-<span>3: 0x0</span><br>
-<span>4: 0x100</span><br> <!-- low word of size-->
-<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
-<span>6: 0x200c</span><br>
-<span>7: 0x1ff00200</span><br>
-</div>
-</span>
-<span class="ipc-img fadeoutArrow" style="visibility:hidden"></span>
-<span>
-<p>Kernel</p>
-<div class="original-ipc-cmd-block" style="visibility:hidden; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry0">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry1">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry2">Dummy<br></span>
-  <span class="original-ipc-cmd-block-entry3">Dummy<br></span>
-</div>
-</span>
-<span class="ipc-img fadeoutArrow2" style="visibility:hidden"></span>
-<span>
-<p>Service</p>
 <div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
-<span>0: 0x802'02'05<br></span>
-<span>1: 0x5<br></span>
-<span>2: 0x200<br></span>
-<span>3: 0x0<br></span>
-<span>4: 0x100<br></span>
-<span>5: 0x0<br></span>
-<span>6: 0x200c<br></span>
-<span>7: 0x2a700200<br></span>
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
+1: 0x5<br> <!-- file descriptor -->
+2: 0x200<br> <!-- low word of offset-->
+3: 0x0<br>
+4: 0x100<br> <!-- low word of size-->
+<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+6: 0x200c<br>
+7: 0x1ff00200<br>
+</div>
+</span>
+<span class="fragment fade-out" data-fragment-index="5"><span class="ipc-img fragment" data-fragment-index="0">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Kernel</p>
+<span class="fragment" data-fragment-index="0"><div class="original-ipc-cmd-block fragment fade-out" data-fragment-index="10" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="fragment" data-fragment-index="1" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)<br></span>
+  <span class="fragment" data-fragment-index="2">
+1: 0x5<br>
+2: 0x200<br>
+3: 0x0<br>
+4: 0x100<br>
+  <span><span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br></span>
+  </span>
+  <span class="fragment" data-fragment-index="3">6: 0x200c<br></span>
+  <span class="fragment" data-fragment-index="4">7: <span style="color:#ff3311">0x2a7</span>00200<br></span>
+</div>
+</span>
+</span>
+<span class="ipc-img fragment" data-fragment-index="7"><span class="fragment fade-out" data-fragment-index="10">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Service</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="10" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="fragment" data-fragment-index="1" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)<br></span>
+  <span class="fragment" data-fragment-index="2">
+1: 0x5<br>
+2: 0x200<br>
+3: 0x0<br>
+4: 0x100<br>
+  <span><span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br></span>
+  </span>
+  <span class="fragment" data-fragment-index="3">6: 0x200c<br></span>
+  <span class="fragment" data-fragment-index="4">7: <span style="color:#ff3311">0x2a7</span>00200<br></span>
+</div>
+</span>
+
+<span class="ipc-img fragment" data-fragment-index="20">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span class="fragment" data-fragment-index="20" style="height:8.61em">
+<div style="text-align:center">
+<div style="height:1.75em">&nbsp;</div><br>
+<p>Emulation&nbsp;&nbsp;<span class="spin-gears"></span></p>
+<br>
+</div>
+</div>
+</section>
+
+
+<section><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="45" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+1: 0x5<br> <!-- result code -->
+2: 0x100<br> <!-- low word of offset-->
+3: 0x0<br>
+</div>
+</span>
+<span class="fragment fade-out" data-fragment-index="45"><span class="ipc-img fragment" data-fragment-index="40">&nbsp;&nbsp;&nbsp;⟵&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Kernel</p>
+<span class="fragment" data-fragment-index="10"><div class="original-ipc-cmd-block fragment fade-out" data-fragment-index="45" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span class="fragment" data-fragment-index="15">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+</span>
+<span class="fragment" data-fragment-index="20">
+1: 0x5<br> <!-- result code -->
+2: 0x100<br> <!-- low word of offset-->
+3: 0x0<br>
+</span>
+</div>
+</span>
+</span>
+<span class="ipc-img fragment" data-fragment-index="10"><span class="fragment fade-out" data-fragment-index="20">&nbsp;&nbsp;&nbsp;⟵&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Service: Response</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="0" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+1: 0x5<br> <!-- result code -->
+2: 0x100<br> <!-- low word of offset-->
+3: 0x0<br>
 </div>
 </span>
 </div>
-<p class="print-only">… and send it to the service</p>
-</span></section>
+</section>
+
 
 <section><h3>Emulating IPC command handlers</h3> <!-- TODO: Make the SVPIW highlight show up after transition -->
-<p style="margin-top:-15px; margin-bottom:0px"><span class="svpiw">SVPIW</span>: Common dispatch flow:</p>
+<p style="margin-top:-15px; margin-bottom:0px"><span class="fragment" data-fragment-index="5"><span class="svpiw">SVPIW</span>:</span> Common dispatch flow:</p>
 <ul>
   <li $make_fragment("0")$><span class="svpiw">S</span>elect C++ handler function based on command index<br>
   <pre style="width:100%"><code class="cpp" style="font-size:90%">std::tuple&lt;Result,uint32_t&gt; DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
@@ -196,13 +154,13 @@
 
 <section><h3>Emulating IPC command handlers</h3>
   <!-- Screenshot/Browse 3dbrew instead here -->
-  How often do we need to write this logic?
+  How often do we need to write the <span class="svpiw">SVPIW</span> logic?
   <ul>
     <li $make_fragment("0")$>~40 active processes</li>
     <li $make_fragment("1")$>Each with ~30 IPC commands on average</li>
     <li $make_fragment("2")$>Manual glue to invoke the C++ handler required for each</li>
   </ul>
   <p $make_fragment("3")$>That is a lot of work.</p>
-  <p $make_fragment("4")$>Correctness? Consistency?</p>
+  <p $make_fragment("4")$>Correctness? Consistency? Maintainability?</p>
   <p $make_fragment("5")$><b>Enter <span style="color:$color_declint$">declarative</span> &amp; <span style="color:$color_codegen$">generative</span> programming</b></p>
 </section>

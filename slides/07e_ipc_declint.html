@@ -32,15 +32,21 @@ void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <s
 <section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>
 <p>Declarative approach maximizes reusability</p>
 
-<p>=&gt; Trivial bringup of entire subsystems!</p>
+<p>⇒ Trivial bringup of entire subsystems!</p>
 <pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
                       ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
                       ::response&lt;uint64_t&gt;;</code></pre>
-<table style="width:104%; margin-left:-2%; border: 0px solid !important">
+<table style="width:100%; margin-left:-2%; border: 0px solid !important">
 <tr style="padding:0px">
-<td style="padding:0px; text-align:center; border: none !important" $make_fragment("0")$>↓<br><span style="color:$color_codegen$">Handlers</span><br><p style="font-size:50%">GlueHandler&lt;FS::GetFileSize&gt;(cmdblk, DoGetFileSize)</p>↓<br>DoGetFileSize(...)</td>
-<td style="padding:0px; text-align:center; border: none !important" $make_fragment("1")$>↓<br><span style="color:$color_codegen$">Synthesis</span><br><p style="font-size:50%">auto blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</p>↓<br>CmdBlock blk</td>
-<td style="padding:0px; text-align:center; border: none !important" $make_fragment("2")$>↓<br><span style="color:$color_codegen$">Logging</span><br><p style="font-size:50%">std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</p>↓<br>"GetFileSize: fd TODO"</td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("0")$>↓<br><span style="color:$color_codegen$">Handlers</span><br><p style="font-size:50%">GlueHandler&lt;GetFileSize&gt;(cmdblk, DoGetFileSize)</p>↓<br><p style="font-size:80%">DoGetFileSize(FileDesc{5})</p></td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("1")$>↓<br><span style="color:$color_codegen$">Synthesis</span><br><p style="font-size:50%">auto blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</p>↓<br>
+<!-- TODO: Center this block!--><div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span style="border-bottom: 2px dashed #ccc;">0: 0x804'00'01 (header)<br></span>
+1: 0x5<br>
+2: 0x0<br>
+</div>
+</td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("2")$>↓<br><span style="color:$color_codegen$">Logging</span><br><p style="font-size:50%">std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</p>↓<br><p style="font-size:80%">"GetFileSize: fd 5"</p></td>
 </tr>
 </table>
 
