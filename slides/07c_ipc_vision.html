@@ -5,6 +5,45 @@
 </section>
 
 <section style="line-height:0.5"><h2>Our Vision</h2>
+<div style="display:flex; justify-content: space-around">
+<span style="width:40%"><font>C++ Handler</font>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
+DoReadFile(FileDesc fd,
+           uint64_t offset,
+           uint64_t num_bytes,
+           $cpptype_writeablebuffer$&amp; output)
+</code></pre></span>
+<span style="width:48%"><font color="$color_declint$">Declarative Interface</font>
+<pre style="width:100%"><code class="cpp">using ReadFile =
+    IPCCmd&lt;0x803&gt;
+    ::normal&lt;FileDesc, uint64_t, uint64_t&gt;
+    ::special&lt;$cpptype_writeablebuffer$&gt;
+    ::response&lt;uint32_t&gt;;
+</code></pre>
+<span class="fragment">
+↓ <font color="$color_declint$">Extract std::tuples</font> ↓
+<pre style="width:100%"><code class="cpp">using RequestList = ReadFile::request_list;
+using ResponseList = ReadFile::response_list;
+</code></pre>
+</span>
+</div> <!-- end of flexbox -->
+
+<span class="fragment">
++ <font color="#f6ba4a">Generators</font>
+<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp" data-noescape><span style="color:$color_codegen$">GlueCommandHandler</span>&lt;<span style="color:$color_declint$">ReadFile</span>&gt;(cmd_block, DoReadFile)
+</code></pre>
+</span>
+</span>
+</span>
+</section>
+
+<!--
+<section style="line-height:0.5"><h2>Our Vision</h2>
 <pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
 DoReadFile(uint32_t file_descriptor, uint64_t offset,
            uint64_t num_bytes, $cpptype_writeablebuffer$&amp; output)
@@ -26,7 +65,8 @@ template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data
 </span>
 </span>
 </span>
-</section>
+</section>-->
+
 
 <section><h2>Our Vision</h2>
 Advantages:

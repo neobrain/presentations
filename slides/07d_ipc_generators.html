@@ -12,7 +12,7 @@
 </section>
 
 <section><h2>A <span style="color:$color_codegen$">Generative</span> decoder</h2>
-  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
@@ -23,18 +23,18 @@ template&lt;typename T&gt;
 auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }</span>
 <span $make_fragment("1")$>
 // Iterate over entire CmdBlock &amp; gather results <span $make_fragment("4")$>&amp; apply to "handler"</span>
-template&lt;<span $make_fragment("4")$>typename Handler, </span>typename... T&gt;
+template&lt;<span $make_fragment("4")$>typename Handler, </span>typename... Ts&gt;
 auto DecodeAll<span $make_fragment("4")$>AndApply</span>(CmdBlock&amp; cmd_block<span $make_fragment("4")$>, Handler&amp;&amp; handler</span>) {
   <span $make_fragment("2")$>int offset = 0x1; // into command block
   <span $make_fragment("3")$>return <span $make_fragment("4")$>handler(</span>DecodeEntry&lt;Ts&gt;(offset, cmd_block)...<span $make_fragment("4")$>)</span>;
 </span></span>}
 </span></code></pre>
-<p $make_fragment("5")$><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p>
+<p class="for-beginners" $make_fragment("5")$><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p>
 </section>
 
 <!-- <section><h2 style="color:$color_codegen$">Generators</h2>
 NOTE: Obsolete.
-  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
@@ -59,7 +59,7 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 </section> -->
 
 <section data-transition="slide-in fade-out"><h2 style="color:$color_codegen$">Generators</h2>
-  <pre style="width:71.1%">std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#3f0000">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
@@ -85,7 +85,7 @@ auto DecodeEntry(int& offset, CmdBlock&amp; block) {
 </section>
 
 <section data-transition="fade-in fade-out"><h2 style="color:$color_codegen$">Generators</h2>
-  <pre style="width:71.1%">std::tuple&lt;uint32_t, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, $cpptype_writeablebuffer$ &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, $cpptype_writeablebuffer$ &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
@@ -110,7 +110,7 @@ auto DecodeEntry(int& offset, CmdBlock&amp; block) {
 </section>
 
 <section data-transition="fade-in slide-out"><h2 style="color:$color_codegen$">Generators</h2>
-  <pre style="width:71.1%">std::tuple&lt;uint32_t, uint64_t, uint64_t, <span style="color:#f03040">$cpptype_writeablebuffer$</span> &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, uint64_t, uint64_t, <span style="color:#f03040">$cpptype_writeablebuffer$</span> &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center; background:#3f0000">buffer descriptor<br>…</td><td style="text-align:center; background:#3f0000">buffer addr<br>0x1ff00200</td>
@@ -135,7 +135,7 @@ auto DecodeEntry(int& offset, CmdBlock&amp; block) {
 </section>
 
 <section><h2>A <span style="color:$color_codegen$">Generative</span> decoder</h2>
-  <pre style="width:71.1%">std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">$cpptype_writeablebuffer$</span> &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">$cpptype_writeablebuffer$</span> &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
@@ -146,7 +146,7 @@ template&lt;typename T&gt;
 auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }
 
 // Iterate over entire CmdBlock &amp; gather results &amp; apply to "handler"
-template&lt;typename Handler, typename... T&gt;
+template&lt;typename Handler, typename... Ts&gt;
 auto DecodeAllAndApply(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
   int offset = 0x1; // into command block
   return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
@@ -157,7 +157,7 @@ auto DecodeAllAndApply(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
 </section>
 
 <section><h2 style="color:$color_codegen$">Generators:</h2>
-  <pre style="width:71.1%">std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">$cpptype_writeablebuffer$</span> &gt;</pre>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">$cpptype_writeablebuffer$</span> &gt;</pre>
   <table style="font-size:50%" align="center">
     <tr>
       <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>

@@ -1,9 +1,11 @@
-<section><h2>Declarative Style</h2>
-<p>Separate What from How</p>
+<section><h2 style="color:$color_declint$">Declarative Style</h2>
+<ul>
+ <li class="fragment">Let's take a step back</li>
+ <li class="fragment">Focus on the problem description first</li>
+ <li class="fragment">Find a solution later, and make it generic</li>
+</ul>
 
-<p>Let's describe the problem domain first</p>
-
-<p>Solve the actual problem later</p>
+<p class="fragment">Separate the <b>what</b> from the <b>how</b></p>
 </section>
 
 
@@ -27,25 +29,25 @@ Key characteristic of declarative interfaces: The only thing they provide is a t
 -->
 
 <section><h2>IPC Commands</h2>
-Need command id + four different type lists:
+<p>What's the least info needed?</p>
 <ul>
-  <li class="fragment">Value-based "normal" parameters (simple copy)</li>
-  <li class="fragment">Special parameters (require preprocessing/translation)</li>
-  <li class="fragment">Normal and Special parameters for the response</li>
+  <li class="fragment">Command id</li>
+  <li class="fragment">Request data: List of "normal" parameters</li>
+  <li class="fragment">Request data: List of "special" parameters</li>
+  <li class="fragment">Response data: Another 2 lists</li>
 </ul>
-<br>&nbsp;<br>
 <p class="fragment">E.g. FS::OpenFile:</p>
 <ul>
-  <li class="fragment">Request takes <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, and <pre style="display:inline">uint32_t</pre>, but also</li>
-  <li class="fragment">Request takes a <pre style="display:inline">StaticBuffer</pre></li>
-  <li class="fragment">Response gives a <pre style="display:inline">FileDescriptor</pre>, and</li>
-  <li class="fragment">Response gives no special parameters</li>
+  <li class="fragment">Command Id 0x802</li>
+  <li class="fragment">Request data: <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, <pre style="display:inline">uint32_t</pre></li>
+  <li class="fragment">Request data: <pre style="display:inline">StaticBuffer</pre></li>
+  <li class="fragment">Response data: <pre style="display:inline">FileDescriptor</pre> (no "special"s)</li>
 </ul>
 </section>
 
 
 <section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
-One approach:
+Using types for information storage:
 
 <pre><code class="cpp" data-noescape style="max-height:500em"><span $make_fragment("1")$>namespace FS { // FileSystem-related commands
 
@@ -71,21 +73,21 @@ One approach:
 struct IPCCmd {
   <span $make_fragment("5")$>template&lt;typename... NormalParams&gt;
   struct normal {
-    <span $make_fragment("8")$>template&lt;typename... SpecialParams&gt;
+    <span $make_fragment("9")$>template&lt;typename... SpecialParams&gt;
     struct special {
-    </span></span><span $make_fragment("2")$>  // Export template params in the interface
+    </span></span><span $make_fragment("3")$>  // Export template params in the interface
       static constexpr uint32_t command_id = CommandId;
       <span $make_fragment("5")$>using normal_params    = std::tuple&lt;NormalParams...&gt;;
       <span $make_fragment("9")$>using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
-    <span $make_fragment("8")$>};</span>
+    <span $make_fragment("9")$>};</span>
   <span $make_fragment("5")$>};</span>
 };
 
 <span $make_fragment("1")$>namespace FS { // FileSystem-related commands
-using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("8")$>
-                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span $make_fragment("12")$>
+using OpenFile    = IPCCmd&lt;0x802&gt;<span $make_fragment("7")$>
+                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span $make_fragment("10")$>
                   ::special&lt;StaticBuffer&gt;</span>;
-<span $make_fragment("3")$>using GetFileSize = IPCCmd&lt;0x804&gt;<span $make_fragment("9")$>
+<span $make_fragment("2")$>using GetFileSize = IPCCmd&lt;0x804&gt;<span $make_fragment("8")$>
                   ::normal&lt;FileDescriptor&gt;</span><span $make_fragment("13")$>
                   ::special&lt;&gt;</span>;</span>
 }</span>

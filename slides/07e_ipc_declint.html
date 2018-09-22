@@ -1,14 +1,14 @@
 <!-- TODO: Make highlights in comments on SPVIW work properly! -->
 <section><h2><span style="color:$color_codegen$">Generators</span> with <span style="color:$color_declint$">declarative</span> interfaces</h2>
 <pre $make_fragment("0")$ style="width:96%"><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
-void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) { <span class="svpiw">// S</span>
+void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <span class="svpiw">// S</span>
   <span $make_fragment("1")$>auto request_header = cmd_block.ReadU32(0);</span>
   <span $make_fragment("2")$>if (request_header != IPCRequest::request_header) <span class="svpiw">// V</span>
     throw std::runtime_error("Invalid request header");</span>
 
-  <span $make_fragment("3")$>auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler);</span> <span class="svpiw">// P + I</span></span>
+  <span $make_fragment("3")$>auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler); <span class="svpiw">// P + I</span></span></span>
   <span $make_fragment("4")$>cmd_block.WriteU32(IPCRequest::response_header);</span>
-  <span $make_fragment("5")$>WriteFold&lt;ResponseList&gt;{cmd_block}.Run(results);</span> <span class="svpiw">// W</span></span>
+  <span $make_fragment("5")$>EncodeAll&lt;IPCRequest::response_list&gt;(cmd_block, results); <span class="svpiw">// W</span></span></span>
 }
 </code></pre>
 
@@ -30,6 +30,23 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) { <s
 </section>-->
 
 <section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>
+<p>Declarative approach maximizes reusability</p>
+
+<p>=&gt; Trivial bringup of entire subsystems!</p>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<table style="width:104%; margin-left:-2%; border: 0px solid !important">
+<tr style="padding:0px">
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("0")$>↓<br><span style="color:$color_codegen$">Handlers</span><br><p style="font-size:50%">GlueHandler&lt;FS::GetFileSize&gt;(cmdblk, DoGetFileSize)</p>↓<br>DoGetFileSize(...)</td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("1")$>↓<br><span style="color:$color_codegen$">Synthesis</span><br><p style="font-size:50%">auto blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</p>↓<br>CmdBlock blk</td>
+<td style="padding:0px; text-align:center; border: none !important" $make_fragment("2")$>↓<br><span style="color:$color_codegen$">Logging</span><br><p style="font-size:50%">std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</p>↓<br>"GetFileSize: fd TODO"</td>
+</tr>
+</table>
+
+</section>
+
+<!-- <section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>
 <pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
                       ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
                       ::response&lt;uint64_t&gt;;</code></pre>
@@ -41,7 +58,7 @@ void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) { <s
 </tr>
 </table>
 
-</section>
+</section>-->
 
 <!-- <section><h3><span style="color:$color_declint$">Declarative </span> vs <span style="color:$color_reflection$">Reflective</span></h3>
 <hr>

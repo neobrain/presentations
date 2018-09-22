@@ -1,9 +1,9 @@
-<section><h1>Process Architecture</h1><p>+ InterProcess Communication</p>
+<!-- <section><h1>Process Architecture</h1><p>+ InterProcess Communication</p>
   <img src="/images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
-</section>
+</section>-->
 
 <section><h2>Process Architecture</h2>
-<p>Strong separation of responsibilities among processes:</p> <!-- NB: Crucial for games -->
+<p>Functionality provided by external processes:</p> <!-- NB: Crucial for games -->
 <ul>
   <li $make_fragment("0")$>Rendering graphics <span $make_fragment("4")$ style="color:#40c030">(gsp)</span> &amp; playing audio <span $make_fragment("5")$ style="color:#40c030">(dsp)</span></li>
   <li $make_fragment("1")$>Accessing WiFi <span $make_fragment("6")$ style="color:#40c030">(soc)</span> &amp; connecting to friends <span $make_fragment("7")$ style="color:#40c030">(frd)</span></li>
@@ -15,6 +15,7 @@
 </section>
 
 <section><h2>Interprocess Communication</h2>
+<p $make_fragment("13")$>Required to do anything useful on the 3DS!</p>
 <ul>
 <li $make_fragment("14")$><span style="color:#f0b0b0">Client-Server</span> based: Games ⇄ Services</li> <!-- NB: Services ⇄ Services also works -->
 <li $make_fragment("15")$><span style="color:#f0b0b0">Request-response</span> exchange via command blocks</li>
@@ -22,8 +23,6 @@
   (e.g. shared buffers or kernel object handles)--></li>
 <!-- <li $make_fragment("17")$><span style="color:#f0b0b0">Hierarchy</span> of abstraction for exploit mitigation</li> -->
 </ul>
-
-<p $make_fragment("18")$>Required to do anything useful on the 3DS!</p>
 
 <p $make_fragment("19")$>Hierarchical: Game ⇄ <span style="color:#40c030">cfg</span> ⇄ <span style="color:#40c030">fs</span> ⇄ <span style="color:#40c030">fspxi</span></p>
 </section>
