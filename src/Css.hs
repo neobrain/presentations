@@ -58,26 +58,20 @@ css print = do
                                             --(100.0, transform $ translateX $ em 0)
                                             ]
 
-  let spinGearsAnimationBegin = ipcCommandBufferMoveToServiceBegin + ipcCommandBufferMoveToServiceDur + 1.0
+  --let spinGearsAnimationBegin = ipcCommandBufferMoveToServiceBegin + ipcCommandBufferMoveToServiceDur + 1.0
+  let spinGearsAnimationBegin = 0
   let spinGearsAnimationDur = 6
   ".spin-gears" ? do
     textDecoration none
-    --fontSize $ px 36
+    fontSize $ px 36
     when (not print) $ do
-      animation (fromString spinKeyFrameName :: AnimationName) (sec spinGearsAnimationDur) linear (sec spinGearsAnimationBegin) (iterationCount 1) normal none
+      animation (fromString spinKeyFrameName :: AnimationName) (sec spinGearsAnimationDur) linear (sec spinGearsAnimationBegin) (iterationCount 10000) normal none
     display inlineBlock
-    opacity 0.0 -- Will be blended in once the animation starts
   ".spin-gears" # before ? content (stringContent "⚙") -- Gear character
-  keyframes (T.pack spinKeyFrameName)  [(0, opacity 0.0),
-                                        (16.6, do
-                                          transform $ rotate $ deg 0
-                                          opacity 1.0),
-                                        (83.3, do
-                                          transform $ rotate $ deg 300
-                                          opacity 1.0),
+  keyframes (T.pack spinKeyFrameName)  [(0.0, do
+                                          transform $ rotate $ deg 0),
                                         (100.0, do
-                                          transform $ rotate $ deg 360
-                                          opacity 0.0)]
+                                          transform $ rotate $ deg 360)]
 
   when (not print) $ do
     ".fadeoutArrow" ? animation (fromString "fadeoutArrow" :: AnimationName) (sec 1) linear (sec 7) (iterationCount 1) normal forwards
