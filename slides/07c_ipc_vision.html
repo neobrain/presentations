@@ -1,9 +1,16 @@
 <section><h2>Declarative Compile-time Programming</h2>
 <p>Building blocks:</p>
 <img $make_fragment("0")$ src="/images/metaprogramming_declint_pure.svg" style="background:#2a2a2a">
+<p class="fragment">Kinds of Declarative Interfaces:</p>
+<ul>
+ <li class="fragment">Type-based systems</li>
+ <li class="fragment">constexpr objects</li> <!-- and other constexpr-based systems. cf e.g. Hana Dusikova's compile-time RegExp library -->
+ <li class="fragment">Reflection-based systems</li>
+ <li class="fragment">Plain definition vs eDSL</li>
+</ul>
 </section>
 
-<section style="line-height:0.5"><h2>Our Vision</h2>
+<section style="line-height:0.5"><h2>Our Vision for <span class="svpiw">SVPIR</span></h2>
 <div style="display:flex; justify-content: space-around">
 <span style="width:40%"><font>C++ Handler</font>
 <pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
@@ -29,8 +36,8 @@ using ResponseList = ReadFile::response_list;
 
 <span class="fragment">
 + <font color="#f6ba4a">Generators</font>
-<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
-template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+<pre style="width:100%"><code class="cpp">template&lt;typename Cmd, typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename Cmd, typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
 </code></pre>
 <span class="fragment">
 ↓ <font color="#f7f749">Combine</font> ↓

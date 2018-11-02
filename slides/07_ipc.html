@@ -129,7 +129,7 @@
 
 
 <section><h3>Emulating IPC command handlers</h3> <!-- TODO: Make the SVPIW highlight show up after transition -->
-<p style="margin-top:-15px; margin-bottom:0px"><span class="fragment" data-fragment-index="5"><span class="svpiw">SVPIW</span>:</span> Common dispatch flow:</p>
+<p style="margin-top:-15px; margin-bottom:0px"><span class="fragment" data-fragment-index="5"><span class="svpiw">SVPIR</span>:</span> Common dispatch flow:</p>
 <ul>
   <li $make_fragment("0")$><span class="svpiw">S</span>elect C++ handler function based on command index<br>
   <pre style="width:100%"><code class="cpp" style="font-size:90%">std::tuple&lt;Result,uint32_t&gt; DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
@@ -143,7 +143,7 @@
   </table></li>
   <li $make_fragment("3")$><span class="svpiw">I</span>nvoke C++ handler function<br>
   <pre style="width:100%"><code class="cpp">DoReadFile(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
-  <li $make_fragment("4")$><span class="svpiw">W</span>rite response back to command block
+  <li $make_fragment("4")$>Write <span class="svpiw">R</span>esponse back to command block
   <table style="font-size:60%">
     <tr>
       <td>header: 0x8020002</td><td>Result: 0x0</td><td>Result 2: 0xd00f</td>
@@ -154,7 +154,7 @@
 
 <section><h3>Emulating IPC command handlers</h3>
   <!-- Screenshot/Browse 3dbrew instead here -->
-  How often do we need to write the <span class="svpiw">SVPIW</span> logic?
+  How often do we need to write the <span class="svpiw">SVPIR</span> logic?
   <ul>
     <li $make_fragment("0")$>~40 active processes</li>
     <li $make_fragment("1")$>Each with ~30 IPC commands on average</li>

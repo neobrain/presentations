@@ -8,7 +8,7 @@ void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <s
 
   <span $make_fragment("3")$>auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler); <span class="svpiw">// P + I</span></span></span>
   <span $make_fragment("4")$>cmd_block.WriteU32(IPCRequest::response_header);</span>
-  <span $make_fragment("5")$>EncodeAll&lt;IPCRequest::response_list&gt;(cmd_block, results); <span class="svpiw">// W</span></span></span>
+  <span $make_fragment("5")$>EncodeAll&lt;IPCRequest::response_list&gt;(cmd_block, results); <span class="svpiw">// R</span></span></span>
 }
 </code></pre>
 
@@ -50,6 +50,11 @@ void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <s
 </tr>
 </table>
 
+</section>
+
+
+<section><h2><span style="color:$color_declint$">Declarative Interfaces</span> & <span style="color:$color_codegen$"> Generators</span></h2>
+<h2>Demo time!</h2>
 </section>
 
 <!-- <section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>

@@ -1,4 +1,4 @@
-<section><h2 style="color:$color_declint$">Declarative Style</h2>
+<section><h2 style="color:$color_declint$">Declarative Programming</h2>
 <ul>
  <li class="fragment">Let's take a step back</li>
  <li class="fragment">Focus on the problem description first</li>
@@ -29,19 +29,19 @@ Key characteristic of declarative interfaces: The only thing they provide is a t
 -->
 
 <section><h2>IPC Commands</h2>
-<p>How to characterize IPC commands?</p>
+<p>How to characterize IPC commands? <span class="fragment" data-fragment-index="10" style="color:#e22">At compile-time</span></p>
 <ul>
-  <li class="fragment">Command id</li>
-  <li class="fragment">Request data: List of "normal" parameters</li>
-  <li class="fragment">Request data: List of "special" parameters</li>
-  <li class="fragment">Response data: Another 2 lists</li>
+  <li class="fragment" data-fragment-index="1">Command id</li>
+  <li class="fragment" data-fragment-index="2">Request data: List of "normal" parameters</li>
+  <li class="fragment" data-fragment-index="3">Request data: List of "special" parameters</li>
+  <li class="fragment" data-fragment-index="4">Response data: Another 2 lists</li>
 </ul>
-<p class="fragment">E.g. FS::OpenFile:</p>
+<p class="fragment" data-fragment-index="5">E.g. FS::OpenFile:</p>
 <ul>
-  <li class="fragment">Command Id 0x802</li>
-  <li class="fragment">Request data: <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, <pre style="display:inline">uint32_t</pre></li>
-  <li class="fragment">Request data: <pre style="display:inline">StaticBuffer</pre></li>
-  <li class="fragment">Response data: <pre style="display:inline">FileDescriptor</pre> (no "special"s)</li>
+  <li class="fragment" data-fragment-index="6">Command id 0x802</li>
+  <li class="fragment" data-fragment-index="7">Request data: <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, <pre style="display:inline">uint32_t</pre></li>
+  <li class="fragment" data-fragment-index="8">Request data: <pre style="display:inline">StaticBuffer</pre></li>
+  <li class="fragment" data-fragment-index="9">Response data: <pre style="display:inline">FileDescriptor</pre> (no "special"s)</li>
 </ul>
 </section>
 
