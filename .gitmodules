@@ -10,3 +10,7 @@
 	path = cppnow_may2018
 	url = https://github.com/neobrain/presentations
 	branch = cppnow_may2018_dev
+[submodule "generative_and_declarative_3ds"]
+	path = Generative and Declarative Programming in Action - Emulating the 3DS
+	url = https://github.com/neobrain/presentations
+	branch = generative_and_declarative_3ds_dev
