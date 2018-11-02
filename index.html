@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="./css/css.css">
+        <link rel="stylesheet" href="./css/reveal.css">
+        <link rel="stylesheet" href="./css/theme/black.css" id="theme">
+        <link rel="stylesheet" href="./lib/css/zenburn.css">
+        
+        <link rel="stylesheet" type="text/css" href="./css/generated.css">
+        
+        <title>Emulating the Nintendo 3DS: Generative &amp; Declarative Programming in Action</title>
+        <style>
+          .comment { color: #bbb; font-size: 22pt !important; }
+          .fixed { color: purple; font-size: 13pt !important; }
+          table, td, th { border: 3px solid #b0b0b0 !important; border-collapse: collapse !important; border-radius:5px !important; }
+          img { border-radius:10px; }
+          .main_cpu { border-color: #FFA500 !important; border-collapse: separate !important; }
+          .chip { display: inline; border-color: #D8BFD8 !important; border-collapse: separate !important; }
+          .chip td { border-width: 0 !important; }
+          .chip tr { border-width: 0 !important; }
+          .ipc-img { border:none !important; box-shadow:none !important; background-color:#0000 !important }
+          
+          .print-hack-slide-4 { top:0px }
+          .print-hack-slide-5 { margin-top:0.5em !important }
+          .fadeoutArrow::before { content:url(./images/stuff0.svg) }
+          .fadeoutArrow2::before { content:url(./images/stuff1.svg) }
+          .print-only { display:none }
+          
+        </style>
+
+    </head>
+    <body>
+      <div class="reveal">
+        <div class="slides">
+  <section><h3>Emulating the Nintendo 3DS</h3><p>Generative &amp; Declarative Programming in Action</p>
+<div style="display:flex; justify-content:space-around">
+<span style="width:25%">
+<img src="./images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle; border-color:#334455">
+<span style="font-size:80%; color:#e0e0e0"><br>Tony Wasserka<br><small>@fail_cluez</small></span>
+</span>
+<span style="width:25%">
+<img src="./images/cppcon.png" height="100em" style="border-radius:20px; vertical-align:middle; background-color:#fff">
+<span style="font-size:80%; color:#e0e0e0"><br>CppCon 2018<br><small>24 September 2018</small></span>
+</span>
+</div>
+</section>
+
+<section><h2>Who am I?</h2>
+  <ul>
+    <li class="fragment" data-fragment-index="0">Freelancer in embedded systems development <!-- low-level (close to hardware & control over data structures/algorithms) &amp; type-safety (type system & abstractions). C++ makes the type system effective even for inherently untyped data -->
+    <li class="fragment" data-fragment-index="1">Focus: Low-level &amp; Type-safety</li>
+    <li class="fragment" data-fragment-index="2">Side projects: Game console emulators</li>
+    <div class="fragment" data-fragment-index="3" style="display:flex; justify-content:space-around; align-items:center">
+      <small style="text-align: center"><img src="./images/ppsspp_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>PPSSPP</small>
+      <small style="text-align: center"><img src="./images/dolphin_logo.svg" height="150em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><div style="margin-top:-50px">Dolphin</div></small>
+      <small style="text-align: center"><img src="./images/citra_logo.svg" height="100em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle"><br>Citra</small><br>
+    </div>
+    <li class="fragment" data-fragment-index="4">Twitter: <a href="https://twitter.com/fail_cluez" target="_blank">@fail_cluez</a></li>
+    <li class="fragment" data-fragment-index="5">GitHub: <a href="https://github.com/neobrain" target="_blank">neobrain</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="./images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle"></li>
+    <li class="fragment" data-fragment-index="6"><a href="https://neobrain.github.io" target="_blank">neobrain.github.io</a></li>
+  </ul>
+</section>
+
+<section><h2>What is this about?</h2>
+  <ul>
+    <li class="fragment" data-fragment-index="1">Serialization &amp; emulation</li>
+    <li class="fragment" data-fragment-index="2">Case study: InterProcess Communication (IPC)</li>
+    <ul><li class="fragment" data-fragment-index="2"><span style="color:#f6ba4a">Generative</span> &amp; <span style="color:#30cfcf">declarative</span></li></ul>
+    <li class="fragment" data-fragment-index="3">How does modern C++ help?</li>
+    <ul>
+      <li class="fragment" data-fragment-index="5">How much boilerplate can we automate?</li> <!-- Reflection -->
+      <li class="fragment" data-fragment-index="6">What runtime-errors can we turn into compile-errors?</li>
+      <li class="fragment" data-fragment-index="7">How can we maximise reuse?</li> <!-- Declarative interface -->
+    </ul>
+  </ul>
+</section>
+
+<!-- <section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
+High-Level Software:
+<br>&nbsp;
+<div style="position:relative; margin-top:0.5em">
+  <div style="width:100%; position:absolute; top:0; left:0">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div></div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Module A</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Hardware</div>
+      <div></div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div></div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Module B</div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Operating System</div>
+      <div></div>
+    </div>
+  </div>
+</div>
+</section>-->
+
+
+<section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
+Component interaction in games:
+<div style="position:relative; margin-top:0.5em">
+  <div style="width:100%; position:absolute; top:0; left:0">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Main Thread</div>
+      <div></div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">GPU</div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Scripting Engine</div>
+      <div></div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:28%">Operating System</div>
+    </div>
+  </div>
+</div>
+<svg width="100%" height="600" style="width=100%; position:absolute; left:0" class="print-hack-slide-4">
+<g class="fragment" data-fragment-index="0">
+  <line x1="200" y1="300" x2="200" y2="445" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line>
+  <text x="260" y="380" font-size="36" fill="#fff">trivial</text>
+  <text x="210" y="408" font-size="24" fill="#fff">(C++ function call)</text>
+</g>
+<g class="fragment" data-fragment-index="1">
+  <line x1="450" y1="300" x2="880" y2="470" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line>
+  <text x="580" y="430" font-size="36" fill="#fff">trivial</text>
+  <text x="510" y="458" font-size="24" fill="#fff">(calling conventions</text>
+  <text x="480" y="482" font-size="24" fill="#fff">&nbsp;&nbsp;implemented by compiler)</text>
+</g>
+<g class="fragment" data-fragment-index="2">
+  <line x1="450" y1="240" x2="880" y2="240" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line>
+  <text x="740" y="280" font-size="36" fill="#fff">simple</text>
+  <text x="700" y="308" font-size="24" fill="#fff">(basically memcpy)</text>
+</g>
+<line class="fragment" data-fragment-index="0" x1="200" y1="300" x2="200" y2="445" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line>
+</svg>
+</section>
+
+
+<section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
+Emulated Games:
+<div style="position:relative" class="print-hack-slide-5">
+  <svg width="100%" height="600" style="width=100%; position:absolute; top:0; left:0">
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#fff"></path>
+    </marker>
+    <clipPath clipPathUnits="userSpaceOnUse" id="clipPath862">
+    <path style="fill:none;stroke:#ffffff;stroke-width:2.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 13.129929,52.982921 c 14.088016,11.530028 5.172884,21.850894 23.709719,15.80634 l 26.343142,-8.59006 c 10.745346,-0.92119 14.441863,10.416282 22.869653,7.459753 7.51809,-2.6374 16.248977,-5.589914 25.068657,-6.836537 17.93266,-2.534703 21.39527,-2.66942 24.8414,-4.899529 14.99773,-9.70559 -24.47125,-8.258219 -8.82196,-19.510679 4.93397,-3.54772 8.42487,-24.538647 -11.18274,-28.0633042 C 104.41447,6.2738801 95.533553,1.5693172 88.073873,2.3640393 78.195193,3.4164709 79.624893,14.763377 63.133309,14.763377 c -9.573668,0 -6.890381,-9.6695182 -20.741188,-6.6817382 -11.310284,2.4397602 -9.241341,5.4606002 -17.841771,8.5526302 -9.028228,3.24582 9.771626,13.59215 -4.46044,18.70886 -12.7263865,4.57539 -19.37110753,9.990572 -6.959981,17.639792 z" sodipodi:nodetypes="csccsssscsc" transform="translate(430, 130) scale(3)">
+     </path>
+    </clipPath>
+    <g class="fragment" data-fragment-index="0">
+      <line x1="420" y1="70" x2="910" y2="70" stroke="#fff" stroke-width="3" stroke-dasharray="15,10" marker-end="url(#arrow)"></line>
+      <!-- TODO: Need a second line for VirtCPU -> VirtOS -->
+    </g>
+    <g class="fragment" data-fragment-index="2">
+      <line x1="390" y1="120" x2="455" y2="165" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line> <!-- Serialization -->
+      <text x="200" y="180" font-size="24" fill="#fff">Game writing raw data</text>
+    </g>
+    <g class="fragment" data-fragment-index="4">
+      <line x1="850" y1="200" x2="950" y2="140" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line> <!-- Deserialize -->
+      <text x="910" y="190" font-size="24" fill="#fff">Deserialization</text>
+    </g>
+    <g class="fragment" data-fragment-index="5">
+      <line x1="860" y1="310" x2="950" y2="380" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"></line> <!-- Deserialize -->
+      <text x="910" y="340" font-size="24" fill="#fff">Deserialization</text>
+    </g>
+    <path class="fragment" data-fragment-index="1" style="fill:#3c3c3c;stroke:#ffffff;stroke-width:2.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 13.129929,52.982921 c 14.088016,11.530028 5.172884,21.850894 23.709719,15.80634 l 26.343142,-8.59006 c 10.745346,-0.92119 14.441863,10.416282 22.869653,7.459753 7.51809,-2.6374 16.248977,-5.589914 25.068657,-6.836537 17.93266,-2.534703 21.39527,-2.66942 24.8414,-4.899529 14.99773,-9.70559 -24.47125,-8.258219 -8.82196,-19.510679 4.93397,-3.54772 8.42487,-24.538647 -11.18274,-28.0633042 C 104.41447,6.2738801 95.533553,1.5693172 88.073873,2.3640393 78.195193,3.4164709 79.624893,14.763377 63.133309,14.763377 c -9.573668,0 -6.890381,-9.6695182 -20.741188,-6.6817382 -11.310284,2.4397602 -9.241341,5.4606002 -17.841771,8.5526302 -9.028228,3.24582 9.771626,13.59215 -4.46044,18.70886 -12.7263865,4.57539 -19.37110753,9.990572 -6.959981,17.639792 z" sodipodi:nodetypes="csccsssscsc" transform="translate(430, 130) scale(3)">
+     </path>
+    <g clip-path="url(#clipPath862)">
+    <text class="fragment" data-fragment-index="1" x="300" y="5" font-size="24" fill="#1c1c1c" transform="rotate(10)">
+      <tspan x="300" dy="1.2em">000010111111001001110111100010001010011011010001</tspan>
+      <tspan x="300" dy="1.2em">101100101110111001010001100010010100011010001101</tspan>
+      <tspan x="300" dy="1.2em">101100001001001101110101000001101011111111000001</tspan>
+      <tspan x="300" dy="1.2em">111100000001000100111101001111100110101101100101</tspan>
+      <tspan x="300" dy="1.2em">000000001100000010111110110001110000011010111011</tspan>
+      <tspan x="300" dy="1.2em">101101000110010001100101011100010011100110011001</tspan>
+      <tspan x="300" dy="1.2em">111010100001100010110010000010010111000100101010</tspan>
+      <tspan x="300" dy="1.2em">111001010100000100001000011010000110000100111000</tspan>
+    </text>
+    </g>
+    <path class="fragment" data-fragment-index="1" style="fill:none;stroke:#ffffff;stroke-width:2.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 13.129929,52.982921 c 14.088016,11.530028 5.172884,21.850894 23.709719,15.80634 l 26.343142,-8.59006 c 10.745346,-0.92119 14.441863,10.416282 22.869653,7.459753 7.51809,-2.6374 16.248977,-5.589914 25.068657,-6.836537 17.93266,-2.534703 21.39527,-2.66942 24.8414,-4.899529 14.99773,-9.70559 -24.47125,-8.258219 -8.82196,-19.510679 4.93397,-3.54772 8.42487,-24.538647 -11.18274,-28.0633042 C 104.41447,6.2738801 95.533553,1.5693172 88.073873,2.3640393 78.195193,3.4164709 79.624893,14.763377 63.133309,14.763377 c -9.573668,0 -6.890381,-9.6695182 -20.741188,-6.6817382 -11.310284,2.4397602 -9.241341,5.4606002 -17.841771,8.5526302 -9.028228,3.24582 9.771626,13.59215 -4.46044,18.70886 -12.7263865,4.57539 -19.37110753,9.990572 -6.959981,17.639792 z" sodipodi:nodetypes="csccsssscsc" transform="translate(430, 130) scale(3)">
+     </path>
+  </svg>
+  <div style="width:100%; position:absolute; top:0; left:0">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>CPU</div>
+      <div></div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>GPU</div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <!-- <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%"><User<br>Interface</div>--><div></div>
+      <div></div>
+      <div style="border: 5px solid; background: #3c3c3c; padding:10px; border-radius:10px; width:25%">Virtualized<br>OS</div>
+    </div>
+  </div>
+</div>
+<p style="position:absolute; left:550px; top:360px" class="fragment" data-fragment-index="3">Untyped Sea<br>of raw data</p>
+</section>
+
+
+<section><h2>Emulation &nbsp; &amp; &nbsp; Serialization</h2>
+
+Example: System Call Emulation on ARM32
+
+<div style="display:flex; align-items:center; justify-content:space-around">
+<span></span>
+<span>
+  Virtual CPU
+  <table style="font-size:70%">
+   <tr>
+     <th>Register</th>
+     <th style="text-align:right">Value</th>
+   </tr>
+   <tr>
+     <td>r0</td>
+     <td style="text-align:right">0x1800600</td>
+   </tr>
+   <tr>
+     <td>r1</td>
+     <td style="text-align:right">5</td>
+   </tr>
+   <tr>
+     <td>r2</td>
+     <td style="text-align:right">0x1ff02000</td>
+   </tr>
+   <tr>
+     <td>r3</td>
+     <td style="text-align:right">12</td>
+   </tr>
+   <tr>
+     <td>r4</td>
+     <td style="text-align:right">0x200</td>
+   </tr>
+   <tr>
+     <td>…</td>
+     <td>…</td>
+   </tr>
+  </table>
+</span>
+
+<p class="fragment" data-fragment-index="0" style="line-height:20px"><small>svc 0x55</small><br>⟶</p>
+
+<span class="fragment" data-fragment-index="1">Virtual Operating System
+<pre style="width:100%"><code class="cpp">auto [result,dma] = SvcStartDma(LookupHandle(5),
+                                0x1ff02000,
+                                LookupHandle(12),
+                                0x1800600,
+                                0x200)</code></pre>
+<p class="for-beginners"><small class="fragment" data-fragment-index="2">NB: [a, b] is a <i>structured binding declaration</i></small></p>
+</span>
+<span></span>
+</div>
+<p><small class="fragment" data-fragment-index="3">Presented at C++::London:<br><a href="https://skillsmatter.com/skillscasts/11505-generative-programming-in-action-emulating-the-3ds" target="_blank">Generative Programming in Action: Emulating the 3DS</a></small></p>
+</section>
+
+
+<section><h2>Serialization &nbsp; &amp; &nbsp; Emulation</h2>
+  <p>A ubiquitous problem:</p>
+  <ul>
+    <li class="fragment" data-fragment-index="0">System Calls: <span style="float: right;">CPU registers ⟶ C++ function</span></li>
+    <li class="fragment" data-fragment-index="1">IPC: <span style="float: right;">Memory ⟶ C++ function</span></li>
+    <li class="fragment" data-fragment-index="2">Emulated file IO: <span style="float: right;">Disk ⟶ C++ struct&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+    <li class="fragment" data-fragment-index="3">GPU command buffers</li> <!-- TODO: uint32_t[] -> well-typed register struct --> <!-- Good example: DSP firmware -->
+  </ul>
+
+  <p class="fragment" data-fragment-index="4">What makes for reliable emulation?</p>
+  <ul>
+    <li class="fragment" data-fragment-index="5">Avoid repetitive boilerplate</li>
+    <li class="fragment" data-fragment-index="6">Validate inputs (consistently!)</li>
+    <li class="fragment" data-fragment-index="7">Detect invalid states in the emulated system</li> <!-- i.e. diagnose when an emulated task returns unexpected errors -->
+  </ul>
+  <p class="fragment" data-fragment-index="9">Today's goal: Let the compiler deal with it!</p>
+</section>
+
+
+<section><h2>The Nintendo 3DS</h2>
+<img src="./images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+</section>
+
+
+<section><h2>The Nintendo 3DS</h2>
+<div style="display:flex; justify-direction:column">
+<img src="./images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+<ul>
+<li>Released in 2011</li>
+<!-- "Big embedded system" -->
+<!--<li class="fragment" data-fragment-index=0>CPU: 2x ARM11 MPCore @ 268 MHz</li> -->
+<li class="fragment" data-fragment-index="0">2 CPU cores: ARMv6 @ 268 MHz</li>
+<li class="fragment" data-fragment-index="0">Unique-ish GPU (DMP PICA200)</li>
+<li class="fragment" data-fragment-index="0">128 MB FCRAM</li>
+<li class="fragment" data-fragment-index="1">Software stack:
+<ul class="fragment" data-fragment-index="1">
+<li>Microkernel (fully multitasking)</li>
+<li>About 40 active processes (microservices)</li>
+<li>Games</li>
+</ul>
+</ul>
+</div>
+</section>
+
+<section><h2>The 3DS Software Stack</h2> <!-- Three layers that are relevant to emulation -->
+<div style="display:flex; justify-direction:column">
+<img src="./images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+<table width="65%">
+            <tr> <!-- TODO: Add note that games<->services is where IPC gets into play -->
+              <td class="fragment fade-in" data-fragment-index="1" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <div><font color="#40c030">Game/Browser</font></div>
+                  <div class="comment" style="font-size:17pt !important; text-align:right">Runs on emulated CPU</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index="3" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <!-- TODO: Illustrate that there are a lot of different services -->
+                  <div><font color="#40c030">Processes ("Services")</font></div>
+                  <div class="comment" style="font-size:17pt !important; text-align:right">API emulation<br><span class="fragment" data-fragment-index="9">(or could run on emulated CPU)</span></div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index="2" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                  <font color="#e06130">Kernel: Horizon</font>
+                  <div class="comment">API emulation</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="fragment fade-in" data-fragment-index="0" colspan="6">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                   <font color="#d02030">ARM11 CPUs</font>
+                   <div class="comment">Interpreter</div>
+                </div>
+              </td>
+            </tr>
+</table>
+</div>
+</section>
+
+<!-- <section><h1>Process Architecture</h1><p>+ InterProcess Communication</p>
+  <img src="/images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+</section>-->
+
+<section><h2>Process Architecture</h2>
+<p>Functionality provided by external processes:</p> <!-- NB: Crucial for games -->
+<ul>
+  <li class="fragment" data-fragment-index="0">Rendering graphics <span class="fragment" data-fragment-index="4" style="color:#40c030">(gsp)</span> &amp; playing audio <span class="fragment" data-fragment-index="5" style="color:#40c030">(dsp)</span></li>
+  <li class="fragment" data-fragment-index="1">Accessing WiFi <span class="fragment" data-fragment-index="6" style="color:#40c030">(soc)</span> &amp; connecting to friends <span class="fragment" data-fragment-index="7" style="color:#40c030">(frd)</span></li>
+  <li class="fragment" data-fragment-index="2">Loading assets &amp; saving progress <span class="fragment" data-fragment-index="8" style="color:#40c030">(fs)</span></li>
+  <li class="fragment" data-fragment-index="3">…</li>
+</ul>
+
+<p class="fragment" data-fragment-index="9"><span style="color:#40c030">~40 processes ("services")</span> in total,<br>each serving different functionality</p>
+</section>
+
+<section><h2>Interprocess Communication</h2>
+<p class="fragment" data-fragment-index="13">Required to do anything useful on the 3DS!</p>
+<ul>
+<li class="fragment" data-fragment-index="14"><span style="color:#f0b0b0">Client-Server</span> based: Games ⇄ Services</li> <!-- NB: Services ⇄ Services also works -->
+<li class="fragment" data-fragment-index="15"><span style="color:#f0b0b0">Request-response</span> exchange via command blocks</li>
+<li class="fragment" data-fragment-index="16"><span style="color:#f0b0b0">Marshalling</span> of sensitive data by the OS kernel<!-- NB: <br>
+  (e.g. shared buffers or kernel object handles)--></li>
+<!-- <li class="fragment" data-fragment-index=17><span style="color:#f0b0b0">Hierarchy</span> of abstraction for exploit mitigation</li> -->
+</ul>
+
+<p class="fragment" data-fragment-index="19">Hierarchical: Game ⇄ <span style="color:#40c030">cfg</span> ⇄ <span style="color:#40c030">fs</span> ⇄ <span style="color:#40c030">fspxi</span></p>
+</section>
+
+
+<section><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App: ReadFile</p>
+<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
+1: 0x5<br> <!-- file descriptor -->
+2: 0x200<br> <!-- low word of offset-->
+3: 0x0<br>
+4: 0x100<br> <!-- low word of size-->
+<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+6: 0x200c<br>
+7: 0x1ff00200<br>
+</div>
+</span>
+<span class="fragment fade-out" data-fragment-index="5"><span class="ipc-img fragment" data-fragment-index="0">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Kernel</p>
+<span class="fragment" data-fragment-index="0"><div class="original-ipc-cmd-block fragment fade-out" data-fragment-index="10" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="fragment" data-fragment-index="1" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)<br></span>
+  <span class="fragment" data-fragment-index="2">
+1: 0x5<br>
+2: 0x200<br>
+3: 0x0<br>
+4: 0x100<br>
+  <span><span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br></span>
+  </span>
+  <span class="fragment" data-fragment-index="3">6: 0x200c<br></span>
+  <span class="fragment" data-fragment-index="4">7: <span style="color:#ff3311">0x2a7</span>00200<br></span>
+</div>
+</span>
+</span>
+<span class="ipc-img fragment" data-fragment-index="7"><span class="fragment fade-out" data-fragment-index="10">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Service</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="10" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="fragment" data-fragment-index="1" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)<br></span>
+  <span class="fragment" data-fragment-index="2">
+1: 0x5<br>
+2: 0x200<br>
+3: 0x0<br>
+4: 0x100<br>
+  <span><span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br></span>
+  </span>
+  <span class="fragment" data-fragment-index="3">6: 0x200c<br></span>
+  <span class="fragment" data-fragment-index="4">7: <span style="color:#ff3311">0x2a7</span>00200<br></span>
+</div>
+</span>
+
+<span class="ipc-img fragment" data-fragment-index="20">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span class="fragment" data-fragment-index="20" style="height:8.61em">
+<div style="text-align:center">
+<div style="height:1.75em">&nbsp;</div><br>
+<p>Emulation&nbsp;&nbsp;<span class="spin-gears"></span></p>
+<br>
+</div>
+</div>
+</section>
+
+
+<section><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="45" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+1: 0x0<br> <!-- result code -->
+2: 0x100<br> <!-- low word of bytes read-->
+3: 0x0<br>
+</div>
+</span>
+<span class="fragment fade-out" data-fragment-index="45"><span class="ipc-img fragment" data-fragment-index="40">&nbsp;&nbsp;&nbsp;⟵&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Kernel</p>
+<span class="fragment" data-fragment-index="10"><div class="original-ipc-cmd-block fragment fade-out" data-fragment-index="45" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span class="fragment" data-fragment-index="15">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+</span>
+<span class="fragment" data-fragment-index="20">
+1: 0x0<br> <!-- result code -->
+2: 0x100<br> <!-- low word of bytes read-->
+3: 0x0<br>
+</span>
+</div>
+</span>
+</span>
+<span class="ipc-img fragment" data-fragment-index="10"><span class="fragment fade-out" data-fragment-index="20">&nbsp;&nbsp;&nbsp;⟵&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Service: Response</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="0" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+1: 0x0<br> <!-- result code -->
+2: 0x100<br> <!-- low word of bytes read -->
+3: 0x0<br>
+</div>
+</span>
+</div>
+</section>
+
+
+<section><h3>Emulating IPC command handlers</h3> <!-- TODO: Make the SVPIW highlight show up after transition -->
+<p style="margin-top:-15px; margin-bottom:0px"><span class="fragment" data-fragment-index="5"><span class="svpiw">SVPIR</span>:</span> Common dispatch flow:</p>
+<ul>
+  <li class="fragment" data-fragment-index="0"><span class="svpiw">S</span>elect C++ handler function based on command index<br>
+  <pre style="width:100%"><code class="cpp" style="font-size:90%">std::tuple&lt;Result,uint32_t&gt; DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
+  <li class="fragment" data-fragment-index="1"><span class="svpiw">V</span>erify command header (number of parameters)<br>
+  <pre style="width:100%"><code class="cpp">(cmd_header &amp; 0xFF == 5) &nbsp;&amp;&amp;&nbsp; ((cmd_header &gt;&gt; 8) &amp; 0xff == 2)</code></pre></li>
+  <li class="fragment" data-fragment-index="2"><span class="svpiw">P</span>arse parameters from command block
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table></li>
+  <li class="fragment" data-fragment-index="3"><span class="svpiw">I</span>nvoke C++ handler function<br>
+  <pre style="width:100%"><code class="cpp">DoReadFile(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
+  <li class="fragment" data-fragment-index="4">Write <span class="svpiw">R</span>esponse back to command block
+  <table style="font-size:60%">
+    <tr>
+      <td>header: 0x8020002</td><td>Result: 0x0</td><td>Result 2: 0xd00f</td>
+    </tr>
+  </table></li>
+</ul>
+</section>
+
+<section><h3>Emulating IPC command handlers</h3>
+  <!-- Screenshot/Browse 3dbrew instead here -->
+  How often do we need to write the <span class="svpiw">SVPIR</span> logic?
+  <ul>
+    <li class="fragment" data-fragment-index="0">~40 active processes</li>
+    <li class="fragment" data-fragment-index="1">Each with ~30 IPC commands on average</li>
+    <li class="fragment" data-fragment-index="2">Manual glue to invoke the C++ handler required for each</li>
+  </ul>
+  <p class="fragment" data-fragment-index="3">That is a lot of work.</p>
+  <p class="fragment" data-fragment-index="4">Correctness? Consistency? Maintainability?</p>
+  <p class="fragment" data-fragment-index="5"><b>Enter <span style="color:#30cfcf">declarative</span> &amp; <span style="color:#f6ba4a">generative</span> programming</b></p>
+</section>
+
+<section><h2 style="color:#30cfcf">Declarative Programming</h2>
+<ul>
+ <li class="fragment">Let's take a step back</li>
+ <li class="fragment">Focus on the problem description first</li>
+ <li class="fragment">Find a solution later, and make it generic</li>
+</ul>
+
+<p class="fragment">Separate the <b>what</b> from the <b>how</b></p>
+</section>
+
+
+<!-- <section><h2>&lt;/<span style="color:#49f749">Reflective</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
+<h2 class="fragment" data-fragment-index=0>&lt;<span style="color:#30cfcf">Declarative</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
+</section>
+
+<section><h2><span style="color:#30cfcf">Declarative</span> Compile-time Programming</h2>
+<p>Building blocks:</p>
+<img class="fragment" data-fragment-index=0 src="/images/metaprogramming_declint.svg" style="background:#2a2a2a">
+</section> -->
+
+<!-- TODO: Show means of constructing declarative interfaces:
+* (e)DSL
+* Type lists
+* ::chains
+
+Highlight that all of these are at the type-system level (mention constexpr, though!)
+
+Key characteristic of declarative interfaces: The only thing they provide is a translation to type lists!
+-->
+
+<section><h2>IPC Commands</h2>
+<p>How to characterize IPC commands? <span class="fragment" data-fragment-index="10" style="color:#e22">At compile-time</span></p>
+<ul>
+  <li class="fragment" data-fragment-index="1">Command id</li>
+  <li class="fragment" data-fragment-index="2">Request data: List of "normal" parameters</li>
+  <li class="fragment" data-fragment-index="3">Request data: List of "special" parameters</li>
+  <li class="fragment" data-fragment-index="4">Response data: Another 2 lists</li>
+</ul>
+<p class="fragment" data-fragment-index="5">E.g. FS::OpenFile:</p>
+<ul>
+  <li class="fragment" data-fragment-index="6">Command id 0x802</li>
+  <li class="fragment" data-fragment-index="7">Request data: <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, <pre style="display:inline">uint32_t</pre></li>
+  <li class="fragment" data-fragment-index="8">Request data: <pre style="display:inline">StaticBuffer</pre></li>
+  <li class="fragment" data-fragment-index="9">Response data: <pre style="display:inline">FileDescriptor</pre> (no "special"s)</li>
+</ul>
+</section>
+
+
+<section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
+Using types for information storage:
+
+<pre><code class="cpp" data-noescape style="max-height:500em"><span class="fragment" data-fragment-index="1">namespace FS { // FileSystem-related commands
+
+<span class="fragment" data-fragment-index="2">using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index="7">
+                    ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index="10">
+                    ::special&lt;StaticBuffer&gt;</span><span class="fragment" data-fragment-index="11">
+                    ::response&lt;FileDescriptor&gt;;</span></span>
+
+<span class="fragment" data-fragment-index="12">using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index="12">
+                    ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index="12">
+                    ::special&lt;&gt;
+                    ::response&lt;uint64_t&gt;;</span></span>
+
+}</span>
+</code></pre>
+
+<p class="fragment">⇒ Builder-like pattern</p>
+</section>
+
+
+<section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
+<pre style="width:100%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
+struct IPCCmd {
+  <span class="fragment" data-fragment-index="5">template&lt;typename... NormalParams&gt;
+  struct normal {
+    <span class="fragment" data-fragment-index="9">template&lt;typename... SpecialParams&gt;
+    struct special {
+    </span></span><span class="fragment" data-fragment-index="3">  // Export template params in the interface
+      static constexpr uint32_t command_id = CommandId;
+      <span class="fragment" data-fragment-index="5">using normal_params    = std::tuple&lt;NormalParams...&gt;;
+      <span class="fragment" data-fragment-index="9">using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
+    <span class="fragment" data-fragment-index="9">};</span>
+  <span class="fragment" data-fragment-index="5">};</span>
+};
+
+<span class="fragment" data-fragment-index="1">namespace FS { // FileSystem-related commands
+using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index="7">
+                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index="10">
+                  ::special&lt;StaticBuffer&gt;</span>;
+<span class="fragment" data-fragment-index="2">using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index="8">
+                  ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index="13">
+                  ::special&lt;&gt;</span>;</span>
+}</span>
+</code></pre>
+</section>
+
+<!-- <section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
+  Adding IPC response layout information is trivial:
+<pre style="width:110%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
+struct IPCCmd {
+  template&lt;typename... NormalParams&gt;
+  struct normal {
+    template&lt;typename... SpecialParams&gt;
+    struct special {
+      <span class="fragment" data-fragment-index=0>template&lt;typename... ResponseNormalParams&gt;
+      struct response {</span>
+        // Export template params in the interface
+        static constexpr uint32_t command_id = CommandId;
+        using normal_params           = std::tuple&lt;NormalParams...&gt;;
+        using special_params          = std::tuple&lt;SpecialParams...&gt;;
+        <span class="fragment" data-fragment-index=1>using response_normal_params  = std::tuple&lt;ResponseNormalParams...&gt;;</span>
+};};};<span class="fragment" data-fragment-index=0>};</span>
+
+namespace FS {
+using GetFileSize = IPCCmd&lt;0x804&gt;
+                  ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                  <span class="fragment" data-fragment-index=2>::response&lt;uint64_t&gt;</span>;
+// ...
+}
+</code></pre>
+</section> -->
+
+<section><h2>Declarative Compile-time Programming</h2>
+<p>Building blocks:</p>
+<img class="fragment" data-fragment-index="0" src="./images/metaprogramming_declint_pure.svg" style="background:#2a2a2a">
+<p class="fragment">Kinds of Declarative Interfaces:</p>
+<ul>
+ <li class="fragment">Type-based systems</li>
+ <li class="fragment">constexpr objects</li> <!-- and other constexpr-based systems. cf e.g. Hana Dusikova's compile-time RegExp library -->
+ <li class="fragment">Reflection-based systems</li>
+ <li class="fragment">Plain definition vs eDSL</li>
+</ul>
+</section>
+
+<section style="line-height:0.5"><h2>Our Vision for <span class="svpiw">SVPIR</span></h2>
+<div style="display:flex; justify-content: space-around">
+<span style="width:40%"><font>C++ Handler</font>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
+DoReadFile(FileDesc fd,
+           uint64_t offset,
+           uint64_t num_bytes,
+           WriteableBuffer&amp; output)
+</code></pre></span>
+<span style="width:48%"><font color="#30cfcf">Declarative Interface</font>
+<pre style="width:100%"><code class="cpp">using ReadFile =
+    IPCCmd&lt;0x803&gt;
+    ::normal&lt;FileDesc, uint64_t, uint64_t&gt;
+    ::special&lt;WriteableBuffer&gt;
+    ::response&lt;uint32_t&gt;;
+</code></pre>
+<span class="fragment">
+↓ <font color="#30cfcf">Extract std::tuples</font> ↓
+<pre style="width:100%"><code class="cpp">using RequestList = ReadFile::request_list;
+using ResponseList = ReadFile::response_list;
+</code></pre>
+</span>
+</span>
+</div> <!-- end of flexbox -->
+
+<span class="fragment">
++ <font color="#f6ba4a">Generators</font>
+<pre style="width:100%"><code class="cpp">template&lt;typename Cmd, typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename Cmd, typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp" data-noescape><span style="color:#f6ba4a">GlueCommandHandler</span>&lt;<span style="color:#30cfcf">ReadFile</span>&gt;(cmd_block, DoReadFile)
+</code></pre>
+</span>
+</span>
+</section>
+
+<!--
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
+DoReadFile(uint32_t file_descriptor, uint64_t offset,
+           uint64_t num_bytes, WriteableBuffer&amp; output)
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<pre style="width:100%"><code class="cpp">using RequestList  = std::tuple&lt;uint32_t, uint64_t, uint64_t, WriteableBuffer>
+using ResponseList = std::tuple&lt;Result, uint32_t>
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">GlueCommandHandler(cmd_block, DoReadFile)
+</code></pre>
+</span>
+</span>
+</span>
+</section>-->
+
+
+<section><h2>Our Vision</h2>
+Advantages:
+<ul>
+  <li class="fragment">Automated command encoding/decoding</li>
+  <li class="fragment">Type safe: Decoded data matches C++ function signature <i>by design</i></li>
+  <li class="fragment">Bonus: It's easier to read <small class="fragment" style="vertical-align:baseline">(since there's nothing to read anymore)</small></li>
+</ul>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators</h2>
+<p>Core idea: Generate <span style="color:#f64a4a">runtime code</span> based on a <span style="color:#f7f749">type list</span> via</p> <!-- NB: Mention this is done via a function or function object -->
+<ul>
+  <li class="fragment">Recursion</li>
+  <li class="fragment"><pre style="display:inline; font-size:85%">for_each(tuple, f)</pre></li> <!-- NB: e.g. via boost mpl -->
+  <li class="fragment">parameter pack expansions (C++11)</li>
+  <li class="fragment">fold expressions (C++17)</li>
+</ul>
+
+<p class="fragment">We got our <span style="color:#f7f749">type list</span> from the <span style="color:#30cfcf">declarative interface</span></p>
+<p class="fragment">How do we <span style="color:#f6ba4a">generate</span> a command block decoder?</p>
+</section>
+
+<section><h2>A <span style="color:#f6ba4a">Generative</span> decoder</h2>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, uint64_t, uint64_t, WriteableBuffer &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape><span class="fragment" data-fragment-index="0">// Read a single entry from the CmdBlock and advance "offset"
+template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }</span>
+<span class="fragment" data-fragment-index="1">
+// Iterate over entire CmdBlock &amp; gather results <span class="fragment" data-fragment-index="4">&amp; apply to "handler"</span>
+template&lt;<span class="fragment" data-fragment-index="4">typename Handler, </span>typename... Ts&gt;
+auto DecodeAll<span class="fragment" data-fragment-index="4">AndApply</span>(CmdBlock&amp; cmd_block<span class="fragment" data-fragment-index="4">, Handler&amp;&amp; handler</span>) {
+  <span class="fragment" data-fragment-index="2">int offset = 0x1; // into command block
+  <span class="fragment" data-fragment-index="3">return <span class="fragment" data-fragment-index="4">handler(</span>DecodeEntry&lt;Ts&gt;(offset, cmd_block)...<span class="fragment" data-fragment-index="4">)</span>;
+</span></span>}
+</span></code></pre>
+<span class="for-beginners"><p class="fragment" data-fragment-index="5"><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p></span>
+</section>
+
+
+<section data-transition="slide-in fade-out"><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, WriteableBuffer &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#3f0000">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+Decoding 32-bit values:
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) {
+  <span class="fragment" data-fragment-index="0">if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    <span class="fragment" data-fragment-index="1">return block.ReadU32(offset<span class="fragment" data-fragment-index="2">++</span>);</span>
+
+
+
+
+
+
+
+  }</span><span class="fragment" data-fragment-index="3"> else {
+    ...
+  }</span>
+}
+</code></pre>
+</section>
+
+<section data-transition="fade-in fade-out"><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, WriteableBuffer &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+Decoding 64-bit values:
+<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) {
+  if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    return block.ReadU32(offset++);
+  <span class="fragment" data-fragment-index="0">} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
+    <span class="fragment" data-fragment-index="1">uint32_t val_low  = block.ReadU32(offset++);
+    uint32_t val_high = block.ReadU32(offset++);</span>
+    <span class="fragment" data-fragment-index="2">return (val_high &lt;&lt; 32) | val_low;</span>
+
+
+
+  </span>} else {
+    ...
+  }
+}</code></pre>
+</section>
+
+<section data-transition="fade-in slide-out"><h2 style="color:#f6ba4a">Generators</h2>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, uint64_t, uint64_t, <span style="color:#f03040">WriteableBuffer</span> &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center; background:#3f0000">buffer descriptor<br>…</td><td style="text-align:center; background:#3f0000">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+Decoding buffer descriptors:
+<pre><code class="cpp hljs" style="max-height:100em" data-noescape>template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) {
+  if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
+    return block.ReadU32(offset++);
+  } else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
+    ...
+  <span class="fragment" data-fragment-index="0">} else if constexpr (std::is_same_v&lt;T, WriteableBuffer&gt;) {
+    <span class="fragment" data-fragment-index="1">uint32_t descriptor = block.ReadU32(offset++);
+    auto [size, flags] = DecodeBufferDescriptor(descriptor);</span>
+    <span class="fragment" data-fragment-index="2">uint32_t address = block.ReadU32(offset++);</span>
+    <span class="fragment" data-fragment-index="3">return WriteableBuffer { address, size };</span>
+  </span>} else {
+    ...
+  }
+}</code></pre>
+</section>
+
+<section><h2>A <span style="color:#f6ba4a">Generative</span> decoder</h2>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">WriteableBuffer</span> &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape>// Read a single entry from the CmdBlock and advance "offset"
+template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }
+
+// Iterate over entire CmdBlock &amp; gather results &amp; apply to "handler"
+template&lt;typename Handler, typename... Ts&gt;
+auto DecodeAllAndApply(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+  int offset = 0x1; // into command block
+  return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
+}
+</code></pre>
+<p class="fragment" data-fragment-index="0">No boilerplate!</p>
+<p class="fragment" data-fragment-index="1">Caveat 1: The template needs a std::tuple&lt;T...&gt; &nbsp;😔</p>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators:</h2>
+  <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#4030f0">uint32_t</span>, <span style="color:#f03040">uint64_t</span>, <span style="color:#f0f040">uint64_t</span>, <span style="color:#30f040">WriteableBuffer</span> &gt;</pre>
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center; background:#00003f">uint32<br>5</td><td style="text-align:center; background:#3f0000">uint64_lo<br>0xdeadbeef</td><td style="text-align:center; background:#3f0000">uint64_hi<br>0x5555</td><td style="text-align:center; background:#3f3f00">uint64_lo<br>0xd00f</td><td style="text-align:center; background:#3f3f00">uint64_hi<br>0</td><td style="text-align:center; background:#003f00">buffer descriptor<br>…</td><td style="text-align:center; background:#003f00">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table>
+<pre><code class="cpp" style="max-height:100em" data-noescape>// Read a single entry from the CmdBlock and advance "offset"
+template&lt;typename T&gt;
+auto DecodeEntry(int& offset, CmdBlock&amp; block) { ... }
+
+template&lt;typename TypeList&gt; struct DecodeAllAndApply;
+
+template&lt;typename... Ts&gt;
+struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
+  int offset = 1; // offset into command block
+
+  // Iterate over entire CmdBlock &amp; gather results &amp; apply to "handler"
+  template&lt;typename Handler&gt;
+  auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
+    <span class="fragment" data-fragment-index="0">// Caveat 2: Execution order undefined :(</span>
+    return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
+  }
+};</code></pre>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators:</h2>
+<h2>Demo time!</h2>
+<p><a href="https://github.com/neobrain/presentations/blob/TODO/live/01a_generators.cpp">01a_generators.cpp</a><br>
+<a href="https://github.com/neobrain/presentations/blob/TODO/live/01b_generators.cpp">01b_generators.cpp</a><br>
+<a href="https://github.com/neobrain/presentations/blob/TODO/live/magic.hpp">magic.hpp</a></p>
+</section>
+
+<section><h2 style="color:#f6ba4a">Generators: Result encoder</h2>
+  <table style="font-size:60%">
+    <tr>
+      <td style="text-align:center">header<br>0x8020002</td><td style="text-align:center">Result<br>0x0</td><td style="text-align:center">uint32_t<br>0xd00f</td>
+    </tr>
+  </table>
+
+<p>Trivial with fold expressions!</p>
+
+<pre class="fragment" data-fragment-index="0"><code class="cpp" data-noescape>template&lt;typename T&gt;
+void EncodeEntry(int& offset, CmdBlock&amp; block, T t) { ... }
+
+<span class="fragment">template&lt;typename... Ts&gt;
+void EncodeAll(CmdBlock&amp; cmd_block, Ts... ts) {
+  int offset = 1;
+
+  <span class="fragment">(EncodeEntry&lt;T&gt;(offset, cmd_block, ts), ...);</span>
+}</span></code></pre>
+</section>
+
+<!-- <section><h2>Putting Things Together</h2>
+<pre><code class="cpp" data-noescape><span class="fragment" data-fragment-index=8>GlueCommandHandler(DoOpenFile, cmd_block);</span>
+GlueCommandHandler(DoReadFile, cmd_block);
+<span class="fragment" data-fragment-index=8>GlueCommandHandler(DoCloseFile, cmd_block);</span></code></pre>
+
+<pre class="fragment" data-fragment-index=0><code class="cpp" data-noescape>template&lt;typename Handler&gt;
+void GlueCommandHandler(Handler&amp;&amp; handler, CmdBlock&amp; cmd_block) {
+  <span class="fragment" data-fragment-index=1>auto request_header = cmd_block.ReadU32(0);</span></span>
+  <span class="fragment" data-fragment-index=2>using RequestList = typename FunctionTraits&lt;Handler&gt;::Args;</span>
+  <span class="fragment" data-fragment-index=2>using ResponseList = typename FunctionTraits&lt;Handler&gt;::Result;</span>
+  <span class="fragment" data-fragment-index=3>auto results = DecodeAllAndApply&lt;RequestList&gt;{}(cmd_block, handler);</span>
+  <span class="fragment" data-fragment-index=4>cmd_block.WriteU32(BuildResponseHeader(results));</span>
+  <span class="fragment" data-fragment-index=5>EncodeAll&lt;ResponseList&gt;{}(cmd_block, results);</span>
+}</code></pre>
+
+<p class="fragment" data-fragment-index=6>Omitted for now:</p>
+<ul class="fragment" data-fragment-index=6>
+  <li>Command header verification</li>
+  <li>BuildResponseHeader</li>
+</ul>
+<p class="fragment" data-fragment-index=7>But: This can be used for all IPC commands!</p>
+</section>
+-->
+
+<!-- TODO: Make highlights in comments on SPVIW work properly! -->
+<section><h2><span style="color:#f6ba4a">Generators</span> with <span style="color:#30cfcf">declarative</span> interfaces</h2>
+<pre class="fragment" data-fragment-index="0" style="width:96%"><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
+void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <span class="svpiw">// S</span>
+  <span class="fragment" data-fragment-index="1">auto request_header = cmd_block.ReadU32(0);</span>
+  <span class="fragment" data-fragment-index="2">if (request_header != IPCRequest::request_header) <span class="svpiw">// V</span>
+    throw std::runtime_error("Invalid request header");</span>
+
+  <span class="fragment" data-fragment-index="3">auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler); <span class="svpiw">// P + I</span></span></span>
+  <span class="fragment" data-fragment-index="4">cmd_block.WriteU32(IPCRequest::response_header);</span>
+  <span class="fragment" data-fragment-index="5">EncodeAll&lt;IPCRequest::response_list&gt;(cmd_block, results); <span class="svpiw">// R</span></span></span>
+}
+</code></pre>
+
+<p class="fragment" data-fragment-index="6">This can be used for all IPC commands!</p>
+</section>
+
+<section><h2><span style="color:#30cfcf">Declarative Interfaces:</span><span style="color:#f6ba4a"> Generators</span></h2>
+<p>Declarative approach maximizes reusability</p>
+
+<p>⇒ Trivial bringup of entire subsystems!</p>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<table style="width:100%; margin-left:-2%; border: 0px solid !important">
+<tr style="padding:0px">
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index="0">↓<br><span style="color:#f6ba4a">Handlers</span><br><p style="font-size:50%">GlueHandler&lt;GetFileSize&gt;(cmdblk, DoGetFileSize)</p>↓<br><p style="font-size:80%">DoGetFileSize(FileDesc{5})</p></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index="1">↓<br><span style="color:#f6ba4a">Synthesis</span><br><p style="font-size:50%">auto blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</p>↓<br>
+<!-- TODO: Center this block!--><div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span style="border-bottom: 2px dashed #ccc;">0: 0x804'00'01 (header)<br></span>
+1: 0x5<br>
+2: 0x0<br>
+</div>
+</td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index="2">↓<br><span style="color:#f6ba4a">Logging</span><br><p style="font-size:50%">std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</p>↓<br><p style="font-size:80%">"GetFileSize: fd 5"</p></td>
+</tr>
+</table>
+
+</section>
+
+
+<section><h2><span style="color:#30cfcf">Declarative Interfaces</span> & <span style="color:#f6ba4a"> Generators</span></h2>
+<h2>Demo time!</h2>
+<p><a href="https://github.com/neobrain/presentations/blob/TODO/live/02_generators.cpp">02_generators.cpp</a><br>
+<a href="https://github.com/neobrain/presentations/blob/TODO/live/dummy_env.hpp">dummy_env.hpp</a><br>
+<a href="https://github.com/neobrain/presentations/blob/TODO/live/ipc.hpp">ipc.hpp</a><br>
+<a href="https://github.com/neobrain/presentations/blob/TODO/live/magic.hpp">magic.hpp</a></p>
+</section>
+
+<!-- <section><h2><span style="color:#30cfcf">Declarative Interfaces:</span><span style="color:#f6ba4a"> Generators</span></h2>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<table style="width:104%; margin-left:-2%; border: 0px solid !important">
+<tr style="padding:0px">
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=0>↓<br><span style="color:#f6ba4a">Handlers</span><br><small>GlueHandler&lt;FS::GetFileSize&gt;(cmdblk)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=1>↓<br><span style="color:#f6ba4a">Synthesis</span><br><small>CmdBlock blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=2>↓<br><span style="color:#f6ba4a">Logging</span><br><small>std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</small></td>
+</tr>
+</table>
+
+</section>-->
+
+<!-- <section><h3><span style="color:#30cfcf">Declarative </span> vs <span style="color:#49f749">Reflective</span></h3>
+<hr>
+<table style="border: none !important">
+<tr>
+<td style="border: none !important; color:#30cfcf"><b>Pros</b></td>
+<td style="border: none !important; color:#30cfcf"><b>Cons</b></td>
+</tr>
+<tr>
+<td style="border: none !important">Flexibility</td>
+<td style="border: none !important">Redundancy</td>
+</tr>
+<tr>
+<td style="border: none !important">Consistency <i>by design</i></td>
+<td style="border: none !important">Implementation complexity</td>
+</tr>
+<tr>
+<td style="border: none !important">Separation: Logic ↔ Structure</td>
+<td style="border: none !important"></td>
+</tr>
+</table>
+<hr>
+<p><b>Common:</b><br>
+No boilerplate<br>
+Type safe &amp; correct by design</p>
+</section>-->
+
+<section><h2>Why <span style="color:#30cfcf">Declarative</span>?</h2>
+<ul>
+ <li class="fragment">Separates concerns (what vs how)
+  <ul><li class="fragment">Business structure and logic rarely <i>both</i> change</li></ul></li>
+ <li class="fragment">Speeds up feature bringup due to reusable components</li> <!-- Time to market Flexibility -->
+ <li class="fragment">Expresses programmer intent naturally</li>
+ <li class="fragment">Encourages automation of boilerplate <span style="color:#f6ba4a">generation</span></li>
+ <li class="fragment">Helps detect errors at compile-time</li>
+</ul>
+
+<p class="fragment">Improved flexibility, time to market, and maintainability!</p>
+</section>
+
+<section><h2>Conclusion</h2>
+  <ul>
+    <li class="fragment" data-fragment-index="0">Untyped data makes serialization centric to emulation</li>
+    <li class="fragment" data-fragment-index="1"><span style="color:#f6ba4a">Generating</span> code via stateful variadic folds over <span style="color:#f7f749">type lists</span><br>
+    <small class="fragment" data-fragment-index="2">Fold expressions are big for simplicity!</small></li>
+    <!-- <li class="fragment" data-fragment-index=3><span style="color:#49f749">Reflection</span> to synthesize code from data structures<br>
+    <small class="fragment" data-fragment-index=4>We have function traits now; full reflection in C++2n?</small></li> -->
+    <li class="fragment" data-fragment-index="5"><span style="color:#30cfcf">Declarative interfaces:</span> Novel but powerful
+    <p class="fragment" data-fragment-index="5" style="text-align:center"><img class="fragment" data-fragment-index="0" src="./images/metaprogramming_declint_pure.svg" style="background:#2a2a2a; width:50%"></p></li>
+    <li class="fragment" data-fragment-index="6">Vastly more maintainable and expressive at zero overhead</li>
+  </ul>
+</section>
+
+<section><h1>Thanks!</h1>
+<div><a href="https://neobrain.github.io" target="_blank">neobrain.github.io</a></div>
+<div><a href="https://twitter.com/fail_cluez" target="_blank"><img src="./images/Twitter_Logo_Custom.svg" height="75pt" style="vertical-align:middle; border:none; background-color:transparent; box-shadow:none"><span style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif">@</span>fail_cluez</a></div>
+<div><a href="https://github.com/neobrain" target="_blank"><img src="./images/GitHub-Mark-Custom.svg" height="38px" style="vertical-align:middle; border:none; background-color:transparent; box-shadow:none">&nbsp; neobrain</a></div>
+<img src="./images/glitchedcube2.png" height="100em" style="border-radius:20px; vertical-align:middle; margin-top:36px">
+<p><small>(const west const best!)</small></p>
+</section>
+
+
+
+        </div>
+      </div>
+      <script src="./lib/js/head.min.js"></script>
+      <script src="./js/reveal.js"></script>
+      <script>
+        Reveal.initialize({
+          width: 1366,
+          height: 768,
+          controls: false,
+          transition: 'slide',
+          transitionSpeed: 'fast',
+          fragments: 'true',
+          slideNumber: 'h/v',
+          dependencies: [
+            // Highlighting for code blocks
+           { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          // Interpret Markdown in <section> elements
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+
+          // Syntax highlight for <code> elements
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+          ]
+        });
+
+  // Make left/right mouseclicks move to the next/previous slide. Disabled in the public version to make clicking on links possible.
+  // window.addEventListener("mousedown", handleClick, false);
+  // window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+  //
+  // function handleClick(e) {
+  //  e.preventDefault();
+  //  if(e.button === 0) Reveal.next();
+  //  if(e.button === 2) Reveal.prev();
+  // }
+      </script>
+    </body>
+
+</html>

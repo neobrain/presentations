@@ -1,0 +1,85 @@
+<section><h2>Declarative Compile-time Programming</h2>
+<p>Building blocks:</p>
+<img class="fragment" data-fragment-index=0 src="/images/metaprogramming_declint_pure.svg" style="background:#2a2a2a">
+<p class="fragment">Kinds of Declarative Interfaces:</p>
+<ul>
+ <li class="fragment">Type-based systems</li>
+ <li class="fragment">constexpr objects</li> <!-- and other constexpr-based systems. cf e.g. Hana Dusikova's compile-time RegExp library -->
+ <li class="fragment">Reflection-based systems</li>
+ <li class="fragment">Plain definition vs eDSL</li>
+</ul>
+</section>
+
+<section style="line-height:0.5"><h2>Our Vision for <span class="svpiw">SVPIR</span></h2>
+<div style="display:flex; justify-content: space-around">
+<span style="width:40%"><font>C++ Handler</font>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
+DoReadFile(FileDesc fd,
+           uint64_t offset,
+           uint64_t num_bytes,
+           WriteableBuffer&amp; output)
+</code></pre></span>
+<span style="width:48%"><font color="#30cfcf">Declarative Interface</font>
+<pre style="width:100%"><code class="cpp">using ReadFile =
+    IPCCmd&lt;0x803&gt;
+    ::normal&lt;FileDesc, uint64_t, uint64_t&gt;
+    ::special&lt;WriteableBuffer&gt;
+    ::response&lt;uint32_t&gt;;
+</code></pre>
+<span class="fragment">
+↓ <font color="#30cfcf">Extract std::tuples</font> ↓
+<pre style="width:100%"><code class="cpp">using RequestList = ReadFile::request_list;
+using ResponseList = ReadFile::response_list;
+</code></pre>
+</span>
+</span>
+</div> <!-- end of flexbox -->
+
+<span class="fragment">
++ <font color="#f6ba4a">Generators</font>
+<pre style="width:100%"><code class="cpp">template&lt;typename Cmd, typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename Cmd, typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp" data-noescape><span style="color:#f6ba4a">GlueCommandHandler</span>&lt;<span style="color:#30cfcf">ReadFile</span>&gt;(cmd_block, DoReadFile)
+</code></pre>
+</span>
+</span>
+</section>
+
+<!--
+<section style="line-height:0.5"><h2>Our Vision</h2>
+<pre style="width:100%"><code class="cpp">std::tuple&lt;Result, uint32_t&gt;
+DoReadFile(uint32_t file_descriptor, uint64_t offset,
+           uint64_t num_bytes, WriteableBuffer&amp; output)
+</code></pre>
+<span class="fragment">
+↓ <font color="#49f749">Function Traits</font> ↓
+<pre style="width:100%"><code class="cpp">using RequestList  = std::tuple&lt;uint32_t, uint64_t, uint64_t, WriteableBuffer>
+using ResponseList = std::tuple&lt;Result, uint32_t>
+</code></pre>
+<span class="fragment">
+↓ <font color="#f6ba4a">Generators</font> ↓
+<pre style="width:100%"><code class="cpp">template&lt;typename... T&gt; tuple&lt;T...&gt; DecodeMessage(CmdBlock&amp;)
+template&lt;typename... T&gt; void        EncodeMessage(CmdBlock&amp;, T... data)
+</code></pre>
+<span class="fragment">
+↓ <font color="#f7f749">Combine</font> ↓
+<pre style="width:100%"><code class="cpp">GlueCommandHandler(cmd_block, DoReadFile)
+</code></pre>
+</span>
+</span>
+</span>
+</section>-->
+
+
+<section><h2>Our Vision</h2>
+Advantages:
+<ul>
+  <li class="fragment">Automated command encoding/decoding</li>
+  <li class="fragment">Type safe: Decoded data matches C++ function signature <i>by design</i></li>
+  <li class="fragment">Bonus: It's easier to read <small class="fragment" style="vertical-align:baseline">(since there's nothing to read anymore)</small></li>
+</ul>
+</section>
+

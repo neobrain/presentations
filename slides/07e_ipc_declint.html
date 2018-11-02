@@ -1,0 +1,89 @@
+<!-- TODO: Make highlights in comments on SPVIW work properly! -->
+<section><h2><span style="color:#f6ba4a">Generators</span> with <span style="color:#30cfcf">declarative</span> interfaces</h2>
+<pre class="fragment" data-fragment-index=0 style="width:96%"><code class="cpp" data-noescape>template&lt;typename IPCRequest, typename Handler&gt;
+void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <span class="svpiw">// S</span>
+  <span class="fragment" data-fragment-index=1>auto request_header = cmd_block.ReadU32(0);</span>
+  <span class="fragment" data-fragment-index=2>if (request_header != IPCRequest::request_header) <span class="svpiw">// V</span>
+    throw std::runtime_error("Invalid request header");</span>
+
+  <span class="fragment" data-fragment-index=3>auto results = DecodeAllAndApply&lt;IPCRequest::request_list&gt;{}(cmd_block, handler); <span class="svpiw">// P + I</span></span></span>
+  <span class="fragment" data-fragment-index=4>cmd_block.WriteU32(IPCRequest::response_header);</span>
+  <span class="fragment" data-fragment-index=5>EncodeAll&lt;IPCRequest::response_list&gt;(cmd_block, results); <span class="svpiw">// R</span></span></span>
+}
+</code></pre>
+
+<p class="fragment" data-fragment-index=6>This can be used for all IPC commands!</p>
+</section>
+
+<section><h2><span style="color:#30cfcf">Declarative Interfaces:</span><span style="color:#f6ba4a"> Generators</span></h2>
+<p>Declarative approach maximizes reusability</p>
+
+<p>⇒ Trivial bringup of entire subsystems!</p>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<table style="width:100%; margin-left:-2%; border: 0px solid !important">
+<tr style="padding:0px">
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=0>↓<br><span style="color:#f6ba4a">Handlers</span><br><p style="font-size:50%">GlueHandler&lt;GetFileSize&gt;(cmdblk, DoGetFileSize)</p>↓<br><p style="font-size:80%">DoGetFileSize(FileDesc{5})</p></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=1>↓<br><span style="color:#f6ba4a">Synthesis</span><br><p style="font-size:50%">auto blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</p>↓<br>
+<!-- TODO: Center this block!--><div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span style="border-bottom: 2px dashed #ccc;">0: 0x804'00'01 (header)<br></span>
+1: 0x5<br>
+2: 0x0<br>
+</div>
+</td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=2>↓<br><span style="color:#f6ba4a">Logging</span><br><p style="font-size:50%">std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</p>↓<br><p style="font-size:80%">"GetFileSize: fd 5"</p></td>
+</tr>
+</table>
+
+</section>
+
+
+<section><h2><span style="color:#30cfcf">Declarative Interfaces</span> & <span style="color:#f6ba4a"> Generators</span></h2>
+<h2>Demo time!</h2>
+<p><a href=https://github.com/neobrain/presentations/blob/TODO/live/02_generators.cpp>02_generators.cpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/dummy_env.hpp>dummy_env.hpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/ipc.hpp>ipc.hpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/magic.hpp>magic.hpp</a></p>
+</section>
+
+<!-- <section><h2><span style="color:#30cfcf">Declarative Interfaces:</span><span style="color:#f6ba4a"> Generators</span></h2>
+<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
+                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                      ::response&lt;uint64_t&gt;;</code></pre>
+<table style="width:104%; margin-left:-2%; border: 0px solid !important">
+<tr style="padding:0px">
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=0>↓<br><span style="color:#f6ba4a">Handlers</span><br><small>GlueHandler&lt;FS::GetFileSize&gt;(cmdblk)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=1>↓<br><span style="color:#f6ba4a">Synthesis</span><br><small>CmdBlock blk = CraftBlock&lt;FS::GetFileSize&gt;(fd)</small></td>
+<td style="padding:0px; text-align:center; border: none !important" class="fragment" data-fragment-index=2>↓<br><span style="color:#f6ba4a">Logging</span><br><small>std::cout &lt;&lt; LogInfo&lt;FS::GetFileSize&gt;</small></td>
+</tr>
+</table>
+
+</section>-->
+
+<!-- <section><h3><span style="color:#30cfcf">Declarative </span> vs <span style="color:#49f749">Reflective</span></h3>
+<hr>
+<table style="border: none !important">
+<tr>
+<td style="border: none !important; color:#30cfcf"><b>Pros</b></td>
+<td style="border: none !important; color:#30cfcf"><b>Cons</b></td>
+</tr>
+<tr>
+<td style="border: none !important">Flexibility</td>
+<td style="border: none !important">Redundancy</td>
+</tr>
+<tr>
+<td style="border: none !important">Consistency <i>by design</i></td>
+<td style="border: none !important">Implementation complexity</td>
+</tr>
+<tr>
+<td style="border: none !important">Separation: Logic ↔ Structure</td>
+<td style="border: none !important"></td>
+</tr>
+</table>
+<hr>
+<p><b>Common:</b><br>
+No boilerplate<br>
+Type safe &amp; correct by design</p>
+</section>-->
+

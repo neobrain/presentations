@@ -1,0 +1,167 @@
+<!-- <section><h1>Process Architecture</h1><p>+ InterProcess Communication</p>
+  <img src="/images/3ds.png" height="250em" style="border:none; background-color: transparent; box-shadow: none; vertical-align:middle">
+</section>-->
+
+<section><h2>Process Architecture</h2>
+<p>Functionality provided by external processes:</p> <!-- NB: Crucial for games -->
+<ul>
+  <li class="fragment" data-fragment-index=0>Rendering graphics <span class="fragment" data-fragment-index=4 style="color:#40c030">(gsp)</span> &amp; playing audio <span class="fragment" data-fragment-index=5 style="color:#40c030">(dsp)</span></li>
+  <li class="fragment" data-fragment-index=1>Accessing WiFi <span class="fragment" data-fragment-index=6 style="color:#40c030">(soc)</span> &amp; connecting to friends <span class="fragment" data-fragment-index=7 style="color:#40c030">(frd)</span></li>
+  <li class="fragment" data-fragment-index=2>Loading assets &amp; saving progress <span class="fragment" data-fragment-index=8 style="color:#40c030">(fs)</span></li>
+  <li class="fragment" data-fragment-index=3>…</li>
+</ul>
+
+<p class="fragment" data-fragment-index=9><span style="color:#40c030">~40 processes ("services")</span> in total,<br>each serving different functionality</p>
+</section>
+
+<section><h2>Interprocess Communication</h2>
+<p class="fragment" data-fragment-index=13>Required to do anything useful on the 3DS!</p>
+<ul>
+<li class="fragment" data-fragment-index=14><span style="color:#f0b0b0">Client-Server</span> based: Games ⇄ Services</li> <!-- NB: Services ⇄ Services also works -->
+<li class="fragment" data-fragment-index=15><span style="color:#f0b0b0">Request-response</span> exchange via command blocks</li>
+<li class="fragment" data-fragment-index=16><span style="color:#f0b0b0">Marshalling</span> of sensitive data by the OS kernel<!-- NB: <br>
+  (e.g. shared buffers or kernel object handles)--></li>
+<!-- <li class="fragment" data-fragment-index=17><span style="color:#f0b0b0">Hierarchy</span> of abstraction for exploit mitigation</li> -->
+</ul>
+
+<p class="fragment" data-fragment-index=19>Hierarchical: Game ⇄ <span style="color:#40c030">cfg</span> ⇄ <span style="color:#40c030">fs</span> ⇄ <span style="color:#40c030">fspxi</span></p>
+</section>
+
+
+<section><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App: ReadFile</p>
+<div class="original-ipc-cmd-block" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)</span><br>
+1: 0x5<br> <!-- file descriptor -->
+2: 0x200<br> <!-- low word of offset-->
+3: 0x0<br>
+4: 0x100<br> <!-- low word of size-->
+<span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br>
+6: 0x200c<br>
+7: 0x1ff00200<br>
+</div>
+</span>
+<span class="fragment fade-out" data-fragment-index="5"><span class="ipc-img fragment" data-fragment-index="0">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Kernel</p>
+<span class="fragment" data-fragment-index="0"><div class="original-ipc-cmd-block fragment fade-out" data-fragment-index="10" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="fragment" data-fragment-index="1" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)<br></span>
+  <span class="fragment" data-fragment-index="2">
+1: 0x5<br>
+2: 0x200<br>
+3: 0x0<br>
+4: 0x100<br>
+  <span><span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br></span>
+  </span>
+  <span class="fragment" data-fragment-index="3">6: 0x200c<br></span>
+  <span class="fragment" data-fragment-index="4">7: <span style="color:#ff3311">0x2a7</span>00200<br></span>
+</div>
+</span>
+</span>
+<span class="ipc-img fragment" data-fragment-index="7"><span class="fragment fade-out" data-fragment-index="10">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Service</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="10" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+  <span class="fragment" data-fragment-index="1" style="border-bottom: 2px dashed #ccc;">0: 0x802'02'05 (header)<br></span>
+  <span class="fragment" data-fragment-index="2">
+1: 0x5<br>
+2: 0x200<br>
+3: 0x0<br>
+4: 0x100<br>
+  <span><span style="border-bottom: 2px dashed #ccc;">5: 0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br></span>
+  </span>
+  <span class="fragment" data-fragment-index="3">6: 0x200c<br></span>
+  <span class="fragment" data-fragment-index="4">7: <span style="color:#ff3311">0x2a7</span>00200<br></span>
+</div>
+</span>
+
+<span class="ipc-img fragment" data-fragment-index="20">&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;</span></span>
+<span class="fragment" data-fragment-index="20" style="height:8.61em">
+<div style="text-align:center">
+<div style="height:1.75em">&nbsp;</div><br>
+<p>Emulation&nbsp;&nbsp;<span class="spin-gears"></span></p>
+<br>
+</div>
+</div>
+</section>
+
+
+<section><h2>IPC Visualized</h2>
+<div style="display:flex; flex-direction: row; justify-content:center; align-items:center">
+<span>
+<p>App</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="45" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+1: 0x0<br> <!-- result code -->
+2: 0x100<br> <!-- low word of bytes read-->
+3: 0x0<br>
+</div>
+</span>
+<span class="fragment fade-out" data-fragment-index="45"><span class="ipc-img fragment" data-fragment-index="40">&nbsp;&nbsp;&nbsp;⟵&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Kernel</p>
+<span class="fragment" data-fragment-index="10"><div class="original-ipc-cmd-block fragment fade-out" data-fragment-index="45" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span class="fragment" data-fragment-index="15">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+</span>
+<span class="fragment" data-fragment-index="20">
+1: 0x0<br> <!-- result code -->
+2: 0x100<br> <!-- low word of bytes read-->
+3: 0x0<br>
+</span>
+</div>
+</span>
+</span>
+<span class="ipc-img fragment" data-fragment-index="10"><span class="fragment fade-out" data-fragment-index="20">&nbsp;&nbsp;&nbsp;⟵&nbsp;&nbsp;&nbsp;</span></span>
+<span>
+<p>Service: Response</p>
+<div class="original-ipc-cmd-block fragment" data-fragment-index="0" style="text-align:left; border:solid 2.3px; border-radius:4px; font-size:0.6em; width:10em">
+<span style="border-bottom: 2px dashed #ccc;">0: 0x802'00'04 (header)</span><br>
+1: 0x0<br> <!-- result code -->
+2: 0x100<br> <!-- low word of bytes read -->
+3: 0x0<br>
+</div>
+</span>
+</div>
+</section>
+
+
+<section><h3>Emulating IPC command handlers</h3> <!-- TODO: Make the SVPIW highlight show up after transition -->
+<p style="margin-top:-15px; margin-bottom:0px"><span class="fragment" data-fragment-index="5"><span class="svpiw">SVPIR</span>:</span> Common dispatch flow:</p>
+<ul>
+  <li class="fragment" data-fragment-index=0><span class="svpiw">S</span>elect C++ handler function based on command index<br>
+  <pre style="width:100%"><code class="cpp" style="font-size:90%">std::tuple&lt;Result,uint32_t&gt; DoReadFile(uint32_t, uint64_t, uint64_t, BufferPointerW)</code></pre></li>
+  <li class="fragment" data-fragment-index=1><span class="svpiw">V</span>erify command header (number of parameters)<br>
+  <pre style="width:100%"><code class="cpp">(cmd_header &amp; 0xFF == 5) &nbsp;&amp;&amp;&nbsp; ((cmd_header &gt;&gt; 8) &amp; 0xff == 2)</code></pre></li>
+  <li class="fragment" data-fragment-index=2><span class="svpiw">P</span>arse parameters from command block
+  <table style="font-size:50%" align="center">
+    <tr>
+      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
+    </tr>
+  </table></li>
+  <li class="fragment" data-fragment-index=3><span class="svpiw">I</span>nvoke C++ handler function<br>
+  <pre style="width:100%"><code class="cpp">DoReadFile(5, 0x5555deadbeef, 0xd00f, BufferPointerW{0x1ff00200});</code></pre></li>
+  <li class="fragment" data-fragment-index=4>Write <span class="svpiw">R</span>esponse back to command block
+  <table style="font-size:60%">
+    <tr>
+      <td>header: 0x8020002</td><td>Result: 0x0</td><td>Result 2: 0xd00f</td>
+    </tr>
+  </table></li>
+</ul>
+</section>
+
+<section><h3>Emulating IPC command handlers</h3>
+  <!-- Screenshot/Browse 3dbrew instead here -->
+  How often do we need to write the <span class="svpiw">SVPIR</span> logic?
+  <ul>
+    <li class="fragment" data-fragment-index=0>~40 active processes</li>
+    <li class="fragment" data-fragment-index=1>Each with ~30 IPC commands on average</li>
+    <li class="fragment" data-fragment-index=2>Manual glue to invoke the C++ handler required for each</li>
+  </ul>
+  <p class="fragment" data-fragment-index=3>That is a lot of work.</p>
+  <p class="fragment" data-fragment-index=4>Correctness? Consistency? Maintainability?</p>
+  <p class="fragment" data-fragment-index=5><b>Enter <span style="color:#30cfcf">declarative</span> &amp; <span style="color:#f6ba4a">generative</span> programming</b></p>
+</section>
+

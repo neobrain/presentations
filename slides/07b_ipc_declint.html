@@ -1,0 +1,122 @@
+<section><h2 style="color:#30cfcf">Declarative Programming</h2>
+<ul>
+ <li class="fragment">Let's take a step back</li>
+ <li class="fragment">Focus on the problem description first</li>
+ <li class="fragment">Find a solution later, and make it generic</li>
+</ul>
+
+<p class="fragment">Separate the <b>what</b> from the <b>how</b></p>
+</section>
+
+
+<!-- <section><h2>&lt;/<span style="color:#49f749">Reflective</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
+<h2 class="fragment" data-fragment-index=0>&lt;<span style="color:#30cfcf">Declarative</span>_<span style="color:#f6ba4a">Generators</span>&gt;</h2>
+</section>
+
+<section><h2><span style="color:#30cfcf">Declarative</span> Compile-time Programming</h2>
+<p>Building blocks:</p>
+<img class="fragment" data-fragment-index=0 src="/images/metaprogramming_declint.svg" style="background:#2a2a2a">
+</section> -->
+
+<!-- TODO: Show means of constructing declarative interfaces:
+* (e)DSL
+* Type lists
+* ::chains
+
+Highlight that all of these are at the type-system level (mention constexpr, though!)
+
+Key characteristic of declarative interfaces: The only thing they provide is a translation to type lists!
+-->
+
+<section><h2>IPC Commands</h2>
+<p>How to characterize IPC commands? <span class="fragment" data-fragment-index="10" style="color:#e22">At compile-time</span></p>
+<ul>
+  <li class="fragment" data-fragment-index="1">Command id</li>
+  <li class="fragment" data-fragment-index="2">Request data: List of "normal" parameters</li>
+  <li class="fragment" data-fragment-index="3">Request data: List of "special" parameters</li>
+  <li class="fragment" data-fragment-index="4">Response data: Another 2 lists</li>
+</ul>
+<p class="fragment" data-fragment-index="5">E.g. FS::OpenFile:</p>
+<ul>
+  <li class="fragment" data-fragment-index="6">Command id 0x802</li>
+  <li class="fragment" data-fragment-index="7">Request data: <pre style="display:inline">IOFlags</pre>, <pre style="display:inline">FileAttributes</pre>, <pre style="display:inline">uint32_t</pre></li>
+  <li class="fragment" data-fragment-index="8">Request data: <pre style="display:inline">StaticBuffer</pre></li>
+  <li class="fragment" data-fragment-index="9">Response data: <pre style="display:inline">FileDescriptor</pre> (no "special"s)</li>
+</ul>
+</section>
+
+
+<section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
+Using types for information storage:
+
+<pre><code class="cpp" data-noescape style="max-height:500em"><span class="fragment" data-fragment-index=1>namespace FS { // FileSystem-related commands
+
+<span class="fragment" data-fragment-index=2>using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index=7>
+                    ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index=10>
+                    ::special&lt;StaticBuffer&gt;</span><span class="fragment" data-fragment-index=11>
+                    ::response&lt;FileDescriptor&gt;;</span></span>
+
+<span class="fragment" data-fragment-index=12>using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index=12>
+                    ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index=12>
+                    ::special&lt;&gt;
+                    ::response&lt;uint64_t&gt;;</span></span>
+
+}</span>
+</code></pre>
+
+<p class="fragment">⇒ Builder-like pattern</p>
+</section>
+
+
+<section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
+<pre style="width:100%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
+struct IPCCmd {
+  <span class="fragment" data-fragment-index=5>template&lt;typename... NormalParams&gt;
+  struct normal {
+    <span class="fragment" data-fragment-index=9>template&lt;typename... SpecialParams&gt;
+    struct special {
+    </span></span><span class="fragment" data-fragment-index=3>  // Export template params in the interface
+      static constexpr uint32_t command_id = CommandId;
+      <span class="fragment" data-fragment-index=5>using normal_params    = std::tuple&lt;NormalParams...&gt;;
+      <span class="fragment" data-fragment-index=9>using special_params   = std::tuple&lt;SpecialParams...&gt;;</span></span></span>
+    <span class="fragment" data-fragment-index=9>};</span>
+  <span class="fragment" data-fragment-index=5>};</span>
+};
+
+<span class="fragment" data-fragment-index=1>namespace FS { // FileSystem-related commands
+using OpenFile    = IPCCmd&lt;0x802&gt;<span class="fragment" data-fragment-index=7>
+                  ::normal&lt;IOFlags, FileAttributes, uint32_t&gt;</span><span class="fragment" data-fragment-index=10>
+                  ::special&lt;StaticBuffer&gt;</span>;
+<span class="fragment" data-fragment-index=2>using GetFileSize = IPCCmd&lt;0x804&gt;<span class="fragment" data-fragment-index=8>
+                  ::normal&lt;FileDescriptor&gt;</span><span class="fragment" data-fragment-index=13>
+                  ::special&lt;&gt;</span>;</span>
+}</span>
+</code></pre>
+</section>
+
+<!-- <section><h2><span style="color:#30cfcf">A Declarative Interface</span></h2>
+  Adding IPC response layout information is trivial:
+<pre style="width:110%"><code class="cpp" data-noescape style="max-height:500em">template&lt;uint32_t CommandId&gt;
+struct IPCCmd {
+  template&lt;typename... NormalParams&gt;
+  struct normal {
+    template&lt;typename... SpecialParams&gt;
+    struct special {
+      <span class="fragment" data-fragment-index=0>template&lt;typename... ResponseNormalParams&gt;
+      struct response {</span>
+        // Export template params in the interface
+        static constexpr uint32_t command_id = CommandId;
+        using normal_params           = std::tuple&lt;NormalParams...&gt;;
+        using special_params          = std::tuple&lt;SpecialParams...&gt;;
+        <span class="fragment" data-fragment-index=1>using response_normal_params  = std::tuple&lt;ResponseNormalParams...&gt;;</span>
+};};};<span class="fragment" data-fragment-index=0>};</span>
+
+namespace FS {
+using GetFileSize = IPCCmd&lt;0x804&gt;
+                  ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
+                  <span class="fragment" data-fragment-index=2>::response&lt;uint64_t&gt;</span>;
+// ...
+}
+</code></pre>
+</section> -->
+
