@@ -15,20 +15,6 @@ void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <s
 <p $make_fragment("6")$>This can be used for all IPC commands!</p>
 </section>
 
-<!-- <section><h2><span style="color:$color_declint$">A Declarative Interface</span></h2>
-<pre><code class="cpp">  using GetFileSize = IPCCmd&lt;0x804&gt;
-                      ::normal&lt;FileDescriptor&gt;::special&lt;&gt;
-                      ::response&lt;uint64_t&gt;;</code></pre>
-<p class="fragment">Builder-like pattern:</p>
-  <ul>
-    <li class="fragment">More expressive ("named" lists of types)</li>
-    <li class="fragment">Enforces of ordering rules</li>
-    <li class="fragment">Can handle multiple parameter packs</li>
-    <li class="fragment">Extendible: Easy to add more information later</li> <!-- Referring to how easy it was to add response lists -->
-  <!--</ul>
-  <p class="fragment"><span style="color:$color_declint$">Declarative</span> anatomy of the full IPC command structure!</p>
-</section>-->
-
 <section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>
 <p>Declarative approach maximizes reusability</p>
 
@@ -55,6 +41,10 @@ void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <s
 
 <section><h2><span style="color:$color_declint$">Declarative Interfaces</span> & <span style="color:$color_codegen$"> Generators</span></h2>
 <h2>Demo time!</h2>
+<p><a href=https://github.com/neobrain/presentations/blob/TODO/live/02_generators.cpp>02_generators.cpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/dummy_env.hpp>dummy_env.hpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/ipc.hpp>ipc.hpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/magic.hpp>magic.hpp</a></p>
 </section>
 
 <!-- <section><h2><span style="color:$color_declint$">Declarative Interfaces:</span><span style="color:$color_codegen$"> Generators</span></h2>
@@ -96,9 +86,3 @@ void GlueCommandHandler(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) { <s
 No boilerplate<br>
 Type safe &amp; correct by design</p>
 </section>-->
-
-<!--
-<section><h2><span style="color:$color_declint$">Declarative</span> Compile-time Programming</h2>
-<h2>Mini-Demo!</h2> <!-- NB: source/platform/fs.hpp, source/ipc.hpp, (tests/common/ipc_helper.hpp) ->
-</section>
--->

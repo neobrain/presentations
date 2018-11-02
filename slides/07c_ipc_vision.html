@@ -32,6 +32,7 @@ DoReadFile(FileDesc fd,
 using ResponseList = ReadFile::response_list;
 </code></pre>
 </span>
+</span>
 </div> <!-- end of flexbox -->
 
 <span class="fragment">
@@ -43,7 +44,6 @@ template&lt;typename Cmd, typename... T&gt; void        EncodeMessage(CmdBlock&a
 ↓ <font color="#f7f749">Combine</font> ↓
 <pre style="width:100%"><code class="cpp" data-noescape><span style="color:$color_codegen$">GlueCommandHandler</span>&lt;<span style="color:$color_declint$">ReadFile</span>&gt;(cmd_block, DoReadFile)
 </code></pre>
-</span>
 </span>
 </span>
 </section>

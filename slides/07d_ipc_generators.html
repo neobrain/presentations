@@ -29,34 +29,9 @@ auto DecodeAll<span $make_fragment("4")$>AndApply</span>(CmdBlock&amp; cmd_block
   <span $make_fragment("3")$>return <span $make_fragment("4")$>handler(</span>DecodeEntry&lt;Ts&gt;(offset, cmd_block)...<span $make_fragment("4")$>)</span>;
 </span></span>}
 </span></code></pre>
-<p class="for-beginners" $make_fragment("5")$><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p>
+<span class="for-beginners"><p $make_fragment("5")$><small>NB: <i>Variadic templates</i> and <i>parameter pack expansions</i> are awesome!</small></p></span>
 </section>
 
-<!-- <section><h2 style="color:$color_codegen$">Generators</h2>
-NOTE: Obsolete.
-  <pre style="width:71.1%">RequestList: std::tuple&lt;uint32_t, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
-  <table style="font-size:50%" align="center">
-    <tr>
-      <td style="text-align:center">header<br>0x8020205</td><td style="text-align:center">uint32<br>5</td><td style="text-align:center">uint64_lo<br>0xdeadbeef</td><td style="text-align:center">uint64_hi<br>0x5555</td><td style="text-align:center">uint64_lo<br>0xd00f</td><td style="text-align:center">uint64_hi<br>0</td><td style="text-align:center">buffer descriptor<br>…</td><td style="text-align:center">buffer addr<br>0x1ff00200</td>
-    </tr>
-  </table>
-<pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename TypeList&gt; struct DecodeAllAndApply;
-
-<span $make_fragment("0")$>template&lt;typename... Ts&gt;
-struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
-<span $make_fragment("1")$>  uint32_t offset = 0x1; // offset into command block
-
-  <span $make_fragment("2")$>// Read a single entry from the CmdBlock and advance "offset"
-  template&lt;typename T&gt;
-  auto DecodeEntry(CmdBlock&amp; block) { ... }</span>
-
-  <span $make_fragment("3")$>// Iterate the entire CmdBlock, gather results and apply to "handler"
-  template&lt;typename Handler&gt;
-  auto operator()(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
-    return handler(DecodeEntry&lt;Ts&gt;(cmd_block)... );
-  }</span></span>
-};</span></code></pre>
-</section> -->
 
 <section data-transition="slide-in fade-out"><h2 style="color:$color_codegen$">Generators</h2>
   <pre style="width:71.1%">RequestList: std::tuple&lt;<span style="color:#f03040">uint32_t</span>, uint64_t, uint64_t, $cpptype_writeablebuffer$ &gt;</pre>
@@ -95,11 +70,11 @@ Decoding 64-bit values:
 <pre><code class="cpp" style="max-height:100em" data-noescape>template&lt;typename T&gt;
 auto DecodeEntry(int& offset, CmdBlock&amp; block) {
   if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
-    return block.ReadU32(offset++);</span>
+    return block.ReadU32(offset++);
   <span $make_fragment("0")$>} else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
     <span $make_fragment("1")$>uint32_t val_low  = block.ReadU32(offset++);
     uint32_t val_high = block.ReadU32(offset++);</span>
-    <span $make_fragment("2")$>return (val_high << 32) | val_low;</span>
+    <span $make_fragment("2")$>return (val_high &lt;&lt; 32) | val_low;</span>
 
 
 
@@ -120,7 +95,7 @@ Decoding buffer descriptors:
 <pre><code class="cpp hljs" style="max-height:100em" data-noescape>template&lt;typename T&gt;
 auto DecodeEntry(int& offset, CmdBlock&amp; block) {
   if constexpr (std::is_same_v&lt;T, uint32_t&gt;) {
-    return block.ReadU32(offset++);</span>
+    return block.ReadU32(offset++);
   } else if constexpr (std::is_same_v&lt;T, uint64_t&gt;) {
     ...
   <span $make_fragment("0")$>} else if constexpr (std::is_same_v&lt;T, $cpptype_writeablebuffer$&gt;) {
@@ -151,7 +126,7 @@ auto DecodeAllAndApply(CmdBlock&amp; cmd_block, Handler&amp;&amp; handler) {
   int offset = 0x1; // into command block
   return handler(DecodeEntry&lt;Ts&gt;(offset, cmd_block)...);
 }
-</span></code></pre>
+</code></pre>
 <p $make_fragment("0")$>No boilerplate!</p>
 <p $make_fragment("1")$>Caveat 1: The template needs a std::tuple&lt;T...&gt; &nbsp;😔</p>
 </section>
@@ -184,7 +159,9 @@ struct DecodeAllAndApply&lt;std::tuple&lt;Ts...&gt;&gt; {
 
 <section><h2 style="color:$color_codegen$">Generators:</h2>
 <h2>Demo time!</h2>
-<p><a href=https://github.com/neobrain/presentations/blob/TODO/live/01_generators.cpp>generators.cpp</a><br><a href=https://github.com/neobrain/presentations/blob/TODO/live/magic.hpp>magic.hpp</a></p>
+<p><a href=https://github.com/neobrain/presentations/blob/TODO/live/01a_generators.cpp>01a_generators.cpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/01b_generators.cpp>01b_generators.cpp</a><br>
+<a href=https://github.com/neobrain/presentations/blob/TODO/live/magic.hpp>magic.hpp</a></p>
 </section>
 
 <section><h2 style="color:$color_codegen$">Generators: Result encoder</h2>

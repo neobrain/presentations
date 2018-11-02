@@ -29,6 +29,8 @@
           .print-hack-slide-5 { margin-top:0.9em !important }
           .fadeoutArrow::before { content: " ⟶ "; padding-left:15px; padding-right:15px }
           .fadeoutArrow2::before { content: " ⟶ "; padding-left:15px; padding-right:15px }
+          /* There's no hiding in print mode */
+          .reveal .slides section .fragment.fade-out.visible { opacity: 100 !important; visibility: inherit !important }
           $else$
           .print-hack-slide-4 { top:0px }
           .print-hack-slide-5 { margin-top:0.5em !important }
