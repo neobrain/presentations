@@ -10,3 +10,7 @@
 	path = ndcoslo_jun2018
 	url = https://github.com/neobrain/presentations
 	branch = ndcoslo_jun2018
+[submodule "generative_and_declarative_3ds"]
+	path = Generative and Declarative Programming in Action - Emulating the 3DS
+	url = https://github.com/neobrain/presentations
+	branch = generative_and_declarative_3ds
